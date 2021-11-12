@@ -109,3 +109,18 @@ Easier, but more limited
 
 More difficult, but more opportunities
 </div>
+
+
+# Directive-based accelerator languages
+
+- Annotate code to mark accelerator-offloadable regions
+- OpenACC
+    - focus on optimizing productivity (reasonably good performance with
+      minimal effort)
+    - created in 2011, latest version is 3.1 (November 2020)
+    - mostly Nvidia only
+- OpenMP
+    - de-facto standard for shared-memory parallelisation
+    - initial support for accelerators in 4.0 (2013)
+    - significant improvements/extensions in 4.5 (2015), 5.0 (2018),
+      and 5.1 (2020)
