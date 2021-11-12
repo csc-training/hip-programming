@@ -1,15 +1,3 @@
-/* The purpose of this exercise is to 
- * run a loop accessing a struct from host and 
- * device using different memory management strategies.
- *
- * The function runHost() demonstrates the execution on
- * host. The task is to fill the functions runDeviceUnifiedMem()
- * and runDeviceExplicitMem() to do the same thing parallel
- * on the device. The latter function also requires further 
- * filling struct allocation and deallocation functions 
- * createDeviceExample() and freeDeviceExample().
- */
-
 #include <cstdio>
 #include <hip/hip_runtime.h>
 
@@ -17,9 +5,9 @@
 #define BLOCKSIZE 64
 
 /* Example struct to practise copying structs with pointers to device memory */
-typedef struct 
+typedef struct
 {
-	float *x;
+  float *x;
   int *idx;
   int size;
 } Example;
@@ -70,7 +58,7 @@ void runHost()
 void runDeviceUnifiedMem()
 {
   // Allocate struct using Unified Memory
-  
+
   // Allocate struct members using Unified Memory
 
   // Initialize struct from host
@@ -107,7 +95,7 @@ void freeDeviceExample(Example *d_ex)
 
   // Free device struct members
 
-	// Free device struct
+  // Free device struct
 }
 
 /* Run on device using Explicit memory management */
@@ -126,7 +114,7 @@ void runDeviceExplicitMem()
 
   // Allocate device struct and copy values from host to device
   Example *d_ex = createDeviceExample(ex);
-  
+
   // Print struct values from device by calling hipKernel()
   printf("\nDevice (ExplicitMem):\n");
 
@@ -137,7 +125,7 @@ void runDeviceExplicitMem()
 }
 
 /* The main function */
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
   runHost();
   runDeviceUnifiedMem();

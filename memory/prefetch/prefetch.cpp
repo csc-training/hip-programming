@@ -1,19 +1,3 @@
-/* The purpose of this exercise is to compare 
- * 6 different memory management strategies and
- * their computational overhead. The following 
- * functions are called at the end of this file
- * by the main() function:
- *   explicitMem();
- *   explicitMemPinned();
- *   explicitMemNoCopy();
- *   unifiedMem();
- *   unifiedMemPrefetch();
- *   unifiedMemNoCopy();
- *
- * The task is to fill the blanks indicated by:
- * <<<<<<<<FILL HERE>>>>>>>>
- */
-
 #include <cstdio>
 #include <cstring>
 #include <time.h>
@@ -40,9 +24,9 @@ void checkResults(int* const A, const int nx, const int ny, const std::string st
   // Check that the results are correct
   int errored = 0;
   for(unsigned int i = 0; i < nx * ny; i++)
-    if(A[i] != i) 
+    if(A[i] != i)
       errored = 1;
-  
+
   // Indicate if the results are correct
   if(errored)
     printf("The results are incorrect!/n");
@@ -51,7 +35,7 @@ void checkResults(int* const A, const int nx, const int ny, const std::string st
 }
 
 /* Run using explicit memory management */
-void explicitMem(int nSteps, int nx, int ny) 
+void explicitMem(int nSteps, int nx, int ny)
 {
   // Determine grid size
   const int gridsize = (nx * ny - 1 + BLOCKSIZE) / BLOCKSIZE;
@@ -69,14 +53,14 @@ void explicitMem(int nSteps, int nx, int ny)
   clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
   {
-    /* The order of calls inside this loop represent a common 
+    /* The order of calls inside this loop represent a common
      * workflow of a GPU accelerated program:
-     * Accessing the array from host, 
-     * copying data from host to device, 
+     * Accessing the array from host,
+     * copying data from host to device,
      * and running a GPU kernel.
      */
 
-    // Initialize array from host 
+    // Initialize array from host
     memset(A, 0, size);
 
     // Copy data to device (A to d_A)
@@ -106,7 +90,7 @@ void explicitMem(int nSteps, int nx, int ny)
 }
 
 /* Run using explicit memory management and pinned host allocations */
-void explicitMemPinned(int nSteps, int nx, int ny) 
+void explicitMemPinned(int nSteps, int nx, int ny)
 {
   // Determine grid size
   const int gridsize = (nx * ny - 1 + BLOCKSIZE) / BLOCKSIZE;
@@ -124,14 +108,14 @@ void explicitMemPinned(int nSteps, int nx, int ny)
   clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
   {
-    /* The order of calls inside this loop represent a common 
+    /* The order of calls inside this loop represent a common
      * workflow of a GPU accelerated program:
-     * Accessing the array from host, 
-     * copying data from host to device, 
+     * Accessing the array from host,
+     * copying data from host to device,
      * and running a GPU kernel.
      */
 
-    // Initialize array from host 
+    // Initialize array from host
     memset(A, 0, size);
 
     // Copy data to device (A to d_A)
@@ -141,7 +125,7 @@ void explicitMemPinned(int nSteps, int nx, int ny)
     hipLaunchKernelGGL(hipKernel,
       gridsize, BLOCKSIZE, 0, 0,
       d_A, nx, ny);
-    
+
     // Synchronization
     /*<<<<<<<<FILL HERE>>>>>>>>*/
   }
@@ -152,7 +136,7 @@ void explicitMemPinned(int nSteps, int nx, int ny)
   // Check results and print timings
   clock_t tStop = clock();
   checkResults(A, nx, ny, "ExplicitMemPinnedCopy", (double)(tStop - tStart) / CLOCKS_PER_SEC);
-  
+
   // Free device array (d_A)
   /*<<<<<<<<FILL HERE>>>>>>>>*/
 
@@ -161,14 +145,14 @@ void explicitMemPinned(int nSteps, int nx, int ny)
 }
 
 /* Run using explicit memory management without recurring host/device memcopies */
-void explicitMemNoCopy(int nSteps, int nx, int ny) 
+void explicitMemNoCopy(int nSteps, int nx, int ny)
 {
   // Determine grid size
   const int gridsize = (nx * ny - 1 + BLOCKSIZE) / BLOCKSIZE;
 
   int *A, *d_A;
   size_t size = nx * ny * sizeof(int);
-  
+
   // Allocate pageable host memory of size for the pointer A
   /*<<<<<<<<FILL HERE>>>>>>>>*/
 
@@ -196,20 +180,20 @@ void explicitMemNoCopy(int nSteps, int nx, int ny)
 
   // Copy data back to host (d_A to A)
   /*<<<<<<<<FILL HERE>>>>>>>>*/
-  
+
   // Check results and print timings
   clock_t tStop = clock();
   checkResults(A, nx, ny, "ExplicitMemNoCopy", (double)(tStop - tStart) / CLOCKS_PER_SEC);
-  
+
   // Free device array (d_A)
   /*<<<<<<<<FILL HERE>>>>>>>>*/
-  
+
   // Free host array (A)
   /*<<<<<<<<FILL HERE>>>>>>>>*/
 }
 
 /* Run using Unified Memory */
-void unifiedMem(int nSteps, int nx, int ny) 
+void unifiedMem(int nSteps, int nx, int ny)
 {
   // Determine grid size
   const int gridsize = (nx * ny - 1 + BLOCKSIZE) / BLOCKSIZE;
@@ -219,19 +203,19 @@ void unifiedMem(int nSteps, int nx, int ny)
 
   // Allocate Unified Memory of size for the pointer A
   /*<<<<<<<<FILL HERE>>>>>>>>*/
-  
+
   // Start timer and begin stepping loop
   clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
   {
-    /* The order of calls inside this loop represent 
+    /* The order of calls inside this loop represent
      * a common workflow of a GPU accelerated program:
-     * Accessing the array from host, 
-     * (data copy from host to device is handled automatically), 
+     * Accessing the array from host,
+     * (data copy from host to device is handled automatically),
      * and running a GPU kernel.
      */
 
-    // Initialize array from host 
+    // Initialize array from host
     memset(A, 0, size);
 
     // Launch GPU kernel
@@ -240,43 +224,43 @@ void unifiedMem(int nSteps, int nx, int ny)
     // Synchronization
     /*<<<<<<<<FILL HERE>>>>>>>>*/
   }
-  
+
   // Check results and print timings
   clock_t tStop = clock();
   checkResults(A, nx, ny, "UnifiedMemNoPrefetch", (double)(tStop - tStart) / CLOCKS_PER_SEC);
-  
+
   // Free Unified Memory array (A)
   /*<<<<<<<<FILL HERE>>>>>>>>*/
 }
 
 /* Run using Unified Memory and prefetching */
-void unifiedMemPrefetch(int nSteps, int nx, int ny) 
+void unifiedMemPrefetch(int nSteps, int nx, int ny)
 {
   // Determine grid size
   const int gridsize = (nx * ny - 1 + BLOCKSIZE) / BLOCKSIZE;
-  
+
   // Get device id number for prefetching
   int device;
   /*<<<<<<<<FILL HERE>>>>>>>>*/
 
   int *A;
   size_t size = nx * ny * sizeof(int);
-  
+
   // Allocate Unified Memory of size for the pointer A
   /*<<<<<<<<FILL HERE>>>>>>>>*/
-  
+
   // Start timer and begin stepping loop
   clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
   {
-    /* The order of calls inside this loop represent a common 
+    /* The order of calls inside this loop represent a common
      * workflow of a GPU accelerated program:
-     * Accessing the array from host, 
-     * prefetching data from host to device, 
+     * Accessing the array from host,
+     * prefetching data from host to device,
      * and running a GPU kernel.
      */
 
-    // Initialize array from host 
+    // Initialize array from host
     memset(A, 0, size);
 
     // Prefetch data from host to device (A)
@@ -294,17 +278,17 @@ void unifiedMemPrefetch(int nSteps, int nx, int ny)
 
   // Synchronization
   /*<<<<<<<<FILL HERE>>>>>>>>*/
-  
+
   // Check results and print timings
   clock_t tStop = clock();
   checkResults(A, nx, ny, "UnifiedMemPrefetch", (double)(tStop - tStart) / CLOCKS_PER_SEC);
-  
+
   // Free Unified Memory array (A)
   /*<<<<<<<<FILL HERE>>>>>>>>*/
 }
 
 /* Run using Unified Memory without recurring host/device memcopies */
-void unifiedMemNoCopy(int nSteps, int nx, int ny) 
+void unifiedMemNoCopy(int nSteps, int nx, int ny)
 {
   // Determine grid size
   const int gridsize = (nx * ny - 1 + BLOCKSIZE) / BLOCKSIZE;
@@ -318,7 +302,7 @@ void unifiedMemNoCopy(int nSteps, int nx, int ny)
 
   // Allocate Unified Memory of size for the pointer A
   /*<<<<<<<<FILL HERE>>>>>>>>*/
-  
+
   // Start timer and begin stepping loop
   clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
@@ -340,21 +324,21 @@ void unifiedMemNoCopy(int nSteps, int nx, int ny)
 
   // Synchronization
   /*<<<<<<<<FILL HERE>>>>>>>>*/
-  
+
   // Check results and print timings
   clock_t tStop = clock();
   checkResults(A, nx, ny, "UnifiedMemNoCopy", (double)(tStop - tStart) / CLOCKS_PER_SEC);
-  
+
   // Free Unified Memory array (A)
   /*<<<<<<<<FILL HERE>>>>>>>>*/
 }
 
 /* The main function */
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
   // Set the number of steps and 2D grid dimensions
   int nSteps = 100, nx = 8000, ny = 2000;
-  
+
   // Run with different memory management strategies
   explicitMem(nSteps, nx, ny);
   explicitMemPinned(nSteps, nx, ny);

@@ -1,15 +1,3 @@
-/* The purpose of this exercise is to 
- * run a loop accessing a struct from host and 
- * device using different memory management strategies.
- *
- * The function runHost() demonstrates the execution on
- * host. The task is to fill the functions runDeviceUnifiedMem()
- * and runDeviceExplicitMem() to do the same thing parallel
- * on the device. The latter function also requires further 
- * filling struct allocation and deallocation functions 
- * createDeviceExample() and freeDeviceExample().
- */
-
 #include <cstdio>
 #include <hip/hip_runtime.h>
 
@@ -17,9 +5,9 @@
 #define BLOCKSIZE 64
 
 /* Example struct to practise copying structs with pointers to device memory */
-typedef struct 
+typedef struct
 {
-	float *x;
+  float *x;
   int *idx;
   int size;
 } Example;
@@ -73,7 +61,7 @@ void runDeviceUnifiedMem()
   Example *ex;
   hipMallocManaged((void**)&ex, sizeof(Example));
   ex->size = 10;
-  
+
   // Allocate struct members using Unified Memory
   hipMallocManaged((void**)&ex->x, ex->size * sizeof(float));
   hipMallocManaged((void**)&ex->idx, ex->size * sizeof(int));
@@ -103,8 +91,8 @@ void runDeviceUnifiedMem()
 Example* createDeviceExample(Example *ex)
 {
   // Allocate device struct
-	Example *d_ex;
-	hipMalloc((void **)&d_ex, sizeof(Example));
+  Example *d_ex;
+  hipMalloc((void **)&d_ex, sizeof(Example));
 
   float *d_x;
   int *d_idx;
@@ -137,11 +125,11 @@ void freeDeviceExample(Example *d_ex)
   hipMemcpy(&d_idx, &(d_ex->idx), sizeof(int*), hipMemcpyDeviceToHost);
 
   // Free device struct members
-	hipFree(d_x);
-	hipFree(d_idx);
+  hipFree(d_x);
+  hipFree(d_idx);
 
-	// Free device struct
-	hipFree(d_ex);
+  // Free device struct
+  hipFree(d_ex);
 }
 
 /* Run on device using Explicit memory management */
@@ -165,7 +153,7 @@ void runDeviceExplicitMem()
 
   // Allocate device struct and copy values from host to device
   Example *d_ex = createDeviceExample(ex);
-  
+
   // Print struct values from device by calling hipKernel()
   printf("\nDevice (ExplicitMem):\n");
   const int gridsize = (ex->size - 1 + BLOCKSIZE) / BLOCKSIZE;
@@ -184,7 +172,7 @@ void runDeviceExplicitMem()
 }
 
 /* The main function */
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
   runHost();
   runDeviceUnifiedMem();
