@@ -2,19 +2,15 @@
 #include <cstdlib>
 #include <mpi.h>
 #include <unistd.h>
+#include <hip/hip_runtime.h>
+#include "error_checks.h"
 
-// Device function declarations
-namespace devices
+/* Very simple addition kernel */
+__global__ void add_kernel(double *in, int N)
 {
-  void call_kernel(double *data, int N);
-  void getDeviceCount(int *devCount);
-  void setDevice(int id);
-  void freeDevice(void* ptr);
-  void freeHost(void* ptr);
-  void* mallocDevice(size_t bytes);
-  void* mallocHost(size_t bytes);
-  void memcpy_d2h(void* dst, void* src, size_t bytes);
-  void memcpy_h2d(void* dst, void* src, size_t bytes);
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < N)
+        in[tid]++;
 }
 
 /* 
@@ -35,7 +31,7 @@ void getNodeInfo(int *nodeRank, int *nodeProcs, int *devCount)
     MPI_Comm_size(intranodecomm, nodeProcs);
 
     MPI_Comm_free(&intranodecomm);
-    devices::getDeviceCount(devCount);
+    HIP_CHECK( hipGetDeviceCount(devCount) );
 }
 
 
@@ -75,30 +71,39 @@ void GPUtoGPUtestManual(int rank, double *hA, double *dA, int N, double &timer)
    //TODO: Implement transfer here that uses manual copies to host, and MPI on
    //host. Remember to add one as in CPU code 
     if (rank == 0) { //Sender process
-        devices::memcpy_d2h(hA, dA, N * sizeof(double));
+        HIP_CHECK( hipMemcpy(hA, dA, sizeof(double)*N, 
+                               hipMemcpyDeviceToHost) );
         /* Send data to rank 1 for addition */
         MPI_Send(hA, N, MPI_DOUBLE, 1, 11, MPI_COMM_WORLD);
         /* Receive the added data back */
         MPI_Recv(hA, N, MPI_DOUBLE, 1, 12, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        devices::memcpy_h2d(dA, hA, N * sizeof(double));
+        HIP_CHECK( hipMemcpy(dA, hA, sizeof(double)*N,
+                               hipMemcpyHostToDevice) );
     } else { // Adder process
-        MPI_Recv(hA, N, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        devices::memcpy_h2d(dA, hA, N * sizeof(double));
-        devices::call_kernel(dA, N);
-        devices::memcpy_d2h(hA, dA, N * sizeof(double));
-        MPI_Send(hA, N, MPI_DOUBLE, 0, 12, MPI_COMM_WORLD);
+       MPI_Recv(hA, N, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+       HIP_CHECK( hipMemcpy(dA, hA, sizeof(double)*N,
+                              hipMemcpyHostToDevice) );
+       int blocksize = 128;
+       int gridsize = (N + blocksize - 1) / blocksize;
+       add_kernel<<<blocksize, gridsize>>> (dA, N);
+       HIP_CHECK( hipMemcpy(hA, dA, sizeof(double)*N,
+                              hipMemcpyDeviceToHost) );
+       MPI_Send(hA, N, MPI_DOUBLE, 0, 12, MPI_COMM_WORLD);
     }
 
     stop = MPI_Wtime();
     timer = stop - start;
+
+ 
 }
+
 
 /* Test routine for GPU-CPU-to-CPU-GPU copy */
 void GPUtoGPUtestHipAware(int rank, double *dA, int N, double &timer)
 {
     double start, stop;
     start = MPI_Wtime();
-    //TODO: Implement transfer here that uses Hip-aware MPI to transfer data
+    //TODO: Implement transfer here that uses HIP-aware MPI to transfer data
     
     if (rank == 0) { //Sender process
         /* Send data to rank 1 for addition */
@@ -107,14 +112,21 @@ void GPUtoGPUtestHipAware(int rank, double *dA, int N, double &timer)
         MPI_Recv(dA, N, MPI_DOUBLE, 1, 12, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
     } else { // Adder process
+        int blocksize = 128;
+        int gridsize = (N + blocksize - 1) / blocksize;
+
         MPI_Recv(dA, N, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        devices::call_kernel(dA, N);
+        add_kernel<<<blocksize, gridsize>>> (dA, N);
         MPI_Send(dA, N, MPI_DOUBLE, 0, 12, MPI_COMM_WORLD);
     }
 
     stop = MPI_Wtime();
     timer = stop - start;
+
+
 }
+
+
 
 /* Simple ping-pong main program */
 int main(int argc, char *argv[])
@@ -152,11 +164,13 @@ int main(int argc, char *argv[])
     }
 
     //TODO: Select the device according to the node rank
-    devices::setDevice(noderank);
+    HIP_CHECK( hipSetDevice(noderank) );
 
-    //TODO: allocate memories
-    hA = (double*)devices::mallocHost(N * sizeof(double));
-    dA = (double*)devices::mallocDevice(N * sizeof(double));
+    //TODO: allocate device memories
+    HIP_CHECK( hipMallocHost((void **)&hA, sizeof(double) * N) );
+    HIP_CHECK( hipMalloc((void **)&dA, sizeof(double) * N) );
+
+
 
     /* Re-initialize and copy the data to the device memory to prepare for
      * MPI test */
@@ -176,13 +190,13 @@ int main(int argc, char *argv[])
     /* Re-initialize and copy the data to the device memory */
     for (int i = 0; i < N; ++i)
        hA[i] = 1.0;    
-    devices::memcpy_h2d(dA, hA, N * sizeof(double));
+    HIP_CHECK( hipMemcpy(dA, hA, sizeof(double)*N, hipMemcpyHostToDevice) );
     
     /* GPU-to-GPU test, Hip-aware */
     //GPUtoGPUtestHipAware(rank, dA, N, GPUtime);
 
     /*Check results, copy device array back to Host*/
-    devices::memcpy_d2h(hA, dA, N * sizeof(double));
+    HIP_CHECK( hipMemcpy(hA, dA, sizeof(double)*N, hipMemcpyDeviceToHost) );
     if (rank == 0) {
         double errorsum = 0;
         for (int i = 0; i < N; ++i)
@@ -194,13 +208,13 @@ int main(int argc, char *argv[])
      * MPI test */
     for (int i = 0; i < N; ++i)
        hA[i] = 1.0;    
-    devices::memcpy_h2d(dA, hA, N * sizeof(double));
+    HIP_CHECK( hipMemcpy(dA, hA, sizeof(double)*N, hipMemcpyHostToDevice) );
 
     /* GPU-to-GPU test, Manual option*/
     GPUtoGPUtestManual(rank, hA, dA, N, GPUtime);
 
     /*Check results, copy device array back to Host*/
-    devices::memcpy_d2h(hA, dA, N * sizeof(double));
+    HIP_CHECK( hipMemcpy(hA, dA, sizeof(double)*N, hipMemcpyDeviceToHost) );
     if (rank == 0) {
         double errorsum = 0;
         for (int i = 0; i < N; ++i)
@@ -209,8 +223,7 @@ int main(int argc, char *argv[])
         printf("GPU-GPU manual time %f, errorsum %f\n", GPUtime, errorsum);
     }
 
-    devices::freeHost(hA);
-    devices::freeDevice(dA);
+
 
     MPI_Finalize();
     return 0;
