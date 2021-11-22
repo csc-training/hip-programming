@@ -39,6 +39,10 @@ not support it.
 * Need to adjust Makefile to compile the multiple files
 * Example of Fortran with HIP: https://github.com/csc-training/hip-programming/hipfort
 
+# HIPFort code
+
+![width:1200px height:15cm](../imgs/hipfort.png)
+
 # GPUFort
 
 ![width:1200px height:15cm](../imgs/gpufort.png)
