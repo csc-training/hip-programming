@@ -39,4 +39,21 @@ not support it.
 * Need to adjust Makefile to compile the multiple files
 * Example of Fortran with HIP: https://github.com/csc-training/hip-programming/hipfort
 
+# GPUFort
 
+![width:1200px height:15cm](../imgs/gpufort.png)
+
+---
+
+# GPUFort (II)
+![width:1200px height:15cm](../imgs/gpufort1.png)
+
+---
+# GPUFort (III)
+
+![width:1200px height:15cm](../imgs/gpufort2.png)
+
+# Fortran and OpenACC
+
+* HPE will support OpenACC with the Cray Fortran compiler, not yet the latest version.
+* C and C++ will not be supported at least from HPE
