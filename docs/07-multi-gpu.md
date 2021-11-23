@@ -22,14 +22,14 @@ lang:   en
 # GPU Context
 
 * Context is established when a HIP function such as hipMalloc() is called for the first time
-* Several processes can create contexts for single device
+* Several processes can create contexts for a single device
 * Resources are allocated per context
 * By default, one context per device per thread
     * Threads of the same process will create their own contexts
 
 # Selecting device
 
-* Driver associates a number for each hip-capable GPU starting from 0
+* Driver associates a number for each HIP-capable GPU starting from 0
 * The function hipSetDevice() is used for selecting the desired device
 
 # Device management
@@ -58,7 +58,7 @@ hipError_t hipDeviceReset(void)
     * Provides e.g. name, amount of memory, warp size, support for unified virtual addressing, etc.
     * Useful for code portability
 
-Return the properties of hip capable device in *prop
+Return the properties of a HIP capable device in *prop
 ```
 hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 ```
@@ -140,15 +140,15 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
     * Lower latency, higher bandwidth
 * Check peer accessibility 
 ```
-hipDeviceCanAccessPeer(int* canAccessPeer, int device, int peerDevice)
+hipError_t hipDeviceCanAccessPeer(int* canAccessPeer, int device, int peerDevice)
 ``` 
 * Enable peer access 
 ```
-hipDeviceEnablePeerAccess(int peerDevice, unsigned int flags)
+hipError_t hipDeviceEnablePeerAccess(int peerDevice, unsigned int flags)
 ```
 * Disable peer access 
 ```
-hipDeviceDisablePeerAccess(int peerDevice)
+hipError_t hipDeviceDisablePeerAccess(int peerDevice)
 ```
 
 # Peer to peer communication
@@ -156,11 +156,11 @@ hipDeviceDisablePeerAccess(int peerDevice)
 * Devices have separate memories
 * With devices supporting unified virtual addressing, hipMemCpy() with kind=hipMemcpyDefault, works: 
 ```
-hipMemcpy(void* dst, void* src, size_t count, hipMemcpyKind kind)
+hipError_t hipMemcpy(void* dst, void* src, size_t count, hipMemcpyKind kind)
 ```
 * Other option which does not require unified virtual addressing 
 ```
-hipMemcpyPeer(void* dst, int  dstDevice, void* src, int srcDevice, size_t count)
+hipError_t hipMemcpyPeer(void* dst, int  dstDev, void* src, int srcDev, size_t count)
 ```
 
 * If peer to peer access is not available, the functions result in a normal copy through host memory
