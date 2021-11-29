@@ -57,9 +57,9 @@ void runHost()
 /* Run on device using Unified Memory */
 void runDeviceUnifiedMem()
 {
-  // Allocate struct using Unified Memory
+  #error Allocate struct using Unified Memory
 
-  // Allocate struct members using Unified Memory
+  #error Allocate struct members using Unified Memory
 
   // Initialize struct from host
   for(int i = 0; i < ex->size; i++)
@@ -68,42 +68,42 @@ void runDeviceUnifiedMem()
     ex->idx[i] = i;
   }
 
-  // Print struct values from device by calling hipKernel()
+  #error Print struct values from device by calling hipKernel()
   printf("\nDevice (UnifiedMem):\n");
 
-  // Free struct
+  #error Free struct
 }
 
 /* Create the device struct (needed for explicit memory management) */
 Example* createDeviceExample(Example *ex)
 {
-  // Allocate device struct
+  #error Allocate device struct
 
-  // Allocate device struct members
+  #error Allocate device struct members
 
-  // Copy arrays pointed by the struct members from host to device
+  #error Copy arrays pointed by the struct members from host to device
 
-  // Copy struct members from host to device
+  #error Copy struct members from host to device
 
-  // Return device struct
+  #error Return device struct
 }
 
 /* Free the device struct (needed for explicit memory management) */
 void freeDeviceExample(Example *d_ex)
 {
-// Copy struct members (pointers) from device to host
+  #error Copy struct members (pointers) from device to host
 
-  // Free device struct members
+  #error Free device struct members
 
-  // Free device struct
+  #error Free device struct
 }
 
 /* Run on device using Explicit memory management */
 void runDeviceExplicitMem()
 {
-  // Allocate host struct
+  #error Allocate host struct
 
-  // Allocate host struct members
+  #error Allocate host struct members
 
   // Initialize host struct
   for(int i = 0; i < ex->size; i++)
@@ -115,13 +115,13 @@ void runDeviceExplicitMem()
   // Allocate device struct and copy values from host to device
   Example *d_ex = createDeviceExample(ex);
 
-  // Print struct values from device by calling hipKernel()
+  #error Print struct values from device by calling hipKernel()
   printf("\nDevice (ExplicitMem):\n");
 
   // Free device struct
   freeDeviceExample(d_ex);
 
-  // Free host struct
+  #error Free host struct
 }
 
 /* The main function */

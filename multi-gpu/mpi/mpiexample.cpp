@@ -44,7 +44,7 @@ void getNodeInfo(int *nodeRank, int *nodeProcs, int *devCount)
 /* Test routine for CPU-to-CPU copy */
 void CPUtoCPUtest(int rank, double *data, int N, double &timer)
 {
-    double start, stop;  
+    double start, stop; 
     start = MPI_Wtime();
     
     if (rank == 0) {
@@ -70,28 +70,8 @@ void GPUtoGPUtestManual(int rank, double *hA, double *dA, int N, double &timer)
     double start, stop;
     start = MPI_Wtime();
     
-   // Implement transfer here that uses manual copies to host, and MPI on
-   // host. Remember to add one as in CPU code (using the existing GPU kernel)
-    if (rank == 0) { //Sender process
-        HIP_ERRCHK( hipMemcpy(hA, dA, sizeof(double)*N, 
-                               hipMemcpyDeviceToHost) );
-        /* Send data to rank 1 for addition */
-        MPI_Send(hA, N, MPI_DOUBLE, 1, 11, MPI_COMM_WORLD);
-        /* Receive the added data back */
-        MPI_Recv(hA, N, MPI_DOUBLE, 1, 12, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        HIP_ERRCHK( hipMemcpy(dA, hA, sizeof(double)*N,
-                               hipMemcpyHostToDevice) );
-    } else { // Adder process
-       MPI_Recv(hA, N, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-       HIP_ERRCHK( hipMemcpy(dA, hA, sizeof(double)*N,
-                              hipMemcpyHostToDevice) );
-       int blocksize = 128;
-       int gridsize = (N + blocksize - 1) / blocksize;
-       add_kernel<<<blocksize, gridsize>>> (dA, N);
-       HIP_ERRCHK( hipMemcpy(hA, dA, sizeof(double)*N,
-                              hipMemcpyDeviceToHost) );
-       MPI_Send(hA, N, MPI_DOUBLE, 0, 12, MPI_COMM_WORLD);
-    }
+   #error Implement transfer here that uses manual copies to host, and MPI on
+   #error host. Remember to add one as in CPU code (using the existing GPU kernel)
 
     stop = MPI_Wtime();
     timer = stop - start;
@@ -102,32 +82,20 @@ void GPUtoGPUtestHipAware(int rank, double *dA, int N, double &timer)
 {
     double start, stop;
     start = MPI_Wtime();
-    // Implement transfer here that uses HIP-aware MPI to transfer data
-    
-    if (rank == 0) { //Sender process
-        /* Send data to rank 1 for addition */
-        MPI_Send(dA, N, MPI_DOUBLE, 1, 11, MPI_COMM_WORLD);
-        /* Receive the added data back */
-        MPI_Recv(dA, N, MPI_DOUBLE, 1, 12, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-    } else { // Adder process
-        int blocksize = 128;
-        int gridsize = (N + blocksize - 1) / blocksize;
-
-        MPI_Recv(dA, N, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-        add_kernel<<<blocksize, gridsize>>> (dA, N);
-        MPI_Send(dA, N, MPI_DOUBLE, 0, 12, MPI_COMM_WORLD);
-    }
+    #error Implement transfer here that uses HIP-aware MPI to transfer data
 
     stop = MPI_Wtime();
     timer = stop - start;
+
+
 }
+
 
 /* Simple ping-pong main program */
 int main(int argc, char *argv[])
 {
     int rank, nprocs, noderank, nodenprocs, devcount;
-    int N = 100;
+    int N = 100;    
     double GPUtime, CPUtime;
     double *dA, *hA;
 
@@ -152,12 +120,9 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    // Select the device according to the node rank
-    HIP_ERRCHK( hipSetDevice(noderank % devcount) );
+    #error Select the device according to the node rank
 
-    // allocate host and device memory for hA and dA (sizeof(double) * N)
-    HIP_ERRCHK( hipMallocHost((void **)&hA, sizeof(double) * N) );
-    HIP_ERRCHK( hipMalloc((void **)&dA, sizeof(double) * N) );
+    #error allocate host and device memory for hA and dA (sizeof(double) * N)
 
     /* Re-initialize and copy the data to the device memory to prepare for
      * MPI test */

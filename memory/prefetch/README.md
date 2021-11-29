@@ -11,4 +11,4 @@ called at the end of this file by the `main()` function:
 * `unifiedMemPrefetch();`
 * `unifiedMemNoCopy();`
 
-The task is to fill the blanks indicated by: `<<<<<<<<FILL HERE>>>>>>>>`
+The task is to fill the blanks indicated by: `#error`

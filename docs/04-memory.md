@@ -5,6 +5,14 @@ date:   2021-11
 lang:   en
 ---
 
+
+# Outline
+
+* Memory model and hierarchy
+* Memory management strategies
+* Page-locked memory
+* Coalesced memory access in device kernels
+
 # Memory model
 
 * Host and device have separate physical memories
@@ -60,7 +68,7 @@ lang:   en
 
 # Device memory hierarchy (advanced)
 
-- There are more details in the memory hierarchy, some of which are architecture dependent, eg,
+- There are more details in the memory hierarchy, some of which are architecture-dependent, eg,
     - Texture memory
     - Constant memory
 - Complicates implementation
@@ -70,19 +78,19 @@ lang:   en
 
 Allocate pinned device memory
 ```
-hipMalloc(void **devPtr, size_t size)
+hipError_t hipMalloc(void **devPtr, size_t size)
 ```
 Allocate Unified Memory; The data is moved automatically between host/device
 ```
-hipMallocManaged(void **devPtr, size_t size)
+hipError_t hipMallocManaged(void **devPtr, size_t size)
 ```
 Deallocate pinned device memory and Unified Memory
 ```
-hipFree(void *devPtr)
+hipError_t hipFree(void *devPtr)
 ```
 Copy data (host-host, host-device, device-host, device-device)
 ```
-hipMemcpy(void *dst, const void *src, size_t count, enum hipMemcpyKind kind)
+hipError_t hipMemcpy(void *dst, const void *src, size_t count, enum hipMemcpyKind kind)
 ```
 
 # Example of explicit memory management
@@ -148,8 +156,8 @@ int main() {
 # Unified Memory workflow for GPU offloading
 
 4.  Move operations from CPU to GPU if possible, or use hints / prefetching (hipMemAdvice() / hipMemPrefetchAsync())
-    -  It is not necessary to eliminate all page-faults, but eliminating the most frequently occurring ones can provide significant performance improvements
-5.  Allocating GPU memory can have much higher overhead than allocating standard host memory
+    -  It is not necessary to eliminate all page faults, but eliminating the most frequently occurring ones can provide significant performance improvements
+5.  Allocating GPU memory can have a much higher overhead than allocating standard host memory
     - If GPU memory is allocated and deallocated in a loop, consider using a GPU memory pool allocator for better performance
 
 
@@ -202,7 +210,7 @@ int main() {
 
 <div class="column">
 - The global memory loads and stores consist of transactions of a certain size (eg. 32 bytes)
-- If the threads within a warp access data within such block of 32 bytes, only one global memory transaction is needed 
+- If the threads within a warp access data within such a block of 32 bytes, only one global memory transaction is needed 
 </div>
 
 <div class="column">
@@ -240,6 +248,5 @@ __global__ void memAccess(float *out, float *in)
 - Host and device have separate physical memories
 - Using Unified Memory can improve developer productivity and result in a cleaner implementation
 - The number of data copies between CPU and GPU should be minimized
-    - With Unified Memory, if data transfer cannot be avoided, using hints or prefetching to mitigate page-faults is beneficial
+    - With Unified Memory, if data transfer cannot be avoided, using hints or prefetching to mitigate page faults is beneficial
 - Coalesced memory access in the device code is recommended for better performance
-
