@@ -57,7 +57,12 @@ not support it.
 
 ![width:1200px height:15cm](../imgs/gpufort2.png)
 
+---
+
 # Fortran and OpenACC
 
-* HPE will support OpenACC with the Cray Fortran compiler, not yet the latest version.
-* C and C++ will not be supported at least from HPE
+* The CRAY Fortran compiler supports OpenACC v2.7
+* Support for OpenACC 3.0 around June 2022
+* By the end of 2022 the compiler will be up  to the standard in OpenACC
+* Only Fortran and OpenACC will be supported from HPE programming environment, no C/C++
+* For now is not the recommended approach, if a code is already in OpenACC, then you can investigate its performance
