@@ -70,8 +70,9 @@ void GPUtoGPUtestManual(int rank, double *hA, double *dA, int N, double &timer)
     double start, stop;
     start = MPI_Wtime();
     
-   // Implement transfer here that uses manual copies to host, and MPI on
-   // host. Remember to add one as in CPU code (using the existing GPU kernel)
+    // Implement a transfer here that uses manual memcopies from device to host 
+    // (and back to device). Host pointers are passed for the MPI. 
+    // Remember to add one as in CPU code (using the existing GPU kernel).
     if (rank == 0) { //Sender process
         HIP_ERRCHK( hipMemcpy(hA, dA, sizeof(double)*N, 
                                hipMemcpyDeviceToHost) );
@@ -102,7 +103,9 @@ void GPUtoGPUtestHipAware(int rank, double *dA, int N, double &timer)
 {
     double start, stop;
     start = MPI_Wtime();
-    // Implement transfer here that uses HIP-aware MPI to transfer data
+    // Implement a transfer here that uses HIP-aware MPI to transfer the data
+    // directly by passing a device pointer to MPI. 
+    // Remember to add one as in CPU code (using the existing GPU kernel).
     
     if (rank == 0) { //Sender process
         /* Send data to rank 1 for addition */
@@ -155,7 +158,7 @@ int main(int argc, char *argv[])
     // Select the device according to the node rank
     HIP_ERRCHK( hipSetDevice(noderank % devcount) );
 
-    // allocate host and device memory for hA and dA (sizeof(double) * N)
+    // Allocate pinned host and device memory for hA and dA (sizeof(double) * N)
     HIP_ERRCHK( hipMallocHost((void **)&hA, sizeof(double) * N) );
     HIP_ERRCHK( hipMalloc((void **)&dA, sizeof(double) * N) );
 

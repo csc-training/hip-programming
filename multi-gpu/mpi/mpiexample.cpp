@@ -70,8 +70,9 @@ void GPUtoGPUtestManual(int rank, double *hA, double *dA, int N, double &timer)
     double start, stop;
     start = MPI_Wtime();
     
-   #error Implement transfer here that uses manual copies to host, and MPI on
-   #error host. Remember to add one as in CPU code (using the existing GPU kernel)
+    #error Implement a transfer here that uses manual memcopies from device to host 
+    #error (and back to device). Host pointers are passed for the MPI. 
+    #error Remember to add one as in CPU code (using the existing GPU kernel).
 
     stop = MPI_Wtime();
     timer = stop - start;
@@ -82,14 +83,13 @@ void GPUtoGPUtestHipAware(int rank, double *dA, int N, double &timer)
 {
     double start, stop;
     start = MPI_Wtime();
-    #error Implement transfer here that uses HIP-aware MPI to transfer data
+    #error Implement a transfer here that uses HIP-aware MPI to transfer the data
+    #error directly by passing a device pointer to MPI. 
+    #error Remember to add one as in CPU code (using the existing GPU kernel).
 
     stop = MPI_Wtime();
     timer = stop - start;
-
-
 }
-
 
 /* Simple ping-pong main program */
 int main(int argc, char *argv[])
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 
     #error Select the device according to the node rank
 
-    #error allocate host and device memory for hA and dA (sizeof(double) * N)
+    #error Allocate pinned host and device memory for hA and dA (sizeof(double) * N)
 
     /* Re-initialize and copy the data to the device memory to prepare for
      * MPI test */
