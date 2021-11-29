@@ -21,11 +21,11 @@ lang:   en
 
 # GPU Context
 
-* Context is established when a HIP function such as hipMalloc() is called for the first time
+* Context is established when the first HIP function requiring an active context is called (eg. hipMalloc())
 * Several processes can create contexts for a single device
 * Resources are allocated per context
-* By default, one context per device per thread
-    * Threads of the same process will create their own contexts
+* By default, one context per device per process (since CUDA 4.0)
+    * Threads of the same process share the primary context (for each device)
 
 # Selecting device
 
@@ -101,11 +101,11 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 # Many GPUs per process, code example
 
 ```
-  for(unsigned int i = 0; i < deviceCount; i++)
-  {
-    hipSetDevice(i);
-    kernel<<<blocks[i],threads[i]>>>(arg1[i], arg2[i]);
-  }
+for(unsigned int i = 0; i < deviceCount; i++)
+{
+  hipSetDevice(i);
+  kernel<<<blocks[i],threads[i]>>>(arg1[i], arg2[i]);
+}
 ```
 
 # Multi-GPU, one GPU per thread
@@ -114,7 +114,7 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
     * I.e one OpenMP thread per GPU being used
 * HIP API is threadsafe
     * Multiple threads can call the functions at the same time
-* Each thread can create its own context on the GPU
+* Each thread can create its own context on a different GPU
     * hipSetDevice() sets the device and creates a context per thread
     * Easy device management with no changing of device
 * Communication between threads becomes a bit more tricky
@@ -122,13 +122,11 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 # One GPU per thread, code example
 
 ```
-#pragma omp parallel
+#pragma omp parallel for
+for(unsigned int i = 0; i < deviceCount; i++)
 {
-  for(unsigned int i = 0; i < deviceCount; i++)
-  {
-    hipSetDevice(i);
-    kernel<<<blocks[i],threads[i]>>>(arg1[i], arg2[i]);
-  }
+  hipSetDevice(i);
+  kernel<<<blocks[i],threads[i]>>>(arg1[i], arg2[i]);
 }
 ```
 
