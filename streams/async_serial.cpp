@@ -55,7 +55,7 @@ int main(int argc, char **argv)
   float duration; 
   
   // Create events and streams
-  hipEvent_t startEvent, stopEvent, dummyEvent;
+  hipEvent_t startEvent, stopEvent;
   hipStream_t stream[nStreams];
   hipCheck( hipEventCreate(&startEvent) );
   hipCheck( hipEventCreate(&stopEvent) );
