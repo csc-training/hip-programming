@@ -135,13 +135,14 @@ int main() {
 - Allows incremental development 
 - Can increase developer productivity significantly
     - Especially large codebases with complex data structures
-- Data movement can be optimized once the code works
-    - Through prefetches
-    - Through hints
+- Supported by the latest NVIDIA + AMD architectures
 - Allows oversubscribing GPU memory on some architectures
 
 # Unified Memory cons
 
+- Data transfers between host and device are initially slower, but can be optimized once the code works
+    - Through prefetches
+    - Through hints
 - Must still obey concurrency & coherency rules, not foolproof
 - The performance on the AMD cards is an open question
 
@@ -204,7 +205,6 @@ int main() {
 - Threads are executed in warps, memory operations are grouped in a similar fashion
 - Memory access is optimized for coalesced access where threads read from and write to successive memory locations
 - Exact alignment rules and performance issues depend on the architecture
-- Shared memory is better suited for more complicated data access patterns
 
 # Coalesced memory access
 
