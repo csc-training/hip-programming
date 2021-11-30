@@ -10,7 +10,7 @@ We can observe in the code that we record the startEvent on stream 0, copy the d
 
 ## Execute:
 
-sbatch async_serial.sh
+`sbatch async_serial.sh`
 
 ## Results
 
@@ -51,8 +51,10 @@ Copy the async_case1.cpp to async_case2.cpp and edit below the previous code (be
 
 #### Compile and execute
 
+```
 make async_case2
 sbatch async_case2.sh
+```
 
 Is your code faster? Why?
 
