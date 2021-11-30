@@ -16,7 +16,15 @@ We can observe in the code that we record the startEvent on stream 0, copy the d
 
 Duration for sequential transfer and execute (ms): 3.381110
 
-## Exercise
+## Tips
+
+For the following exercises, you would need:
+
+* hipMemcpyAsync
+* hipStreamCreate
+* Use the defined `nStreams` to calculate the `streamSize` based on `n` and define the `streamBytes`which is the total bytes per stream
+
+## Exercises
 
 ### Case 1
 
