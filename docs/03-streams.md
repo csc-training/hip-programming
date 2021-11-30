@@ -48,3 +48,22 @@ lang:   en
 * hipEventDestroy: Destroy the specified event 
 
 ---
+
+# Example - Data Transfer and Compute
+
+```
+  hipCheck( hipEventRecord(startEvent,0) );
+  
+  hipCheck( hipMemcpy(d_a, a, bytes, hipMemcpyHostToDevice) );
+  
+  hipLaunchKernelGGL(kernel, n/blockSize, blockSize, 0, 0, d_a, 0);
+  
+  hipCheck( hipMemcpy(a, d_a, bytes, hipMemcpyDeviceToHost) );
+  
+  hipCheck( hipEventRecord(stopEvent, 0) );
+  hipCheck( hipEventSynchronize(stopEvent) );
+  hipCheck( hipEventElapsedTime(&duration, startEvent, stopEvent) );
+  printf("Duration of sequential transfer and execute (ms): %f\n", ms);
+```
+
+---
