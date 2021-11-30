@@ -35,8 +35,6 @@ int main(int argc, char **argv)
 {
   const int blockSize = 256, nStreams = 4;
   const int n = 4 * 1024 * blockSize * nStreams;
-  const int streamSize = n / nStreams;
-  const int streamBytes = streamSize * sizeof(float);
   const int bytes = n * sizeof(float);
    
   int devId = 0;
@@ -54,9 +52,8 @@ int main(int argc, char **argv)
 
   float duration; 
   
-  // Create events and streams
+  // Create events 
   hipEvent_t startEvent, stopEvent;
-  hipStream_t stream[nStreams];
   hipCheck( hipEventCreate(&startEvent) );
   hipCheck( hipEventCreate(&stopEvent) );
   
