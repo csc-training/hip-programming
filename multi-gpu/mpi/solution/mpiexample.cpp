@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
     HIP_ERRCHK( hipSetDevice(noderank % devcount) );
 
     // Allocate pinned host and device memory for hA and dA (sizeof(double) * N)
-    HIP_ERRCHK( hipMallocHost((void **)&hA, sizeof(double) * N) );
+    HIP_ERRCHK( hipHostMalloc((void **)&hA, sizeof(double) * N) );
     HIP_ERRCHK( hipMalloc((void **)&dA, sizeof(double) * N) );
 
     /* Re-initialize and copy the data to the device memory to prepare for
@@ -211,6 +211,10 @@ int main(int argc, char *argv[])
         
         printf("GPU-GPU manual time %f, errorsum %f\n", GPUtime, errorsum);
     }
+
+    /* Free pinned host and device memory for hA and dA */
+    HIP_ERRCHK( hipHostFree(hA) );
+    HIP_ERRCHK( hipFree(dA) );
 
     MPI_Finalize();
     return 0;

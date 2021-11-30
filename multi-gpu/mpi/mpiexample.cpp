@@ -174,6 +174,8 @@ int main(int argc, char *argv[])
         printf("GPU-GPU manual time %f, errorsum %f\n", GPUtime, errorsum);
     }
 
+    #error Free pinned host and device memory for hA and dA
+
     MPI_Finalize();
     return 0;
 }
