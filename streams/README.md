@@ -6,7 +6,7 @@ We can observe in the code that we record the startEvent on stream 0, copy the d
 
 ## Compile 
 
-make async_serial
+`make async_serial`
 
 ## Execute:
 
@@ -33,8 +33,10 @@ Copy the async_serial.cpp file to async_case1.cpp and edit after the sequential 
 
 #### Compile and execute
 
+```
 make async_case1
 sbatch async_case1.sh
+```
 
 Is your code faster? Why?
 
