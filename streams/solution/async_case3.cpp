@@ -90,6 +90,7 @@ int main(int argc, char **argv)
   printf("Duration for asynchronous kernels, execute (ms): %f\n", duration);
   printf("  max error: %e\n", maxError(a, n));
 
+
   // asynchronous case 2: loop over {copy, kernel, copy}
   memset(a, 0, bytes);
   hipCheck( hipEventRecord(startEvent,0) );
@@ -106,7 +107,35 @@ int main(int argc, char **argv)
   hipCheck( hipEventRecord(stopEvent, 0) );
   hipCheck( hipEventSynchronize(stopEvent) );
   hipCheck( hipEventElapsedTime(&duration, startEvent, stopEvent) );
-  printf("Duration for asynchronous transfer case 1 and execute (ms): %f\n", duration);
+  printf("Duration for asynchronous transfer case 1 and execute (ms): %f %d\n", duration, streamSize);
+  printf("  max error: %e\n", maxError(a, n));
+
+  // asynchronous case 3: loop over copy, loop over kernel, loop over copy
+  memset(a, 0, bytes);
+  hipCheck( hipEventRecord(startEvent,0) );
+  for (int i = 0; i < nStreams; ++i)
+  {
+    int offset = i * streamSize;
+    hipCheck( hipMemcpyAsync(&d_a[offset], &a[offset], 
+                               streamBytes, hipMemcpyHostToDevice,
+                               stream[i]) );
+  }
+  for (int i = 0; i < nStreams; ++i)
+  {
+    int offset = i * streamSize;
+    hipLaunchKernelGGL(kernel, streamSize/blockSize, blockSize, 0, stream[i], d_a, offset);
+  }
+  for (int i = 0; i < nStreams; ++i)
+  {
+    int offset = i * streamSize;
+    hipCheck( hipMemcpyAsync(&a[offset], &d_a[offset], 
+                               streamBytes, hipMemcpyDeviceToHost,
+                               stream[i]) );
+  }
+  hipCheck( hipEventRecord(stopEvent, 0) );
+  hipCheck( hipEventSynchronize(stopEvent) );
+  hipCheck( hipEventElapsedTime(&duration, startEvent, stopEvent) );
+  printf("Duration for asynchronous transfer case 2 and execute (ms): %f %d\n", duration,streamBytes);
   printf("  max error: %e\n", maxError(a, n));
 
   // Clean memory

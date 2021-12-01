@@ -49,20 +49,22 @@ int main(int argc, char **argv)
   
   // Allocate pinned host memory and device memory
   float *a, *d_a;
-  hipCheck( hipHostMalloc((void**)&a, bytes) );      
+  hipCheck( hipHostMalloc((void**)&a, bytes) );   
   hipCheck( hipMalloc((void**)&d_a, bytes) ); 
 
-  float duration; 
+  float duration;
   
-  // create events and streams
+  // Create events and streams
   hipEvent_t startEvent, stopEvent;
   hipStream_t stream[nStreams];
   hipCheck( hipEventCreate(&startEvent) );
   hipCheck( hipEventCreate(&stopEvent) );
+  
   for (int i = 0; i < nStreams; ++i)
     hipCheck( hipStreamCreate(&stream[i]) );
-  
-  // sequential transfer and execute
+
+
+  // Sequential transfer and execute
   memset(a, 0, bytes);
   hipCheck( hipEventRecord(startEvent,0) );
   hipCheck( hipMemcpy(d_a, a, bytes, hipMemcpyHostToDevice) );
@@ -74,24 +76,22 @@ int main(int argc, char **argv)
   printf("Duration for sequential transfer and execute (ms): %f\n", duration);
   printf("  max error: %e\n", maxError(a, n));
 
-  // asynchronous version 1: loop over {copy, kernel, copy}
+ // Async kernels
   memset(a, 0, bytes);
   hipCheck( hipEventRecord(startEvent,0) );
-  for (int i = 0; i < nStreams; ++i) {
+  hipCheck( hipMemcpy(d_a, a, bytes, hipMemcpyHostToDevice) );
+  for (int i = 0; i < nStreams; ++i)
+  {
     int offset = i * streamSize;
-    hipCheck( hipMemcpyAsync(&d_a[offset], &a[offset], 
-                               streamBytes, hipMemcpyHostToDevice, 
-                               stream[i]) );
     hipLaunchKernelGGL(kernel, streamSize/blockSize, blockSize, 0, stream[i], d_a, offset);
-    hipCheck( hipMemcpyAsync(&a[offset], &d_a[offset], 
-                               streamBytes, hipMemcpyDeviceToHost,
-                               stream[i]) );
   }
+  hipCheck( hipMemcpy(a, d_a, bytes, hipMemcpyDeviceToHost) );
   hipCheck( hipEventRecord(stopEvent, 0) );
   hipCheck( hipEventSynchronize(stopEvent) );
   hipCheck( hipEventElapsedTime(&duration, startEvent, stopEvent) );
-  printf("Duration for asynchronous transfer case 1 and execute (ms): %f\n", duration);
+  printf("Duration for asynchronous kernels, execute (ms): %f\n", duration);
   printf("  max error: %e\n", maxError(a, n));
+
 
   // Clean memory
   hipCheck( hipEventDestroy(startEvent) );

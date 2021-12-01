@@ -14,7 +14,7 @@ We can observe in the code that we record the startEvent on stream 0, copy the d
 
 ## Results
 
-Duration for sequential transfer and execute (ms): 3.381110
+Check the SLURM output file
 
 ## Tips
 
@@ -31,7 +31,28 @@ For the following exercises, you would need:
 Copy the async_serial.cpp file to async_case1.cpp and edit after the sequential transfer by adding the code to do the following:
 
 1) Create 4 streams and calculate the size of bytes per stream
-2) record a new event (use same variables where possible)
+2) Record a new event (use same variables where possible)
+3) Use same blocking data transfers
+4) For the number of streams, do:
+	4.1) Execute the kernels in different stream with the appropriate workload per stream
+
+#### Compile and execute
+
+```
+make async_case1
+sbatch async_case1.sh
+```
+
+### Results
+
+Check the new output slurm file
+
+### Case 2
+
+Copy the async_case1.cpp file to async_case2.cpp and edit after the code fo the previous exercise by adding the code to do the following:
+
+1) Create 4 streams and calculate the size of bytes per stream
+2) Record a new event (use same variables where possible)
 3) For the number of streams, do:
 	3.1) Copy the data from host to device through the streams and using hipMemcpyAsync (be careful how much data you transfer per stream and try to create an offset per stream)
 	3.2) Launch the kernel for each stream
@@ -42,15 +63,19 @@ Copy the async_serial.cpp file to async_case1.cpp and edit after the sequential 
 #### Compile and execute
 
 ```
-make async_case1
-sbatch async_case1.sh
+make async_case2
+sbatch async_case2.sh
 ```
+
+### Results
+
+Check the new output slurm file
 
 Is your code faster? Why?
 
-### Case 2
+### Case 3
 
-Copy the async_case1.cpp to async_case2.cpp and edit below the previous code (before the deallocation of the memory)
+Copy the async_case2.cpp to async_case3.cpp and edit below the previous code (before the deallocation of the memory)
 
 1) Now, make a loop and send the data from host to device through streams
 2) Similar for the kernsl
@@ -60,12 +85,21 @@ Copy the async_case1.cpp to async_case2.cpp and edit below the previous code (be
 #### Compile and execute
 
 ```
-make async_case2
-sbatch async_case2.sh
+make async_case3
+sbatch async_case3.sh
 ```
+
+### Results
+
+Check the new output slurm file
+
 
 Is your code faster? Why?
 
 ## Solutions
 
 The solutions are in the corresponding directory
+
+## Questions
+
+* What if we do not synchronize the events? 
