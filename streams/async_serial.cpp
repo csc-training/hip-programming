@@ -48,6 +48,7 @@ int main(int argc, char **argv)
   
   // Allocate pinned host memory and device memory
   float *a, *d_a;
+ // a=(float *)malloc(n * sizeof(float));
   hipCheck( hipHostMalloc((void**)&a, bytes) );      // host pinned
   hipCheck( hipMalloc((void**)&d_a, bytes) ); // device
 
@@ -74,6 +75,7 @@ int main(int argc, char **argv)
 
 // Add code for case 2 here
 
+// Add code for case 3 here
 
   // Clean memory
   hipCheck( hipEventDestroy(startEvent) );

@@ -16,6 +16,9 @@ We can observe in the code that we record the startEvent on stream 0, copy the d
 
 Check the SLURM output file
 
+## Pinned memory
+The code has already pinned memory hipHostMalloc. Try to uncomment the line 51 and comment line 52, you will not use pinned memory and the performance will be lower.
+
 ## Tips
 
 For the following exercises, you would need:
