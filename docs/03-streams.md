@@ -46,11 +46,11 @@ lang:   en
 * hipEventSynchronize: Wait for an event to complete
 * hipEventElapsedTime: Return the elapsed time between two events
 * hipEventDestroy: Destroy the specified event 
-
+HIP API: https://raw.githubusercontent.com/RadeonOpenCompute/ROCm/master/AMD-HIP-API-4.5.pdf 
 ---
 
 # Example - Data Transfer and Compute
-
+* Serial
 ```
   hipCheck( hipEventRecord(startEvent,0) );
   
@@ -63,7 +63,61 @@ lang:   en
   hipCheck( hipEventRecord(stopEvent, 0) );
   hipCheck( hipEventSynchronize(stopEvent) );
   hipCheck( hipEventElapsedTime(&duration, startEvent, stopEvent) );
-  printf("Duration of sequential transfer and execute (ms): %f\n", ms);
+  printf("Duration of sequential transfer and execute (ms): %f\n", duration);
 ```
 
 ---
+# How to improve the performance?
+
+* Use streams to overlap computation with communication
+```
+hipStream_t stream[nStreams];
+for (int i = 0; i < nStreams; ++i)
+    hipStreamCreate(&stream[i])
+```
+* Use Asynchronous data transfer
+```
+hipMemcpyAsync(dst, src, bytes, hipMemcpy kind, stream)
+```
+* Execute kernels on different streams
+```
+hipLaunchKernelGGL((some_kernel, gridsize, blocksize, shared_mem_size, stream, arg0, arg1, ...);
+```
+---
+
+# Synchronization (I)
+
+* Synchronize everything
+
+```
+hipDeviceSynchronize()
+```
+* Synchronize a specific stream
+Blocks host until all HIP calls are completed on this stream
+```
+hipStreamSynchronize(streamid)
+```
+
+---
+
+# Synchronization (II)
+
+* Synchronize using Events
+    * Create event
+    ```
+    hipEvent_t stopEvent
+    hipEventCreate(&stopEvent)
+    ```
+    * Record an event in a specific stream and wait until is recorded
+    ```
+    hipEventRecord(stopEvent,0)
+    hipEventSynchronize(stopEvent)
+    ```
+    * Make a stream wait for a specific event
+    ```
+    hipStreamWaitEvent(stream[i], stopEvent, unsigned int flags) 	
+    ```
+
+---
+
+
