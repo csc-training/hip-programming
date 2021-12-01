@@ -231,5 +231,8 @@ hipSetDevice(nodeRank % deviceCount);
 
 # Summary
 
-* If you have an MPI program, it is often best to let MPI handle data transfers between GPUs
-* There is still little experience from ROCm aware MPIs, be prepared to face issues
+- There are many options to write a multi-GPU program
+- Use hipSetDevice() to select the device, and the subsequent HIP calls operate on that device
+* If you have an MPI program, it is often best to use one GPU per process, and let MPI handle data transfers between GPUs
+* There is still little experience from ROCm aware MPIs, there may be issues 
+    * Note that a CUDA/ROCm aware MPI is only required when passing device pointers to the MPI, passing only host pointers does not require any CUDA/ROCm awareness
