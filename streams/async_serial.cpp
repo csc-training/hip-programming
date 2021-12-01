@@ -34,6 +34,7 @@ float maxError(float *a, int n)
 int main(int argc, char **argv)
 {
   const int blockSize = 256, nStreams = 4;
+// for the exercises case 1 and 2, define also what is the n per stream the bytes of each data transfer
   const int n = 4 * 1024 * blockSize * nStreams;
   const int bytes = n * sizeof(float);
    
@@ -68,6 +69,11 @@ int main(int argc, char **argv)
   hipCheck( hipEventElapsedTime(&duration, startEvent, stopEvent) );
   printf("Duration for sequential transfer and execute (ms): %f\n", duration);
   printf("  max error: %e\n", maxError(a, n));
+
+// Add code for case 1 here
+
+// Add code for case 2 here
+
 
   // Clean memory
   hipCheck( hipEventDestroy(startEvent) );
