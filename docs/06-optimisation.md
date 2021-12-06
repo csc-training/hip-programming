@@ -63,3 +63,22 @@ kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
 * Compile and execute the code Nbody on an AMD MI100 GPU
     * `hip-programming/nbody`
 
+---
+
+
+# AMD MI100 architecture 
+
+![width:1000px height:13cm](./img/mi100_arch.png)
+
+---
+
+# Compute Units (CU)
+
+* Each CU is a 64-wide execution unit, so multiple of 64 as the thread limit.  
+* The 64-wide execution is sub-divided into 4 SIMD units of 16 elements.  
+* For a 16-wide SIMD instruction, the best possible latency is 4 cycles.  
+* So, you need at least 4 SIMD instructions in flight to saturate the SIMD units.
+
+Finally, using 256 threads per block would give the best performance in most cases.
+
+* Change the threads per block to 256 for the all the calls to launch kernel at Nbody exercise and discuss what is the performance improvement.
