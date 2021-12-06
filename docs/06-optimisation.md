@@ -59,6 +59,8 @@ kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
 
 # Exercise Nbody
 
+
+* 32768 number of small particles, 2000 time steps
 * Executing the code on an NVIDIA V100 GPU, the execution time is 68.5 seconds.
 * Compile and execute the code Nbody on an AMD MI100 GPU
     * `hip-programming/nbody`
@@ -82,3 +84,4 @@ kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
 Finally, using 256 threads per block would give the best performance in most cases.
 
 * Change the threads per block to 256 for the all the calls to launch kernel at Nbody exercise and discuss what is the performance improvement.
+* Is the workload enough to stress the AMD MI100 GPUs?
