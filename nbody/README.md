@@ -1,5 +1,7 @@
 # Nbody
 
+This code is part of the repository https://github.com/themathgeek13/N-Body-Simulations-CUDA
+
 ## Compile and execute the code
 
 Edit the nbody.sh to select the appropriate node and GPU
