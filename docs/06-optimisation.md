@@ -35,4 +35,31 @@ lang:   en
 
 ![width:1000px height:13cm](./img/hipblas.png)
 
+--
+
+# Kernels
+
+You can call a kernel with the command:
+
+```
+hipLaunchKernelGGL(kernel_name, dim3(Blocks), dim3(Threads), 0, 0, arg1, arg2, ...);
+```
+
+or
+```
+kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
+```
+* where blocks are for the 3D dimensions of the grid of blocks dimensions
+* threads for the 3D dimentions of a block of threads
+* 0 for bytes of dynamic LDS space
+* 0 for stream
+* kernel arguments 
+
+---
+
+# Exercise Nbody
+
+* Executing the code on an NVIDIA V100 GPU, the execution time is 68.5 seconds.
+* Compile and execute the code Nbody on an AMD MI100 GPU
+    * `hip-programming/nbody`
 
