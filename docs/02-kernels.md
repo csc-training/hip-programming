@@ -1,8 +1,9 @@
 ---
-title:  Kernels and launching
-author: CSC Training
-date:   2021-11
-lang:   en
+title:    HIP and GPU kernels
+subtitle: GPU programming with HIP
+author:   CSC Training
+date:     2021-11
+lang:     en
 ---
 
 # HIP
@@ -46,7 +47,7 @@ lang:   en
 
 # Example: Hello world
 
-```c
+```cpp
 #include <hip/hip_runtime.h>
 #include <stdio.h>
 
@@ -72,13 +73,16 @@ int main(void)
     - function launched to the GPU that is executed by multiple parallel
       workers
 
+
+# AMD GPU terminology (continued)
+
 - Thread
     - individual lane in a wavefront
 - Wavefront (cf. CUDA warp)
     - collection of threads that execute in lockstep and execute the same
       instructions
     - each wavefront has 64 threads
-    - number of wavefronts per workgroup is chosen by the programmer
+    - number of wavefronts per workgroup is chosen at kernel launch
       (up to 16)
 - Workgroup (cf. CUDA thread block)
     - group of wavefronts (threads) that are on the GPU at the same time and
@@ -90,7 +94,7 @@ int main(void)
 
 - GPU model requires many small tasks executing a kernel
     - e.g. can replace iterations of loop with a GPU kernel call
-- need to adapt CPU code to run on the GPU
+- Need to adapt CPU code to run on the GPU
     - rethink algorithm to fit better into the execution model
     - keep reusing data on the GPU to reach high occupancy of the hardware
     - if necessary, manage data transfers between CPU and GPU memories
@@ -99,15 +103,20 @@ int main(void)
 
 # Grid: thread hierarchy
 
+<div class="column">
 - Kernels are executed on a 3D *grid* of threads
     - threads are partitioned into equal-sized *blocks*
 - Code is executed by the threads, the grid is just a way to organise the
   work
 - Dimension of the grid are set at kernel launch
+</div>
+
+<div class="column">
+![](img/grid-threads.png)
+
 - Built-in variables to be used within a kernel:
     - `threadIdx`, `blockIDx`, `blockDim`, `gridDim`
-
-![](img/grid-threads.jpg)
+</div>
 
 
 # Kernels
@@ -122,7 +131,7 @@ int main(void)
 
 # Example: axpy
 
-```c
+```cpp
 __global__ void axpy_(int n, double a, double *x, double *y)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -140,7 +149,7 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 
 # Example: axpy (revisited)
 
-```c
+```cpp
 __global__ void axpy_(int n, double a, double *x, double *y)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -160,7 +169,7 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 - Kernels are launched with the function call `hipLaunchKernelGGL`
     - grid dimensions need to be defined (two vectors of type `dim3`)
 
-```
+```cpp
 dim3 blocks(32);
 dim3 threads(256);
 
@@ -169,7 +178,7 @@ hipLaunchKernelGGL(somekernel, blocks, threads, 0, 0, ...)
 
 - Compared with the CUDA syntax:
 
-```
+```cpp
 somekernel<<<blocks, threads, 0, 0>>>(...)
 ```
 
@@ -181,14 +190,14 @@ somekernel<<<blocks, threads, 0, 0>>>(...)
 - Similarly to `cudaMalloc` (or simple `malloc`), HIP provides a function to
   allocate device memory: `hipMalloc()`
 
-```
+```cpp
 double *x_
 hipMalloc(&x_, sizeof(double) * n);
 ```
 
 - To copy data to/from device, one can use `hipMemcpy()`:
 
-```
+```cpp
 hipMemcpy(&x_, x, sizeof(double) * n, hipMemcpyHostToDevice);
 hipMemcpy(&x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
 ```
@@ -200,7 +209,7 @@ hipMemcpy(&x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
 - Good idea to **always** check for success (`hipSuccess`), e.g. with a macro
   such as:
 
-```
+```cpp
 #define HIP_SAFECALL(x) {      \
   hipError_t status = x;       \
   if (status != hipSuccess) {  \
@@ -212,7 +221,8 @@ hipMemcpy(&x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
 # Example: fill (complete device code and launch)
 
 <small>
-```
+<div class="column">
+```cpp
 #include <hip/hip_runtime.h>
 #include <stdio.h>
 
@@ -225,7 +235,11 @@ __global__ void fill_(int n, double *x, double a)
         x[tid] = a;
     }
 }
+```
+</div>
 
+<div class="column">
+```cpp
 int main(void)
 {
     int i;
@@ -250,6 +264,7 @@ int main(void)
     return 0;
 }
 ```
+</div>
 </small>
 
 

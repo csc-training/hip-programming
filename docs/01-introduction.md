@@ -1,8 +1,9 @@
 ---
-title:  Introduction to GPUs and GPU programming
-author: CSC Training
-date:   2021-11
-lang:   en
+title:    Introduction to GPUs and GPU programming
+subtitle: GPU programming with HIP
+author:   CSC Training
+date:     2021-11
+lang:     en
 ---
 
 # High-performance computing
@@ -25,8 +26,8 @@ lang:   en
 <div class="column">
 - Achieving performance has been based on various strategies throughout the
   years
-- Frequency, vectorization, multinode, multicore ...
-- Now performance is mostly limited by power consumption
+    - frequency, vectorization, multinode, multicore, ...
+    - now performance is mostly limited by power consumption
 - Accelerators provide compute resources based on a very high level of
   parallelism to reach high performance at low relative power consumption
 </div>
@@ -35,27 +36,29 @@ lang:   en
 ![](img/microprocessor-trend-data.png)
 </div>
 
+- Pre-exascale systems in the EU
+- New exascale systems in the US
 
-# Reaching for exascale with accelerators
+# Reaching for exascale with accelerators (EU)
 
 <div class="column">
-- Pre-exascale systems in the EU
-    - LUMI (2021/2022), CSC, ~0.55 EF, AMD EPYC CPUs + AMD Instinct GPUs
-    - Leonardo (2022), Cineca, ~0.32 EF,
-      Intel Ice-Lake/Sapphire Rapids CPUs + NVIDIA Ampere GPUs
-    - Mare Nostrum 5
-
+- **LUMI** (2021/2022), CSC, ~0.55 EF, *AMD EPYC CPUs + AMD Instinct GPUs*
 ![](img/lumi.jpg)
 </div>
 
 <div class="column">
-- New exascale systems in the US
-    - Frontier (2021), ORNL, ~1.5 EF, AMD EPYC CPUs + AMD Instinct GPUs
-    - Aurora (2022), ANL, ~1 EF,
-      Intel Sapphire Rapids CPUs + Intel Ponte Vecchio GPUs
-    - Crossroads (2022), LANL, ~2 EF, Intel Sapphire Rapids CPUs
-    - El Capitan (2023), LLNL, ~2 EF, AMD EPYC CPUs + AMD Instinct GPUs
+- **Leonardo** (2022), Cineca, ~0.32 EF,
+  *Intel Ice-Lake/Sapphire Rapids CPUs + NVIDIA Ampere GPUs*
+- **Mare Nostrum 5**, BSC, ???
 </div>
+
+# Reaching for exascale with accelerators (US)
+
+- **Frontier** (2021), ORNL, ~1.5 EF, *AMD EPYC CPUs + AMD Instinct GPUs*
+- **Aurora** (2022), ANL, ~1 EF,
+  *Intel Sapphire Rapids CPUs + Intel Ponte Vecchio GPUs*
+- **Crossroads** (2022), LANL, ~2 EF, *Intel Sapphire Rapids CPUs*
+- **El Capitan** (2023), LLNL, ~2 EF, *AMD EPYC CPUs + AMD Instinct GPUs*
 
 
 # Accelerators
@@ -90,14 +93,18 @@ lang:   en
 
 # GPU architecture
 
+<div class="column">
 - Designed for running tens of thousands of threads simultaneously on
   thousands of cores
 - Very small penalty for switching threads
 - Running large amounts of threads hides memory access penalties
 - Very expensive to synchronize all threads
+</div>
 
+<div class="column">
 ![](img/mi100-architecture.png)
 <small>AMD Instinct MI100 architecture (source: AMD)</small>
+</div>
 
 
 # Challenges in using Accelerators
@@ -162,23 +169,32 @@ More difficult, but more opportunities
     - syntax similar to Kokkos etc. used to express parallelism
     - compiler automatically generates code for target hardware (incl. GPUs)
 
-```
+<small>
+<div class="column">
+```cpp
 auto cg = [&](handler &cg) {
-    auto prev = accessor(buffer_prev, cg, read_only);
-    auto next = accessor(buffer_next, cg, read_write);
+  auto prev = accessor(buffer_prev, cg, read_only);
+  auto next = accessor(buffer_next, cg, read_write);
 
-    cg.parallel_for(range<2>(nx, ny), [=](id<2> xy) {
-        auto i = xy[0] + 1;
-        auto j = xy[1] + 1;
+  cg.parallel_for(range<2>(nx, ny), [=](id<2> xy) {
+    auto i = xy[0] + 1;
+    auto j = xy[1] + 1;
 
-        next[i][j] = prev[i][j] + a * dt * (
-                       (prev[i+1,j] - 2.0 * prev[i,j] + prev[i-1,j]) * inv_dx2 +
-                       (prev[i,j+1] - 2.0 * prev[i,j] + prev[i,j-1]) * inv_dy2
-                     );
-        }
+```
+</div>
+
+<div class="column">
+```cpp
+    next[i][j] = prev[i][j] + a * dt * (
+           (prev[i+1,j] - 2.0 * prev[i,j] + prev[i-1,j]) * inv_dx2 +
+           (prev[i,j+1] - 2.0 * prev[i,j] + prev[i,j-1]) * inv_dy2
+           );
+    }
 }
 q.submit(cg);
 ```
+</div>
+</small>
 
 
 # Native GPU code: HIP / CUDA
@@ -194,5 +210,3 @@ q.submit(cg);
     - standard C++ syntax, uses nvcc/hcc compiler in the background
     - almost a one-on-one clone of CUDA from the user perspective
     - ecosystem is new and developing fast
-- either one may produce very optimised code for GPUs, but require extensive
-  programming effort
