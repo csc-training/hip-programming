@@ -2,8 +2,10 @@ HIPCC = hipcc
 HIPFLAGS=--offload-arch=gfx908
 SRC1 = copy.cpp
 EXE1 = copy
-SRC2 = async_case2.cpp
-EXE2 = async_case2
+SRC2 = matrix_transpose_naive.cpp
+EXE2 = matrix_transpose_naive
+SRC3 = matrix_transpose_lds.cpp
+EXE3 = matrix_transpose_lds
 
 .SUFFIXES:
 
@@ -17,11 +19,16 @@ $(EXE1): $(SRC1)
 	$(HIPCC) $(HIPFLAGS) $(INCLUDES)  -o $@ $<
 
 
-async_case2: $(EXE2)
+matrix_transpose_naive: $(EXE2)
 
 $(EXE2): $(SRC2)
 	$(HIPCC) $(HIPFLAGS) $(INCLUDES)  -o $@ $<
 
+
+matrix_transpose_lds: $(EXE3)
+
+$(EXE3): $(SRC3)
+	$(HIPCC) $(HIPFLAGS) $(INCLUDES)  -o $@ $<
 
 .PHONY: clean
 
