@@ -35,7 +35,24 @@ lang:   en
     
 ---
 
+# Synchronization and memory (I)
 
+| HIP API  | Sync Event  | Fence  | Conherent Host Memory Visivility  | Non-Coherent Host Memory Visibility  |
+|---|---|---|---|---|
+| hipStreamSynchronize  | host waits for all commands in the specified stream to complete  |  system-scope release |  yes | yes  |
+|hipDeviceSynchronize   |  host waits for all commands in all streams on the specified device to complete |  system-scope release | yes  |  yes |
+
+
+---
+
+# Synchronization and memory (II)
+
+| HIP API  | Sync Event  | Fence  | Conherent Host Memory Visivility  | Non-Coherent Host Memory Visibility  |
+|---|---|---|---|---|
+| hipEventSynchronize  | host waits for the specified event to complete  |  device-scope release |  yes | depends  |
+| hipStreanWaitEvent  | stream waits for the specified event to complete  | none  | yes  |  no |
+
+---
 # Stream/Events API
 
 * hipStreamCreate: Creates an asynchronous stream
@@ -45,8 +62,8 @@ lang:   en
 * hipEventRecord: Record an event in a specified stream
 * hipEventSynchronize: Wait for an event to complete
 * hipEventElapsedTime: Return the elapsed time between two events
-* hipEventDestroy: Destroy the specified event 
-HIP API: https://raw.githubusercontent.com/RadeonOpenCompute/ROCm/master/AMD-HIP-API-4.5.pdf 
+* hipEventDestroy: Destroy the specified event \
+HIP API: https://raw.githubusercontent.com/RadeonOpenCompute/ROCm/master/AMD-HIP-API-4.5.pdf
 ---
 
 # Example - Data Transfer and Compute
@@ -87,7 +104,7 @@ hipLaunchKernelGGL((some_kernel, gridsize, blocksize, shared_mem_size, stream, a
 
 # Synchronization (I)
 
-* Synchronize everything
+* Synchronize everything, could be used after each kernel launch except if you know what you are doing
 
 ```
 hipDeviceSynchronize()
@@ -120,4 +137,11 @@ hipStreamSynchronize(streamid)
 
 ---
 
+# Synchronization in a kernel
+
+```
+__syncthreads
+```
+
+---
 
