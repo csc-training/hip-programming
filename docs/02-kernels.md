@@ -205,9 +205,9 @@ hipMemcpy(&x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
 
 # Error handling
 
-- Most HIP functions return error codes
-- Good idea to **always** check for success (`hipSuccess`), e.g. with a macro
-  such as:
+- Most HIP API functions return error codes
+- Good idea to **always** check for success (`hipSuccess`),
+  e.g. with a macro such as:
 
 ```cpp
 #define HIP_SAFECALL(x) {      \
@@ -242,7 +242,6 @@ __global__ void fill_(int n, double *x, double a)
 ```cpp
 int main(void)
 {
-    int i;
     const int n = 10000;
     double a = 3.4;
     double x[n];
