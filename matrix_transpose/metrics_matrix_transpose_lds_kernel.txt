@@ -1,0 +1,4 @@
+pmc: TCC_EA_WRREQ_sum, TCC_EA_RDREQ_sum
+range: 0:1
+gpu: 0 
+kernel: transpose_lds_kernel
