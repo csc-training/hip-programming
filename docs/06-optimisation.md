@@ -85,3 +85,19 @@ Finally, using 256 threads per block would give the best performance in most cas
 
 * Change the threads per block to 256 for the all the calls to launch kernel at Nbody exercise and discuss what is the performance improvement.
 * Is the workload enough to stress the AMD MI100 GPUs?
+
+---
+
+# Tips
+
+* Get familiar with the GPU hardware
+* Compute units, memory etc.
+* Using 240 blocks (1 x 120 CUs) and 256 threads per block provides good performance, maybe additional tuning required
+
+---
+
+# Matrix multiplication
+
+
+
+
