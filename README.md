@@ -36,3 +36,4 @@ part of the PRACE Training Center (PTC) activities at CSC.
 - [Multi-GPU exercise without MPI](multi-gpu/multigpu)
 - [Multi-GPU exercise with MPI](multi-gpu/mpi)
 - [Peer to peer device access](multi-gpu/p2pcopy)
+- [Bonus: Heat equation with HIP](heat-equation)
