@@ -298,6 +298,13 @@ VALUUtilization,VALUBusy,SALUBusy,L2CacheHit,WriteUnitStalled,LDSBankConflict
 ```
 ---
 
+## Explanation
+
+* There is need for more optimization
+* There are LDS bank conflicts
+
+---
+
 # Exercise
 
 * Execute the presented exercise
