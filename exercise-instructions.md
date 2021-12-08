@@ -17,18 +17,65 @@ git clone https://github.com/csc-training/hip-programming.git
 If you have a GitHub account you can also **Fork** this repository and clone
 then your fork.
 
+
 ## Computing servers
 
-...
+### AMD Accelerator Cloud
 
-### Disk areas
-
-...
-
-### Compilation
+#### Disk areas
 
 ...
 
-### Debugging
+#### Compilation
 
 ...
+
+#### Debugging
+
+...
+
+
+### Puhti
+
+As a backup option, we have also provided you with access to CSC's Puhti
+system that has NVIDIA's V100 GPUs, but has a working HIP installation to
+support code porting activities.
+
+To get started with Puhti, you should log in to Puhti and load the `hip`
+module to get a HIP compiler.
+
+```bash
+ssh -Y trainingXXX@puhti.csc.fi
+module load hip
+```
+
+For more detailed instructions, please refer to the system documentation at
+[Docs CSC](https://docs.csc.fi/).
+
+#### Compiling
+
+In order to compile code with the `hipcc`, one needs to rename the files to
+end with `.cu` (instead of `.cpp`):
+
+```bash
+mv -i hello.cpp hello.cu
+hipcc hello.cu -o hello
+```
+
+#### Running
+
+Puhti uses SLURM for batch jobs. Please see [Docs CSC](https://docs.csc.fi/)
+for more details. If you are using CSC training accounts, you should use the
+following project as your account: `--account=project_2000745`.
+
+We have also reserved some GPU nodes for the course. In order to use these
+dedicated nodes, you need to run your job with the option
+`--reservation=hip2021`, such as
+
+```shell
+srun --reservation=hip2021 -n1 -p gpu --gres=gpu:v100:1 --account=project_2000745 ./my_program
+```
+
+Please note that the normal GPU partition (`-p gpu`) needs to be used with
+the reservation. Otherwise you may use the `gputest` partition for rapid fire
+testing.
