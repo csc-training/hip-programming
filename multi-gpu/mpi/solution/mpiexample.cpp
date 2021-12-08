@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     else{
-        printf("Found %d GPU devices, using GPUs 0 and 1!\n\n", devcount);
+        printf("MPI rank %d: Found %d GPU devices, using GPUs 0 and 1!\n\n", rank, devcount);
     }
 
     // Select the device according to the node rank
