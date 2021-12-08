@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
         printf("Found one HIP device, this program requires two\n");
         exit(EXIT_FAILURE);
     default:
-        printf("Found (at least) two HIP devices.\n");
+        printf("Found %d GPU devices, using GPUs 0 and 1!\n\n", devicecount);
     }
 
     // Create timing events

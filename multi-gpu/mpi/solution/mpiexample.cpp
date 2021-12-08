@@ -154,6 +154,9 @@ int main(int argc, char *argv[])
         printf("Not enough GPUs for all processes in the node.\n");
         exit(EXIT_FAILURE);
     }
+    else{
+        printf("Found %d GPU devices, using GPUs 0 and 1!\n\n", devcount);
+    }
 
     // Select the device according to the node rank
     HIP_ERRCHK( hipSetDevice(noderank % devcount) );
