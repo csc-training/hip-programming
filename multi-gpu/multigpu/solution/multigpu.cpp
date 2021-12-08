@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
         printf("Found one HIP device, this program requires two\n");
         exit(EXIT_FAILURE);
     default:
-        printf("Found (at least) two HIP devices.\n");
+        printf("Found %d GPU devices, using GPUs 0 and 1!\n\n", devicecount);
     }
 
     // Create timing events
@@ -57,9 +57,9 @@ int main(int argc, char *argv[])
     HIP_ERRCHK( hipEventCreate(&start) );
     HIP_ERRCHK( hipEventCreate(&stop) );
 
-    HIP_ERRCHK( hipMallocHost((void**)&hA, sizeof(double) * N) );
-    HIP_ERRCHK( hipMallocHost((void**)&hB, sizeof(double) * N) );
-    HIP_ERRCHK( hipMallocHost((void**)&hC, sizeof(double) * N) );
+    HIP_ERRCHK( hipHostMalloc((void**)&hA, sizeof(double) * N) );
+    HIP_ERRCHK( hipHostMalloc((void**)&hB, sizeof(double) * N) );
+    HIP_ERRCHK( hipHostMalloc((void**)&hC, sizeof(double) * N) );
 
     // Here we initialize the host memory values
     for(int i = 0; i < N; ++i) {
@@ -148,9 +148,9 @@ int main(int argc, char *argv[])
     HIP_ERRCHK( hipEventElapsedTime(&gputime, start, stop) );
     printf("Time elapsed: %f\n", gputime / 1000.);
 
-    HIP_ERRCHK( hipFreeHost((void*)hA) );
-    HIP_ERRCHK( hipFreeHost((void*)hB) );
-    HIP_ERRCHK( hipFreeHost((void*)hC) );
+    HIP_ERRCHK( hipHostFree((void*)hA) );
+    HIP_ERRCHK( hipHostFree((void*)hB) );
+    HIP_ERRCHK( hipHostFree((void*)hC) );
 
     return 0;
 }

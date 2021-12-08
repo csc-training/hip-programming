@@ -107,9 +107,9 @@ int main(int argc, char *argv[])
     HIP_ERRCHK( hipEventElapsedTime(&gputime, start, stop) );
     printf("Time elapsed: %f\n", gputime / 1000.);
 
-    HIP_ERRCHK( hipFreeHost((void*)hA) );
-    HIP_ERRCHK( hipFreeHost((void*)hB) );
-    HIP_ERRCHK( hipFreeHost((void*)hC) );
+    HIP_ERRCHK( hipHostFree((void*)hA) );
+    HIP_ERRCHK( hipHostFree((void*)hB) );
+    HIP_ERRCHK( hipHostFree((void*)hC) );
 
     return 0;
 }

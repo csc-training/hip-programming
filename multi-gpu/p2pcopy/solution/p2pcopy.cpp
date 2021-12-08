@@ -65,6 +65,10 @@ int main(int argc, char *argv[])
     printf("Need at least two GPUs!\n");
     exit(EXIT_FAILURE);
   }
+  else
+  {
+    printf("Found %d GPU devices, using GPUs 0 and 1!\n\n", devCount);
+  }
     
   // Allocate memory for both GPUs
   int gpu0 = 0, gpu1 = 1, *dA_0, *dA_1;
