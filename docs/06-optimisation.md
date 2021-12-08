@@ -35,7 +35,7 @@ lang:   en
 
 ![width:1000px height:13cm](./img/hipblas.png)
 
---
+---
 
 # Kernels
 
@@ -96,7 +96,29 @@ Finally, using 256 threads per block would give the best performance in most cas
 
 ---
 
-# Matrix multiplication
+# Copy matrix
+
+## Example
+
+```
+__global__ void copy_kernel(float *in, float *out, int width, int height) {
+  int x_index = blockIdx.x * tile_dim + threadIdx.x;
+  int y_index = blockIdx.y * tile_dim + threadIdx.y;
+
+  int index = y_index * width + x_index;
+
+  out[index] = in[index];
+}
+```
+```
+  int block_x = width / tile_dim;
+  int block_y = height / tile_dim;
+   hipLaunchKernelGGL(copy_kernel, dim3(block_x, block_y),
+                      dim3(tile_dim, tile_dim), 0, 0, d_in, d_out, width,
+                      height);
+   hipDeviceSynchronize();
+```
+
 
 
 
