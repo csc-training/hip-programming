@@ -34,7 +34,7 @@ lang:     en
 
 # hipBLAS
 
-![width:1000px height:13cm](./img/hipblas.png)
+![](./img/hipblas.png){width=1600px}
 
 ---
 
@@ -71,7 +71,7 @@ kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
 
 # AMD MI100 architecture 
 
-![width:1000px height:13cm](./img/mi100_arch.png)
+![](./img/mi100_arch.png){width=1600px}
 
 ---
 
@@ -157,7 +157,7 @@ Where
 * Click on the left "Open trace file"
 * Select the file which was create from rocprof with extension `.json`
 
-![width:1000px height:10cm](./img/perfetto.png)
+![](./img/perfetto.png){width=1600px}
 
 ---
 
