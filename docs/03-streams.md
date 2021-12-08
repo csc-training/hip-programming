@@ -35,6 +35,17 @@ lang:   en
     
 ---
 
+# Example - issue of order (I)
+
+![width:1000px height:13cm](./img/streams1_explain.png)
+
+---
+
+# Example - issue of order (I)
+
+![width:1000px height:13cm](./img/streams2_explain.png)
+
+---
 # Synchronization and memory (I)
 
 | HIP API  | Sync Event  | Fence  | Conherent Host Memory Visivility  | Non-Coherent Host Memory Visibility  |
@@ -64,6 +75,16 @@ lang:   en
 * hipEventElapsedTime: Return the elapsed time between two events
 * hipEventDestroy: Destroy the specified event \
 HIP API: https://raw.githubusercontent.com/RadeonOpenCompute/ROCm/master/AMD-HIP-API-4.5.pdf
+---
+
+
+# Implicit Synchronization
+
+* himHostMalloc
+* hipMalloc
+* hipMemcpy
+...
+
 ---
 
 # Example - Data Transfer and Compute
