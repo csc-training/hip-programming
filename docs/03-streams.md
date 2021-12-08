@@ -19,14 +19,14 @@ lang:     en
 
 ## Concurrency 
 
-![width:1000px height:13cm](./img/streams.png)
+![](./img/streams.png){width=1600px}
 
 
 ---
 
 ## Amount of concurrency 
 
-![width:1000px height:13cm](./img/streams2.png)
+![](./img/streams2.png){width=1600px}
 
 ---
 ## Default
@@ -39,15 +39,14 @@ lang:     en
 # Example - issue of order (I)
 
 * We have 3 streams and we do 3 (HD, K, DH)
-![width:1000px height:13cm](./img/streams1_explain.png)
+![](./img/streams1_explain.png){width=1600px}
 
 ---
 
 # Example - issue of order (II)
 
 * We have 3 streams and we do 3 (HD, K, DH)
-
-![width:1000px height:13cm](./img/streams2_explain.png)
+![](./img/streams2_explain.png){width=1600px}
 
 * Need to think the dependencies and how to improve the runtime
 
