@@ -37,17 +37,14 @@ To calculate the kernel time, add the time of hipLaunchKernel and hipDeviceSynch
 The metrics are located in the file  `metrics_copy_kernel.txt`:
 
 ```
-pmc: TCC_EA_WRREQ_sum, TCC_EA_RDREQ_sum
+pmc: GPUBusy, Wavefronts, VALUInsts, SALUInsts, SFetchInsts, MemUnitStalled, VALUUtilization, VALUBusy, SALUBusy, L2CacheHit, WriteUnitStalled, LDSBankConflict
 range: 0:1
 gpu: 0
 kernel: copy_kernel
 ```
 
 where:
-* pmc is the lines with the counters:
-	* TCC_EA_WRREQ_sum: Number of transactions (either 32-byte or 64-byte) going over the TC_EA_wrreq interface. Sum over TCC instances
-	* TCC_EA_RDREQ_sumi: Number of TCC/EA read requests (either 32-byte or 64-byte). Sum over TCC instances.
-	* Find metrics information in: /opt/rocm/rocprofiler/lib/metrics.xml 
+* pmc is the lines with the counters (Find metrics information in: /opt/rocm/rocprofiler/lib/metrics.xml) 
 * range is the range of the kernels but her eis executed only once
 * gpu is the GPU id //adjust for the GPU that you use
 * kernel: is the kernel name, if you need to add a second one let an empty space
@@ -62,13 +59,12 @@ sbatch copy_metrics.sh
 There is a file called metrics_copy.csv:
 
 ```
-Index,KernelName,gpu-id,queue-id,queue-index,pid,tid,grd,wgr,lds,scr,vgpr,sgpr,fbar,sig,obj,TCC_EA_WRREQ_sum,TCC_EA_RDREQ_sum
-0,"copy_kernel(float*, float*, int, int) [clone .kd]",0,0,0,2435468,2435471,16777216,1024,0,0,4,24,0,0x0,0x7ffdd7609840,1048576,1058278
+cat metrics_copy.csv
+Index,KernelName,gpu-id,queue-id,queue-index,pid,tid,grd,wgr,lds,scr,vgpr,sgpr,fbar,sig,obj,GPUBusy,Wavefronts,VALUInsts,SALUInsts,SFetchInsts,MemUnitStalled,VALUUtilization,VALUBusy,SALUBusy,L2CacheHit,WriteUnitStalled,LDSBankConflict
+0,"copy_kernel(float*, float*, int, int) [clone .kd]",0,0,0,2460290,2460293,16777216,1024,0,0,4,24,0,0x0,0x7ffdd7609840,100,262144,11,1,2,13,100,13,1,0,6,0
 ```
 
 Duration: 165920 (ns)
-TCC_EA_WRREQ_sum: 1048576
-TCC_EA_RDREQ_sum: 1058278
 
 ## Matrix Transpose
 ### Read the matrix_transpose_naive.cpp file, compile and execute it.
@@ -100,7 +96,7 @@ cat results.stats.csv
 The metrics are located in the file  `metrics_transpose_naive_kernel.txt`:
 
 ```
-pmc: TCC_EA_WRREQ_sum, TCC_EA_RDREQ_sum
+pmc: GPUBusy, Wavefronts, VALUInsts, SALUInsts, SFetchInsts, MemUnitStalled, VALUUtilization, VALUBusy, SALUBusy, L2CacheHit, WriteUnitStalled, LDSBankConflict
 range: 0:1
 gpu: 0
 kernel: transpose_kernel
@@ -116,10 +112,8 @@ Index,KernelName,gpu-id,queue-id,queue-index,pid,tid,grd,wgr,lds,scr,vgpr,sgpr,f
 ```
 
 Duration: 418083 (ns)
-TCC_EA_WRREQ_sum: 1048576
-TCC_EA_RDREQ_sum: 1050256
 
-It is 2.6 times slower than Copy
+It is 2.5 times slower than Copy
 
 ## Matrix Transpose LDS
 ### Read the matrix_transpose_lds.cpp file, compile and execute it.
@@ -151,7 +145,7 @@ cat results.stats.csv
 The metrics are located in the file  `metrics_matrix_transpose_lds_kernel.txt`:
 
 ```
-pmc: TCC_EA_WRREQ_sum, TCC_EA_RDREQ_sum
+pmc: GPUBusy, Wavefronts, VALUInsts, SALUInsts, SFetchInsts, MemUnitStalled, VALUUtilization, VALUBusy, SALUBusy, L2CacheHit, WriteUnitStalled, LDSBankConflict
 range: 0:1
 gpu: 0
 kernel: transpose_lds_kernel
