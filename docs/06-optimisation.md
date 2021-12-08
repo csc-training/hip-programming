@@ -157,7 +157,7 @@ Where
 * Click on the left "Open trace file"
 * Select the file which was create from rocprof with extension `.json`
 
-![width:1000px height:10cm](perfetto.png)
+![width:1000px height:10cm](./img/perfetto.png)
 
 ---
 
