@@ -1,8 +1,9 @@
 ---
-title:  Synchronisation and streams
-author: CSC Training
-date:   2021-11
-lang:   en
+title:    Synchronisation and streams
+subtitle: GPU programming with HIP
+author:   CSC Training
+date:     2021-11
+lang:     en
 ---
 
 # Streams
