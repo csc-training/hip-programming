@@ -11,6 +11,7 @@ part of the PRACE Training Center (PTC) activities at CSC.
 
 - [Hello world](hello-world)
 - [Kernel: saxpy](kernel-saxpy)
+- [Kernel: copy2d](kernel-copy2d)
 
 ### Memory management
 
