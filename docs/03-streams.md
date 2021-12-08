@@ -37,13 +37,18 @@ lang:   en
 
 # Example - issue of order (I)
 
+* We have 3 streams and we do 3 (HD, K, DH)
 ![width:1000px height:13cm](./img/streams1_explain.png)
 
 ---
 
-# Example - issue of order (I)
+# Example - issue of order (II)
+
+* We have 3 streams and we do 3 (HD, K, DH)
 
 ![width:1000px height:13cm](./img/streams2_explain.png)
+
+* Need to think the dependencies and how to improve the runtime
 
 ---
 # Synchronization and memory (I)
