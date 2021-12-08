@@ -46,5 +46,18 @@ int main(void)
     printf("   result: %f %f %f %f ... %f %f\n",
             y[0], y[1], y[2], y[3], y[n-2], y[n-1]);
 
+    // confirm that results are correct
+    float error = 0.0;
+    float tolerance = 1e-6;
+    float diff;
+    for (i=0; i < n; i++) {
+        diff = abs(y_ref[i] - y[i]);
+        if (diff > tolerance)
+            error += diff;
+    }
+    printf("total error: %f\n", error);
+    printf("  reference: %f at (42)\n", y_ref[42]);
+    printf("     result: %f at (42)\n", y[42]);
+
     return 0;
 }

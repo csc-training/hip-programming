@@ -1,8 +1,9 @@
 ---
-title:  Kernel optimisation and profiling
-author: CSC Training
-date:   2021-11
-lang:   en
+title:    Kernel optimisation and profiling
+subtitle: GPU programming with HIP
+author:   CSC Training
+date:     2021-11
+lang:     en
 ---
 
 # Libraries (I)
