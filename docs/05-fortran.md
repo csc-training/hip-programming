@@ -41,21 +41,21 @@ not support it.
 
 # HIPFort code
 
-![width:1200px height:15cm](../imgs/hipfort.png)
+![width:1200px height:15cm](img/hipfort.png)
 
 # GPUFort
 
-![width:1200px height:15cm](../imgs/gpufort.png)
+![width:1200px height:15cm](img/gpufort.png)
 
 ---
 
 # GPUFort (II)
-![width:1200px height:15cm](../imgs/gpufort1.png)
+![width:1200px height:15cm](img/gpufort1.png)
 
 ---
 # GPUFort (III)
 
-![width:1200px height:15cm](../imgs/gpufort2.png)
+![width:1200px height:15cm](img/gpufort2.png)
 
 ---
 
