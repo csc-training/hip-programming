@@ -7,6 +7,11 @@ part of the PRACE Training Center (PTC) activities at CSC.
 
 [General instructions](exercise-instructions.md)
 
+### Basics
+
+- [Hello world](hello-world)
+- [Kernel: saxpy](kernel-saxpy)
+
 ### Memory management
 
 - [Memory management strategies](memory/prefetch)
