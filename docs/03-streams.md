@@ -162,8 +162,6 @@ hipStreamSynchronize(streamid)
     ```
 
 ---
-
----
 # Synchronization in the kernel
 
 `__syncthreads`
@@ -179,4 +177,10 @@ d_a[tid] = s_a[255-tid]; //write out array in reverse order
 }
 ```
 ---
+
+# Exercises
+
+https://github.com/csc-training/hip-programming/tree/main/streams
+
+___
 
