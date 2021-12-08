@@ -163,11 +163,20 @@ hipStreamSynchronize(streamid)
 
 ---
 
-# Synchronization in a kernel
+---
+# Synchronization in the kernel
+
+`__syncthreads`
 
 ```
-__syncthreads
+__global__ void reverse(double *d_a) {
+__shared__ double s_a[256]; //array of doubles, shared in this block
+int tid = threadIdx.x;
+s_a[tid] = d_a[tid];    //each thread fills one entry
+//all wavefronts must reach this point before any wavefront is allowed to continue.
+__syncthreads();
+d_a[tid] = s_a[255-tid]; //write out array in reverse order
+}
 ```
-
 ---
 
