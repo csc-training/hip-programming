@@ -77,7 +77,7 @@ sbatch matrix_transpose_naive.sh
 ### Profile statistics in measurement mode
 
 ```
-sbatch matrix_transpose_naive.sh_profile.sh
+sbatch matrix_transpose_naive_profile.sh
 ```
 
 The command is `rocprof --stats ./matrix_transpose_naive`
@@ -102,7 +102,15 @@ gpu: 0
 kernel: transpose_kernel
 ```
 
-* Execute: `rocprof -i metrics_matrix_transpose_naive_kernel.txt -o metrics_naive.csv ./matrix_transpose_naive`
+* Execute: 
+
+```
+sbatch matrix_transpose_naive_metrics.sh
+```
+
+or from salloc 
+
+`rocprof -i metrics_matrix_transpose_naive_kernel.txt -o metrics_naive.csv ./matrix_transpose_naive`
 
 
 ```
@@ -151,7 +159,15 @@ gpu: 0
 kernel: transpose_lds_kernel
 ```
 
-* Execute: `rocprof -i metrics_matrix_transpose_lds_kernel.txt -o metrics_lds.csv ./matrix_transpose_lds`
+* Execute: 
+
+```
+sbatch matrix_transpose_lds_metrics.sh
+```
+
+or through salloc
+
+`rocprof -i metrics_matrix_transpose_lds_kernel.txt -o metrics_lds.csv ./matrix_transpose_lds`
 
 
 ```
