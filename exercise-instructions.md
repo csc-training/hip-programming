@@ -24,11 +24,14 @@ then your fork.
 
 #### Disk areas
 
-...
+* Create your directory here: `/global/scratch/hip-csc/`
+
 
 #### Compilation
 
-...
+* To use for example the 4th GPU of a node, include in your submission script:
+`source /global/scratch/hip-csc/setup.sh 4`
+
 
 #### Debugging
 
