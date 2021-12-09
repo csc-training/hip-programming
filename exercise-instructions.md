@@ -10,7 +10,7 @@ solve the problem.
 
 All of the exercise materials can be downloaded with the command
 
-```
+```shell
 git clone https://github.com/csc-training/hip-programming.git
 ```
 
@@ -23,7 +23,7 @@ then your fork.
 ### AMD Accelerator Cloud
 
 To get started, log in and load the `rocmmod4.5.0` module:
-```
+```shell
 ssh 205.234.16.68 -p 50023 -l username
 module load rocmmod4.5.0
 ```
@@ -51,7 +51,7 @@ module load rocmmod4.5.0
 
 * To create `submit.sh` file, add the following contents (check the node and GPU number), and hit `sbatch submit.sh`:
 
-```
+```shell
 #!/bin/bash
 #SBATCH --job-name=hello
 #SBATCH --time=00:05:00
@@ -74,7 +74,7 @@ support code porting activities.
 To get started with Puhti, you should log in to Puhti and load the `hip`
 module to get a HIP compiler.
 
-```bash
+```shell
 ssh -Y trainingXXX@puhti.csc.fi
 module load hip
 ```
@@ -84,13 +84,14 @@ For more detailed instructions, please refer to the system documentation at
 
 #### Compiling
 
-In order to compile code with the `hipcc`, one needs to rename the files to
-end with `.cu` (instead of `.cpp`):
+In order to compile code with the `hipcc` on Puhti, one needs to add an
+additional flag (`-x cu`) to indicate that it should target NVIDIA hardware.
+Also, the target architecture should be set with `--gpu-architecture=sm_70`:
 
-```bash
-mv -i hello.cpp hello.cu
-hipcc hello.cu -o hello
+```shell
+hipcc hello.cpp -o hello -x cu --gpu-architecture=sm_70
 ```
+
 
 #### Running
 
