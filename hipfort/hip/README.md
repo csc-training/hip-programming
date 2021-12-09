@@ -5,7 +5,7 @@
 If the Makefile.hipfort had no issues:
 
 ```
-export HIPFORT_ARCHGPU=amdgcn
+export HIPFORT_ARCHGPU=amdgcn-gfx908
 make
 ```
 
@@ -22,7 +22,7 @@ hipfc --offload-arch=gfx908 hipsaxpy.cpp main.f03
 If the Makefile.hipfort had no issues:
 
 ```
-export HIPFORT_ARCHGPU=nvptx
+export HIPFORT_ARCHGPU=nvptx-sm_70
 make
 ```
 
