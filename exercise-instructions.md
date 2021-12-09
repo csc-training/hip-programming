@@ -22,9 +22,16 @@ then your fork.
 
 ### AMD Accelerator Cloud
 
+To get started, log in and load the `rocmmod4.5.0` module:
+```
+ssh 205.234.16.68 -p 50023 -l username
+module load rocmmod4.5.0
+```
+
 #### Disk areas
 
 * Create your directory here: `/global/scratch/hip-csc/`
+* Always work under the `/global/scratch` directory and not in `$HOME`.
 
 
 #### Compilation
