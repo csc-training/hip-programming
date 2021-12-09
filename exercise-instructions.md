@@ -35,10 +35,12 @@ then your fork.
 
 #### Running
 
-* To use for example the 4th GPU of a node, include in your submission script:
+* To use for example the 4th GPU of a node, run or include in your submission script:
 `source /global/scratch/hip-csc/setup.sh 4`
 
-* For example, create `submit.sh` file, add the following contents (check the node and GPU number), and hit `sbatch submit.sh`:
+* Run with srun: `srun --reservation=Lumi --time=00:01:00 -p MI100 --nodes 1 ./hello`
+
+* To create `submit.sh` file, add the following contents (check the node and GPU number), and hit `sbatch submit.sh`:
 
 ```
 #!/bin/bash
