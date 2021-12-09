@@ -30,6 +30,8 @@ then your fork.
 #### Compilation
 
 * Use hipcc to compile, for example: `hipcc hello.cpp -o hello`
+* If compiling on the login node, you should also set the target GPU
+  architecture: `hipcc hello.cpp -o hello --offload-arch=gfx908`
 * If Makefile exists, use make
 
 
