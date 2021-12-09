@@ -29,13 +29,29 @@ then your fork.
 
 #### Compilation
 
+* Use hipcc to compile, for example: `hipcc hello.cpp -o hello`
+* If Makefile exists, use make
+
+
+#### Running
+
 * To use for example the 4th GPU of a node, include in your submission script:
 `source /global/scratch/hip-csc/setup.sh 4`
 
+* For example, create `submit.sh` file, add the following contents (check the node and GPU number), and hit `sbatch submit.sh`:
 
-#### Debugging
+```
+#!/bin/bash
+#SBATCH --job-name=hello
+#SBATCH --time=00:05:00
+#SBATCH --partition=MI100
+#SBATCH --nodes=1
+#SBATCH -w ixt-sjc2-XX
+#SBATCH --reservation=Lumi
 
-...
+source /global/scratch/hip-csc/setup.sh X
+srun -n 1 ./hello
+```
 
 
 ### Puhti
