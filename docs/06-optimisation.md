@@ -231,7 +231,9 @@ cat results.stats.csv
 "Name","Calls","TotalDurationNs","AverageNs","Percentage"
 "transpose_kernel(float*, float*, int, int) [clone .kd]",1,418083,418083,100.0
 ```
+
 The duration is 418083 ns, 2.5 times slower
+
 ---
 
 
