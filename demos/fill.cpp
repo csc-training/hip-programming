@@ -27,7 +27,7 @@ int main(void)
     hipLaunchKernelGGL(fill_, blocks, threads, 0, 0, n, x_, a);
 
     // copy data to the host and print
-    hipMemcpy(&x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
+    hipMemcpy(x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
     printf("%f %f %f %f ... %f %f\n",
             x[0], x[1], x[2], x[3], x[n-2], x[n-1]);
 

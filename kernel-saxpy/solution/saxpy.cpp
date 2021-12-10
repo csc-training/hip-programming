@@ -39,7 +39,7 @@ int main(void)
     hipLaunchKernelGGL(saxpy_, blocks, threads, 0, 0, n, a, x_, y_);
 
     // copy results back to CPU
-    hipMemcpy(&y, y_, sizeof(float) * n, hipMemcpyDeviceToHost);
+    hipMemcpy(y, y_, sizeof(float) * n, hipMemcpyDeviceToHost);
 
     printf("reference: %f %f %f %f ... %f %f\n",
             y_ref[0], y_ref[1], y_ref[2], y_ref[3], y_ref[n-2], y_ref[n-1]);
