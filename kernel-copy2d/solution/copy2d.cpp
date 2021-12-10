@@ -52,7 +52,7 @@ int main(void)
                        n, m, x_, y_);
 
     // copy results back to CPU
-    hipMemcpy(&y, y_, sizeof(double) * size, hipMemcpyDeviceToHost);
+    hipMemcpy(y, y_, sizeof(double) * size, hipMemcpyDeviceToHost);
 
     // confirm that results are correct
     double error = 0.0;
