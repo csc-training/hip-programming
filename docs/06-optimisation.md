@@ -163,7 +163,7 @@ kernel: copy_kernel
 ![](./img/perfetto.png){width=1600px}
 
 <div class="column">
-* Execute the `--stats` profiling
+* Execute the `--hip-trace` profiling
 * Go to the link https://ui.perfetto.dev/
 </div>
 
