@@ -328,5 +328,7 @@ VALUUtilization,VALUBusy,SALUBusy,L2CacheHit,WriteUnitStalled,LDSBankConflict
 
 # Exercise
 
+* Do the hipfort exercise
+* Do the nbody exercise, also profile and visualize 
 * Execute the presented exercise
 * Copy the streams exercise, profile it and visualize the json file.
