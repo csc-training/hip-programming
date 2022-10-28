@@ -2,7 +2,7 @@
 title:    Fortran and HIP
 subtitle: GPU programming with HIP
 author:   CSC Training
-date:     2021-11
+date:     2022-11
 lang:     en
 ---
 

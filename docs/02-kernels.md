@@ -2,7 +2,7 @@
 title:    HIP and GPU kernels
 subtitle: GPU programming with HIP
 author:   CSC Training
-date:     2021-11
+date:     2022-11
 lang:     en
 ---
 
@@ -168,6 +168,7 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 
 - Kernels are launched with the function call `hipLaunchKernelGGL`
     - grid dimensions need to be defined (two vectors of type `dim3`)
+    - execution is asynchronous
 
 ```cpp
 dim3 blocks(32);

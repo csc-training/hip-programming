@@ -1,8 +1,8 @@
 ---
-title:    Memory allocations, access, and unified memory
+title:  Memory allocations, access, and unified memory
 subtitle: GPU programming with HIP
 author:   CSC Training
-date:     2021-11
+date:     2022-11
 lang:     en
 ---
 
@@ -168,7 +168,7 @@ int main() {
 
 1. Allocate memory for the arrays accessed by the GPU with
    `hipMallocManaged()` instead of `malloc()`
-    - It is a good idea to have a wrapper function or use function overloading
+    - It is a good idea to have a wrapper function and use conditional compilation
       for memory allocations
 2. Offload compute kernels to GPUs
 3. Check profiler backtrace for GPU->CPU Unified Memory page-faults (NVIDIA
