@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <cstring>
+#include <string>
 #include <time.h>
 #include <hip/hip_runtime.h>
 
