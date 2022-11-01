@@ -12,8 +12,8 @@ lang:     en
 * Memory model and hierarchy
 * Memory management strategies
 * Page-locked memory
+* The stream-ordered memory allocator and memory pools
 * Coalesced memory access in device kernels
-
 
 # Memory model
 
@@ -95,7 +95,7 @@ Allocate pinned device memory
 ```cpp
 hipError_t hipMalloc(void **devPtr, size_t size)
 ```
-Allocate Unified Memory; The data is moved automatically between host/device
+Allocate Unified Memory; the data is moved automatically between host/device
 ```cpp
 hipError_t hipMallocManaged(void **devPtr, size_t size)
 ```
@@ -108,8 +108,11 @@ Copy data (host-host, host-device, device-host, device-device)
 hipError_t hipMemcpy(void *dst, const void *src, size_t count, enum hipMemcpyKind kind)
 ```
 
-# Example of explicit memory management
+# Memory management strategies
+<small>
+<div class="column">
 
+* Example of explicit memory management
 ```cpp
 int main() {
  int *A, *d_A;
@@ -118,26 +121,27 @@ int main() {
  ...
  /* Copy data to GPU and launch kernel */
  hipMemcpy(d_A, A, N*sizeof(int), hipMemcpyHostToDevice);
- hipLaunchKernelGGL(...);
- ...
+ kernel<<<...>>>(d_A);
  hipMemcpy(A, d_A, N*sizeof(int), hipMemcpyDeviceToHost);
  hipFree(d_A);
+ ...
  printf("A[0]: %d\n", A[0]);
  free(A);
  return 0;
 }
 ```
+</div>
 
+<div class="column">
 
-# Example of Unified Memory
-
+* Example of Unified Memory
 ```cpp
 int main() {
  int *A;
  hipMallocManaged((void**)&A, N*sizeof(int));
  ...
  /* Launch GPU kernel */
- hipLaunchKernelGGL(...);
+ kernel<<<...>>>(A);
  hipStreamSynchronize(0);
  ...
  printf("A[0]: %d\n", A[0]);
@@ -145,6 +149,9 @@ int main() {
  return 0;
 }
 ```
+
+</div>
+</small>
 
 # Unified Memory pros
 
@@ -161,7 +168,7 @@ int main() {
     - Through prefetches
     - Through hints
 - Must still obey concurrency & coherency rules, not foolproof
-- The performance on the AMD cards is an open question
+- Although the performance on AMD cards is quite good, there may be issues with prefetching and hints (with AMD)
 
 
 # Unified Memory workflow for GPU offloading
@@ -188,7 +195,7 @@ int main() {
 5.  Allocating GPU memory can have a much higher overhead than allocating
     standard host memory
     - If GPU memory is allocated and deallocated in a loop, consider using a
-      GPU memory pool allocator for better performance
+      GPU memory pool allocator for better performance (eg Umpire)
 
 
 # Virtual Memory addressing
@@ -217,22 +224,138 @@ int main() {
 
 # Allocating page-locked memory on host
 
-- Allocated with `hipHostMalloc()` function instead of `malloc()`
+- Allocated with `hipMallocHost()` or `hipHostAlloc()` functions instead of `malloc()`
 - The allocation can be mapped to the device address space for device access
   (slow)
     - On some architectures, the host pointer to device-mapped allocation can
-      be directly used in device code (ie. it works similarly to Unified
+      be directly used in device code (ie, it works similarly to Unified
       Memory pointer, but the access from the device is slow)
-- Deallocated using `hipHostFree()`
+- Deallocated using `hipFreeHost()`
 
 # Asynchronous memcopies
 
-- Normal `hipMemcpy()` calls are blocking (i.e. synchronizing)
+- Normal `hipMemcpy()` calls are blocking (ie, synchronizing)
     - The execution of host code is blocked until copying is finished
 - To overlap copying and program execution, asynchronous functions are required
-    - Such functions have Async suffix, eg. `hipMemcpyAsync()`
+    - Such functions have Async suffix, eg, `hipMemcpyAsync()`
 - User has to synchronize the program execution
 - Requires page-locked memory
+
+# The stream-ordered memory allocator and memory pools
+<small>
+
+* Obtain unused memory already allocated from the device's current memory pool in the specified stream (if not enough memory is available, more memory is allocated for the pool)
+```cpp
+​hipError_t hipMallocAsync ( void** devPtr, size_t size, hipStream_t hStream )
+```
+
+* Return memory to the pool in the specific stream (does not deallocate memory)
+```cpp
+hipError_t hipFreeAsync ( void* devPtr, hipStream_t hStream ) 
+```
+
+* By default, the pool is deallocated completely when the stream is synchronized
+
+* The `hipMemPoolAttrReleaseThreshold` represents the size down to which the pool is deallocated during a synchronization, and can be set by 
+
+```cpp
+hipMemPool_t mempool;
+hipDeviceGetDefaultMemPool(&mempool, device);
+uint64_t threshold = UINT64_MAX;
+hipMemPoolSetAttribute(mempool, hipMemPoolAttrReleaseThreshold, &threshold);
+```
+
+* Setting threshold to `UINT64_MAX` means, that the pool is practically never deallocated due to synchronization (because the threshold is a huge number)
+
+</small>
+
+# Memory pools - Example 1/2 
+<small>
+
+<div class="column">
+* Example 1 - slow
+```cpp
+for (int i = 0; i < 100; i++) {
+  // Allocate memory here (slow)
+  hipMalloc(&ptr, size); 
+  // Run GPU kernel
+  kernel<<<..., stream>>>(ptr);
+  // Synchronize stream, does not influence memory allocations
+  hipStreamSynchronize(stream); 
+  // Deallocate memory here
+  hipFree(ptr); 
+}
+```
+* Allocating and deallocating memory in a loop is slow, and can have a significant impact on the performance
+</div>
+<div class="column">
+* Example 2 - fast
+```cpp
+for (int i = 0; i < 100; i++) {
+  // Obtain unused memory from the current memory pool, 
+  // more memory is allocated for the pool if needed
+  hipMallocAsync(&ptr, size, stream); 
+  // Run GPU kernel
+  kernel<<<..., stream>>>(ptr);
+  // Return memory to the current memory pool
+  hipFreeAsync(ptr, stream); 
+}
+// Synchronize and deallocate all memory from the 
+// current memory pool (default behavior)
+hipStreamSynchronize(stream); 
+```
+* Recurring memory allocation and deallocation does not occur anymore, because the memory is obtained from the memory pool and only deallocated during the synchronization (default behavior)
+
+</div>
+</small>
+
+# Memory pools - Example 2/2 
+<small>
+
+<div class="column">
+* Example 3 - slow
+```cpp
+for (int i = 0; i < 100; i++) {
+  // Obtain unused memory from the current memory pool, 
+  // more memory is allocated for the pool if needed
+  hipMallocAsync(&ptr, size, stream); 
+  // Run GPU kernel
+  kernel<<<..., stream>>>(ptr);
+  // Return memory to the current memory pool
+  hipFreeAsync(ptr, stream); 
+  // Synchronize and deallocate all memory from the 
+  // current memory pool (default behavior)
+  hipStreamSynchronize(stream); 
+}
+```
+* Here the call to `hipStreamSynchronize` placed inside the loop results in deallocating the current memory pool, and therefore, `hipMallocAsync` must allocate more memory for the pool every iteration similarly to example 1
+</div>
+
+
+<div class="column">
+* Example 4 - fast
+```cpp
+// Set the memory pool deallocation threshold to UINT64_MAX 
+// to prevent memory deallocations when the synchronization is called
+hipMemPool_t mempool;
+hipDeviceGetDefaultMemPool(&mempool, device);
+uint64_t threshold = UINT64_MAX;
+hipMemPoolSetAttribute(mempool, hipMemPoolAttrReleaseThreshold, &threshold);
+for (int i = 0; i < 100; i++) {
+  // Obtain unused memory from the current memory pool, 
+  // more memory is allocated for the pool if needed
+  hipMallocAsync(&ptr, size, stream); 
+  // Run GPU kernel
+  kernel<<<..., stream>>>(ptr);
+  // Return memory to the current memory pool
+  hipFreeAsync(ptr, stream); 
+  // Sync and deallocate if memory pool size exceeds UINT64_MAX
+  hipStreamSynchronize(stream); 
+}
+```
+* Here the memory pool release threshold is changed to a so big number that the call to `hipStreamSynchronize` does not cause any deallocations
+</div>
+</small>
 
 # Global memory access in device code
 
@@ -247,7 +370,7 @@ int main() {
 
 <div class="column">
 - The global memory loads and stores consist of transactions of a certain size
-  (eg. 32 bytes)
+  (eg, 32 bytes)
 - If the threads within a warp access data within such a block of 32 bytes,
   only one global memory transaction is needed
 </div>
@@ -270,6 +393,8 @@ __global__ void memAccess(float *out, float *in)
 }
 ```
 ![](img/coalesced_access_4.png){width=80%}
+
+* If the tx size is 32B, 4 txs are required in this case
 </div>
 
 <div class="column">
@@ -281,6 +406,8 @@ __global__ void memAccess(float *out, float *in)
 }
 ```
 ![](img/coalesced_access_3.png){width=80%}
+
+* If the tx size is 32B, 5 txs are required in this case
 </div>
 
 
@@ -292,5 +419,7 @@ __global__ void memAccess(float *out, float *in)
 - The number of data copies between CPU and GPU should be minimized
     - With Unified Memory, if data transfer cannot be avoided, using hints or
       prefetching to mitigate page faults is beneficial
-- Coalesced memory access in the device code is recommended for better
+- Recurring allocation and deallocation is slow, use memory pools instead 
+  - Libraries provide pooled Unified Memory support as well (eg, Umpire)
+- Coalesced memory access in kernels results in better
   performance
