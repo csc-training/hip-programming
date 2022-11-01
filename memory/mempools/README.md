@@ -1,6 +1,6 @@
 # The stream-ordered memory allocator and memory pools
 
-The purpose of this exercise is to compare 4 different memory allocation
+The purpose of this exercise is to compare different memory allocation
 strategies within a loop and to understand the performance impact of using or not using a memory pool. The following timed functions are called at the end of the source file by the `main()` function:
 
 * `noRecurringAlloc();`
