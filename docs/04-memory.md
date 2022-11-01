@@ -269,7 +269,7 @@ hipMemPoolSetAttribute(mempool, hipMemPoolAttrReleaseThreshold, &threshold);
 
 </small>
 
-# Memory pools - Example 1/2 
+# Memory pools - Example
 <small>
 
 <div class="column">
@@ -306,54 +306,6 @@ hipStreamSynchronize(stream);
 ```
 * Recurring memory allocation and deallocation does not occur anymore, because the memory is obtained from the memory pool and only deallocated during the synchronization (default behavior)
 
-</div>
-</small>
-
-# Memory pools - Example 2/2 
-<small>
-
-<div class="column">
-* Example 3 - slow
-```cpp
-for (int i = 0; i < 100; i++) {
-  // Obtain unused memory from the current memory pool, 
-  // more memory is allocated for the pool if needed
-  hipMallocAsync(&ptr, size, stream); 
-  // Run GPU kernel
-  kernel<<<..., stream>>>(ptr);
-  // Return memory to the current memory pool
-  hipFreeAsync(ptr, stream); 
-  // Synchronize and deallocate all memory from the 
-  // current memory pool (default behavior)
-  hipStreamSynchronize(stream); 
-}
-```
-* Here the call to `hipStreamSynchronize` placed inside the loop results in deallocating the current memory pool, and therefore, `hipMallocAsync` must allocate more memory for the pool every iteration similarly to example 1
-</div>
-
-
-<div class="column">
-* Example 4 - fast
-```cpp
-// Set the memory pool deallocation threshold to UINT64_MAX 
-// to prevent memory deallocations when the synchronization is called
-hipMemPool_t mempool;
-hipDeviceGetDefaultMemPool(&mempool, device);
-uint64_t threshold = UINT64_MAX;
-hipMemPoolSetAttribute(mempool, hipMemPoolAttrReleaseThreshold, &threshold);
-for (int i = 0; i < 100; i++) {
-  // Obtain unused memory from the current memory pool, 
-  // more memory is allocated for the pool if needed
-  hipMallocAsync(&ptr, size, stream); 
-  // Run GPU kernel
-  kernel<<<..., stream>>>(ptr);
-  // Return memory to the current memory pool
-  hipFreeAsync(ptr, stream); 
-  // Sync and deallocate if memory pool size exceeds UINT64_MAX
-  hipStreamSynchronize(stream); 
-}
-```
-* Here the memory pool release threshold is changed to a so big number that the call to `hipStreamSynchronize` does not cause any deallocations
 </div>
 </small>
 
