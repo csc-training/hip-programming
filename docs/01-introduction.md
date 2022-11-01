@@ -95,7 +95,7 @@ CPU vs Accelerator
 <div class="column">
 - GPU is connected to CPUs via PCIe
 - Local memory in GPU
-    - Smaller than main memory (32 GB in Puhti)
+    - Smaller than main memory (32 GB in Puhti, 128 GB in LUMI)
     - Very high bandwidth (up to 3200 GB/s in LUMI)
     - Latency high compared to compute performance
 - Data must be copied from CPU to GPU over the PCIe bus
