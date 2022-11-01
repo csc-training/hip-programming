@@ -14,7 +14,3 @@ IMPORTANT NOTE! Unfortunately, the support for memory pools was only recently ad
 
 * `hipMallocAsync` -> `cudaMallocAsync`
 * `hipFreeAsync` -> `cudaFreeAsync`
-* `hipMemPool_t` -> `cudaMemPool_t`
-* `hipDeviceGetDefaultMemPool` -> `cudaDeviceGetDefaultMemPool`
-* `hipMemPoolSetAttribute` -> `cudaMemPoolSetAttribute`
-* `hipMemPoolAttrReleaseThreshold` -> `cudaMemPoolAttrReleaseThreshold`
