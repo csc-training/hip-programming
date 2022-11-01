@@ -71,7 +71,7 @@ void noRecurringAlloc(int nSteps, int size)
   hipFree(d_A);
 }
 
-/* Run without memory pooling */
+/* Do recurring allocation without memory pooling */
 void recurringAllocNoMemPools(int nSteps, int size)
 {
   // Determine grid and block size
@@ -146,41 +146,6 @@ void recurringAllocMemPoolSync(int nSteps, int size)
   checkTiming("recurringAllocMemPoolSync", (double)(clock() - tStart) / CLOCKS_PER_SEC);
 }
 
-/* Run using memory pooling and recurring syncs with changed release threshold */
-void recurringAllocMemPoolSyncWithThreshold(int nSteps, int size)
-{
-  // Determine grid and block size
-  const int blocksize = BLOCKSIZE;
-  const int gridsize = (size - 1 + blocksize) / blocksize;
-
-  // Change the memory pool deallocations threshold
-  int device;
-  cudaGetDevice(&device);
-  cudaMemPool_t mempool;
-  cudaDeviceGetDefaultMemPool(&mempool, device);
-  uint64_t threshold = 0*UINT64_MAX;
-  cudaMemPoolSetAttribute(mempool, cudaMemPoolAttrReleaseThreshold, &threshold);
-
-  // Start timer and begin stepping loop
-  clock_t tStart = clock();
-  for(unsigned int i = 0; i < nSteps; i++)
-  {
-    int *d_A;
-    // Allocate pinned device memory
-    cudaMallocAsync((void**)&d_A, size, 0);
-    // Launch GPU kernel
-    hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
-    // Free allocation
-    cudaFreeAsync(d_A, 0);
-    // Synchronization
-    hipStreamSynchronize(0);
-  }
-  // Check results and print timings
-  checkTiming("recurringAllocMemPoolSyncWithThreshold", (double)(clock() - tStart) / CLOCKS_PER_SEC);
-}
-
-
-
 /* The main function */
 int main(int argc, char* argv[])
 {
@@ -195,5 +160,4 @@ int main(int argc, char* argv[])
   recurringAllocNoMemPools(nSteps, size);
   recurringAllocMemPoolNoSync(nSteps, size);
   recurringAllocMemPoolSync(nSteps, size);
-  recurringAllocMemPoolSyncWithThreshold(nSteps, size);
 }
