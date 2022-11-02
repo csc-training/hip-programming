@@ -20,7 +20,7 @@ make
 make MPI=1
 
 // Compile to run parallel on CPU with CUDA
-make HOST=1
+make CUDA=1
 
 // Compile to run parallel on GPU with HIP
 make HIP=CUDA

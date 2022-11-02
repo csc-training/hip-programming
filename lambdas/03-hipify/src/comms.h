@@ -23,8 +23,7 @@ namespace comms{
   void reduce_procs(float *sbuf, int count);
   
   void init_procs(int *argc, char **argv[]);
-  void finalize_procs();
-  
+  void finalize_procs(); 
 }
 
 #endif // !BESSEL_COMMS_H
