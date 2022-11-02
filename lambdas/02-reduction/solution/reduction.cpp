@@ -1,72 +1,97 @@
 #include <stdio.h>
-#include <math.h>
 #include <hip/hip_runtime.h>
+#include "cub/cub.cuh"
 
-/* Blocksize is small because we are printing from all threads */
-#define BLOCKSIZE 4
+/* Blocksize is divisible by the warp size */
+#define BLOCKSIZE 64
 
-/* CPU loop execution */
+/* CPU redution loop */
 template <typename Lambda>
-void cpuKernel(Lambda lambda, const int loop_size) {
+void parallel_reduce_cpu(const int loop_size, Lambda loop_body, int *sum) {
+  // Evaluate the loop body
   for(int i = 0; i < loop_size; i++){
-    lambda(i);
+    loop_body(i, *sum);
   }
 }
 
-/* GPU loop execution */
-template <typename Lambda> 
-__global__ void gpuKernel(Lambda lambda, const int loop_size)
+/* GPU redution kernel */
+template <typename Lambda>
+__global__ void reduction_kernel(Lambda loop_body, const int loop_size, int *sum)
 {
-  const int i = blockIdx.x * blockDim.x + threadIdx.x;
-  if(i < loop_size)
-  {
-    lambda(i);
+  // Specialize BlockReduce for a 1D block of BLOCKSIZE threads of type int
+  typedef cub::BlockReduce<int, BLOCKSIZE> BlockReduce;
+  
+  // Use shared memory for the cub library temporary storage
+  __shared__ typename BlockReduce::TempStorage temp_storage;
+
+  // Get thread index
+  const int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+  // Check loop limits
+  if (idx < loop_size) {
+   
+    // Local storage for the thread summation value
+    int thread_sum = 0;
+  
+    // Evaluate the loop body, the summation value is stored in thread_sum
+    loop_body(idx, thread_sum);
+  
+    // Compute the block-wide sum (aggregate) for the first thread of each block
+    int aggregate = BlockReduce(temp_storage).Sum(thread_sum);
+
+    // The first thread of each block stores the block-wide aggregate to 'sum' using atomics
+    if(threadIdx.x == 0) 
+      atomicAdd(sum, aggregate);
   }
 }
 
-/* Check if this function is running on CPU or GPU */
-__host__ __device__ void helloFromThread(const int i) {
-  #ifdef __HIP_DEVICE_COMPILE__ // If running on GPU
-    printf("Hello from GPU! I'm thread number %d\n", i);
-  #else // If running on CPU
-    printf("Hello from CPU! I'm thread number %d\n", i);
-  #endif
+/* Wrapper for the GPU redution kernel */
+template <typename Lambda>
+void parallel_reduce_gpu(const uint loop_size, Lambda loop_body, int *sum) {
+
+  // Set block and grid dimensions
+  const uint blocksize = BLOCKSIZE;
+  const uint gridsize = (loop_size - 1 + blocksize) / blocksize;
+
+  // Create GPU buffer for the reduction variable
+  int* d_buf;
+  hipMalloc(&d_buf, sizeof(int));
+
+  // Launch the reduction kernel
+  reduction_kernel<<<gridsize, blocksize>>>(loop_body, loop_size, d_buf);
+  hipStreamSynchronize(0);
+  
+  // Copy reduction variable back to host from the GPU buffer
+  cudaMemcpy(sum, d_buf, sizeof(int), cudaMemcpyDeviceToHost);
+  cudaFree(d_buf);
 }
 
 
 /* The main function */
 int main()
 {
-  // Set the problem dimensions
-  const int loop_size = BLOCKSIZE;
-  const int blocksize = BLOCKSIZE;
-  const int gridsize = (loop_size - 1 + blocksize) / blocksize;
+  // Calculate the triangular number up to 'tn', ie, a sum of numbers from 0 to 'tn'
+  const int tn = 1000;
 
-  // Define lambda1 function with 1 integer argument,
-  // the lamba must call helloFromThread with that argument
-  auto lambda1 = [] __host__ __device__ (const int i)
-  {
-    helloFromThread(i);
-  };
+  // Calculate the triangular number on the GPU and store it in sum_gpu
+  int sum_gpu = 0;
+  parallel_reduce_gpu(tn, [] __host__ __device__ (const int i, int &sum){
+    int thread_idx = i;
+    sum += thread_idx; 
+  }, &sum_gpu);
 
-  // Run lambda1 on the CPU device
-  cpuKernel(lambda1, loop_size);
+  // Calculate the triangular number on the CPU and store it in sum_cpu
+  int sum_cpu = 0;
+  parallel_reduce_cpu(tn, [] __host__ __device__ (const int i, int &sum){
+    int thread_idx = i;
+    sum += thread_idx;
+  }, &sum_cpu);
 
-  // Run lambda1 on the GPU device
-  gpuKernel<<<gridsize, blocksize>>>(lambda1, loop_size);
-  hipStreamSynchronize(0);
+  // Check that the results match
+  if(sum_gpu == sum_cpu)
+    printf("The results calculated by GPU = %d and CPU = %d match!\n", sum_gpu, sum_cpu);
+  else
+    printf("The results calculated by GPU = %d and CPU = %d do not match!\n", sum_gpu, sum_cpu);
 
-  // Store value of pi in pi
-  double pi = M_PI;
-
-  // Define lambda2 that captures pi (use [=] to capture by value), 
-  // and prints out the results for i * pi from each thread
-  auto lambda2 = [=] __host__ __device__ (const int i)
-  {
-    printf("i * pi = %f \n", (double)i * pi);
-  };
-
-  // Run lambda2 on the GPU device
-  gpuKernel<<<gridsize, blocksize>>>(lambda2, loop_size);
-  hipStreamSynchronize(0);
+  return 0;
 }
