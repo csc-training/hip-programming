@@ -13,19 +13,19 @@ The implementation uses a special construct for the parallel loops in [bessel.cp
 The code can be conditionally compiled for either CUDA, HIP, or HOST execution with or without MPI. The correct definitions for each accelerator backend option are selected in [comms.h](src/comms.h) by choosing the respective header file. The compilation instructions are shown below:
 
 ```
-// Compile to run parallel on CPU
+// Compile to run sequentially on CPU
 make
 
-// Compile to run parallel on CPU with MPI
+// Compile to run parallel on CPUs with MPI
 make MPI=1
 
-// Compile to run parallel on CPU with CUDA
+// Compile to run parallel on GPU with CUDA
 make CUDA=1
 
 // Compile to run parallel on GPU with HIP
 make HIP=CUDA
 
-// Compile to run parallel on GPU with HIP and MPI
+// Compile to run parallel on many GPUs with HIP and MPI
 make HIP=CUDA MPI=1
 
 ```
