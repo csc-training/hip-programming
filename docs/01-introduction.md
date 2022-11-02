@@ -46,53 +46,13 @@ lang:   en
     - Very high performance per node
 - Usually major rewrites of programs required
 
-# Why use them?
-CPU vs Accelerator
-
-![ <span style=" font-size:0.5em;">https://github.com/karlrupp/cpu-gpu-mic-comparison</span> ](img/comparison.png)
-
-
-# Different design philosophies
-
-<div class="column">
-
-**CPU**
-\
-\
-
-- General purpose
-- Good for serial processing
-- Great for task parallelism
-- Low latency per thread
-- Large area dedicated cache and control
-
-
-</div>
-
-<div class="column">
-
-**GPU**
-\
-\
-
-- Highly specialized for parallelism
-- Good for parallel processing
-- Great for data parallelism
-- High-throughput
-- Hundreds of floating-point execution units
-
-
-</div>
-
-
-# Lumi - Pre-exascale system in Finland
-
- ![](img/lumi.png){.center width=50%}
 
 
 # Accelerator model today
 
-<div class="column">
+
+![](img/gpu-bws.png){width=100%}
+
 - GPU is connected to CPUs via PCIe
 - Local memory in GPU
     - Smaller than main memory (32 GB in Puhti, 128 GB in LUMI)
@@ -100,25 +60,15 @@ CPU vs Accelerator
     - Latency high compared to compute performance
 - Data must be copied from CPU to GPU over the PCIe bus
 
-</div>
-<div class="column">
-![](img/gpuConnect.png){}
-![](img/gpu-bws.png){width=100%}
-</div>
 
-#  Heterogeneous Programming Model
+# Lumi - Pre-exascale system in Finland
 
-- GPUs are co-processors to the CPU
-- CPU controls the work flow:
-  - *offloads* computations to GPU by launching *kernels*
-  - allocates and deallocates the memory on GPUs
-  - handles the data transfers between CPU and GPUs
-- CPU and GPU can work concurrently
-   - kernel launches are normally asynchronous
+ ![](img/lumi.png){.center width=50%}
+
 
 # GPU architecture
 
-<div class="column">
+<div class="column" width=56%>
 - Designed for running tens of thousands of threads simultaneously on
   thousands of cores
 - Very small penalty for switching threads
@@ -126,20 +76,10 @@ CPU vs Accelerator
 - Very expensive to synchronize all threads
 </div>
 
-<div class="column">
-![](img/mi100-architecture.png)
-<small>AMD Instinct MI100 architecture (source: AMD)</small>
+<div class="column" width=42%>
+![](img/amd_m200.png){.center width=60%}
+<div align="center"><small>      AMD Instinct MI200 architecture (source: AMD).  </small></div>
 </div>
-
-
-# Advance features & Performance considerations
-
-- Memory accesses:
-   - data resides in the GPU memory; maximum performance is achieved when reading/writing is done in continuous blocks
-   - very fast on-chip memory can be used as a user programmable cache
-- *Unified Virtual Addressing* provides unified view for all memory
-- Asynchronous calls can be used to overlap transfers and computations.
-
 
 # Challenges in using Accelerators
 
@@ -154,6 +94,16 @@ CPU vs Accelerator
 **Scalability**: Can you scale the GPU software efficiently to several nodes?
 
 
+#  Heterogeneous Programming Model
+
+- GPUs are co-processors to the CPU
+- CPU controls the work flow:
+  - *offloads* computations to GPU by launching *kernels*
+  - allocates and deallocates the memory on GPUs
+  - handles the data transfers between CPU and GPUs
+- CPU and GPU can work concurrently
+   - kernel launches are normally asynchronous
+
 # Using GPUs
 
 <div class="column">
@@ -165,7 +115,6 @@ CPU vs Accelerator
     - CUDA, **HIP**, SYCL, Kokkos,...
 </div>
 <div class="column" width=40%>
-
 Easier, but more limited
 
 ![](img/arrow.png){.center width=20% }
