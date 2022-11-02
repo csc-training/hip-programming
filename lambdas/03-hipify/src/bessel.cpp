@@ -11,10 +11,6 @@
 #include <random>
 #include <stdio.h>
 
-#ifdef HAVE_MATPLOT
-  #include <matplot/matplot.h>
-#endif
-
 // Namespaces "comms" and "devices" declared here
 #include "comms.h"
 
@@ -114,13 +110,6 @@ int main(int argc, char *argv []){
   comms::reduce_procs(mse_stdev, n_beta);
   comms::reduce_procs(mse_var, n_beta);
 
-#ifdef HAVE_MATPLOT
-  // Define vectors for matplot  
-  std::vector<float> x;
-  std::vector<float> y1;
-  std::vector<float> y2;
-#endif
-
   // Divide the error sums to find the averaged errors for each tested beta value
   if(my_rank == 0){
     for(int j = 0; j < n_beta; ++j){
@@ -130,12 +119,6 @@ int main(int argc, char *argv []){
       float rmse_var = sqrtf(mse_var[j]);
       float sub = j * (range_beta / n_beta) - range_beta / 2.0f;
       printf("Beta = %.2f: RMSE for stdev = %.5f and var = %.5f\n", sub, rmse_stdev, rmse_var);
-#ifdef HAVE_MATPLOT     
-      // Add data for matplot 
-      x.push_back(sub);
-      y1.push_back(rmse_stdev);
-      y2.push_back(rmse_var);
-#endif
     }
   }
 
@@ -151,31 +134,6 @@ int main(int argc, char *argv []){
     std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
     std::cout << std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() << "[ms]" << std::endl;
   }
-
-#ifdef HAVE_MATPLOT   
-  // Plot the standard deviation error (1st line) 
-  auto p1 = matplot::plot(x, y1);
-  p1->display_name("stdev");
-  matplot::hold(matplot::on);
-
-  // Plot the variance error (2nd line)
-  auto p2 = matplot::plot(x, y2);
-  p2->use_y2(true).display_name("variance");
-  matplot::hold(matplot::off);
-
-  // Create legend
-  auto l = matplot::legend();
-  l->location(matplot::legend::general_alignment::topright);
-  
-  // Set labels and style
-  matplot::title("Root mean squared error (RMSE) for Bessel's correction");
-  matplot::xlabel("Beta");
-  matplot::ylabel("RMSE");
-  matplot::grid(matplot::on);
-
-  // Show plot
-  matplot::show();
-#endif
 
   return 0;
 }
