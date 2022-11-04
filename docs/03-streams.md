@@ -6,39 +6,162 @@ date:     2022-11
 lang:     en
 ---
 
+# Outline
+
+* Streams 
+* Events
+* Synchronization
+
 # Streams
 
 - What is a stream?
-    - a sequence of operations that execute in order on the GPU
-    - operations in different streams may run concurrently
+    - A sequence of operations that execute in order on the GPU
+    - Operations in different streams may run concurrently
 
-![](./img/streams.png){width=1200px}
+![](./img/streams.png){width=1100px}
+
+- In figure, the kernel and D-to-H copy is split into 4 streams
 
 
-# Amount of concurrency
+# Streams
 
 ![](./img/streams2.png){width=1600px}
 
-
-# Default
-
-- Only a single stream is used if not defined
-- Operations are synchronized unless async versions are used
+- In this figure, H-to-D copy, kernel, and D-to-H copy is split into 4 streams
 
 
-# Example: issue of order (I)
+# Asynchronous funtions and the default stream
 
-- We have 3 streams and we do 3 operations (HD, K, DH)
+<small>
 
-![](./img/streams-example-1.png){height=680px}
+- The functions without `Async`-postfix run on the default stream, and are synchronizing with host
 
+```cpp
+​hipError_t hipMalloc ( void** devPtr, size_t size )
+​hipError_t hipMemcpy ( void* dst, const void* src, size_t count, hipMemcpyKind kind )
+​hipError_t hipFree ( void* devPtr ) 
+```
 
-# Example: issue of order (II)
+- When using non-default streams, functions with `Async`-postfix are needed
+  - These functions take the stream as an additional argument (`0` denotes the default stream)
 
-- Need to think the dependencies and how to improve the runtime
+```cpp
+hipError_t hipMallocAsync ( void** devPtr, size_t size, hipStream_t stream ) 
+hipError_t hipMemcpyAsync ( void* dst, const void* src, size_t count, hipMemcpyKind kind, hipStream_t stream) 
+hipError_t hipFreeAsync ( void* devPtr, hipStream_t stream ) 
 
-![](./img/streams-example-2.png){height=680px}
+```
 
+- Kernels are always asynchronous, and require explicit synchronization
+  - If no stream is specified in the kernel launch, the default stream is used
+  - The fourth kernel argument is reserved for the stream 
+
+```cpp
+// Use the default stream
+hipkernel<<<grid, block>>>(args);
+// Use the default stream
+hipkernel<<<grid, block, bytes, 0>>>(args);
+// Use the stream strm[i]
+hipkernel<<<grid, block, bytes, strm[i]>>>(args);
+```
+
+</small>
+
+# Stream creation, synchronization, and destruction
+
+* Declare a stream variable
+```cpp
+hipStream_t stream
+```
+
+* Create `stream`
+```cpp
+hipError_t hipStreamCreate ( hipStream_t* stream ) 
+```
+
+* Synchronize `stream`
+```cpp
+​hipError_t hipStreamSynchronize ( hipStream_t stream ) 
+``` 
+
+* Destroy `stream`
+```cpp
+​hipError_t hipStreamDestroy ( hipStream_t stream ) 
+```
+
+# Stream example
+
+<small>
+<div class="column">
+```cpp
+// Declare an array of 3 streams
+hipStream_t stream[3];
+
+// Create streams and schedule work
+for (int i = 0; i < 3; ++i){
+  hipStreamCreate(&stream[i]);
+
+  // Each streams copies data from host to device
+  hipMemcpyAsync(d_data[i], h_data[i], bytes, 
+    hipMemcpyHostToDevice, stream[i]);
+
+  // Each streams runs a kernel
+  hipkernel<<<grid, block, 0, strm[i]>>>(d_data[i]);
+
+  // Each streams copies data from device to host
+  hipMemcpyAsync(h_data[i], d_data[i],  bytes, 
+    hipMemcpyDeviceToHost, stream[i]);
+}
+
+// Synchronize and destroy streams
+for (int i = 0; i < 3; ++i){
+  hipStreamSynchronize(stream[i]);
+  hipStreamDestroy(stream[i]);
+}
+```
+</div>
+
+<div class="column">
+![](./img/streams-example-2.png){height=400px}
+</div>
+
+</small>
+
+# Events
+
+<small>
+
+* Create `event` object
+```cpp
+​cudaError_t cudaEventCreate ( cudaEvent_t* event ) 
+```
+
+* Captures in `event` the contents of `stream` at the time of this call
+```cpp
+cudaError_t cudaEventRecord ( cudaEvent_t event, cudaStream_t stream ) 
+``` 
+
+* Computes the elapsed time in milliseconds between `start` and `end` events
+```cpp
+cudaError_t cudaEventElapsedTime ( float* ms, cudaEvent_t start, cudaEvent_t end ) 
+``` 
+
+* Makes all future work submitted to `stream` wait for all work captured in `event`
+```cpp
+​cudaError_t cudaStreamWaitEvent ( cudaStream_t stream, cudaEvent_t event, unsigned int  flags = 0 ) 
+```
+
+* Wait for `event` to complete
+```cpp
+cudaError_t cudaEventSynchronize ( cudaEvent_t event ) 
+``` 
+
+* Destroy `event` object
+```cpp
+cudaError_t cudaEventDestroy ( cudaEvent_t event ) 
+```
+
+</small>
 
 # Synchronization and memory
 
@@ -56,47 +179,8 @@ hipStreamWaitEvent
   : stream waits for the specified event to complete
 
 
-# Stream/Events API
-
-<div class="column">
-hipStreamCreate
-  : creates an asynchronous stream
-
-hipStreamDestroy
-  : destroy an asynchronous stream
-
-hipStreamCreateWithFlags
-  : creates an asynchronous stream with specified flags
-</div>
-
-<div class="column">
-<small>
-
-hipEventCreate
-  : create an event
-
-hipEventDestroy
-  : destroy an event
-
-hipEventRecord
-  : record an event in a specified stream
-
-hipEventSynchronize
-  : wait for an event to complete
-
-hipEventElapsedTime
-  : return the elapsed time between two events
-
-</small>
-</div>
 
 
-# Implicit Synchronization
-
-- hipHostMalloc
-- hipMalloc
-- hipMemcpy
-...
 
 
 # Example: data transfer and compute
@@ -117,41 +201,27 @@ hipEventElapsedTime(&duration, startEvent, stopEvent);
 printf("Duration of sequential transfer and execute (ms): %f\n", duration);
 ```
 
-
-# How to improve the performance?
-
-- Use streams to overlap computation with communication
-```cpp
-hipStream_t stream[nStreams];
-for (int i = 0; i < nStreams; ++i)
-    hipStreamCreate(&stream[i]);
-```
-
-- Use Asynchronous data transfer
-```cpp
-hipMemcpyAsync(dst, src, bytes, hipMemcpyHostToDevice, stream);
-```
-
-- Execute kernels on different streams
-```cpp
-hipLaunchKernelGGL(kernel, gridsize, blocksize, shared_mem_size, stream,
-                   arg0, arg1, ...);
-```
-
-
 # Synchronization (I)
 
-- Synchronize everything
-  ```cpp
-  hipDeviceSynchronize()
-  ```
+* Synchronize the host with a specific stream
+```cpp
+​hipError_t hipStreamSynchronize ( hipStream_t stream ) 
+``` 
 
-- Synchronize a specific stream
-  ```cpp
-  hipStreamSynchronize(streamid)
-  ```
-    - Blocks host until all HIP calls are completed on this stream
+* Synchronize the host with a specific event
+```cpp
+​cudaError_t cudaEventSynchronize ( cudaEvent_t event )
+``` 
 
+* Synchronize a specific stream with a specific event (the event can be in another stream) 
+```cpp
+​cudaError_t cudaStreamWaitEvent ( cudaStream_t stream, cudaEvent_t event, unsigned int  flags = 0 ) 
+``` 
+
+* Synchronize the host with the whole device (wait until all device tasks are finished)
+```cpp
+cudaError_t cudaDeviceSynchronize ( void ) 
+``` 
 
 # Synchronization (II)
 
