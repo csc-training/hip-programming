@@ -13,9 +13,12 @@ For reference, there is also a CPU-to-CPU implementation in the skeleton
 code ([ping-pong.cpp](ping-pong.cpp)). Timing of all tests is also included to
 compare the execution times.
 
-To run, one should use two GPUs and two MPI tasks. On Puhti, MPI is
+To compile, just load the required modules and type `make`. On Puhti, a HIP-aware MPI is
 available with:
 ```
-module load hip
-module load openmpi
+ml purge
+ml .unsupported
+ml gcc cuda openmpi hip
 ```
+For running, one should use two GPUs and two MPI tasks.
+
