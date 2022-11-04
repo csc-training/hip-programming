@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <hip/hip_runtime.h>
-#include "cub/cub.cuh"
+#include "../../../third-party/hipcub/hipcub.hpp"
 
 /* Blocksize is divisible by the warp size */
 #define BLOCKSIZE 64
@@ -19,7 +19,7 @@ template <typename Lambda>
 __global__ void reduction_kernel(Lambda loop_body, const int loop_size, int *sum)
 {
   // Specialize BlockReduce for a 1D block of BLOCKSIZE threads of type int
-  typedef cub::BlockReduce<int, BLOCKSIZE> BlockReduce;
+  typedef hipcub::BlockReduce<int, BLOCKSIZE> BlockReduce;
   
   // Use shared memory for the cub library temporary storage
   __shared__ typename BlockReduce::TempStorage temp_storage;
@@ -62,8 +62,8 @@ void parallel_reduce_gpu(const uint loop_size, Lambda loop_body, int *sum) {
   hipStreamSynchronize(0);
   
   // Copy reduction variable back to host from the GPU buffer
-  cudaMemcpy(sum, d_buf, sizeof(int), cudaMemcpyDeviceToHost);
-  cudaFree(d_buf);
+  hipMemcpy(sum, d_buf, sizeof(int), hipMemcpyDeviceToHost);
+  hipFree(d_buf);
 }
 
 
