@@ -21,7 +21,7 @@ __global__ void reduction_kernel(Lambda loop_body, const int loop_size, int *sum
   // Specialize BlockReduce for a 1D block of BLOCKSIZE threads of type int
   typedef hipcub::BlockReduce<int, BLOCKSIZE> BlockReduce;
   
-  // Use shared memory for the cub library temporary storage
+  // Use shared memory for the hipcub library temporary storage
   __shared__ typename BlockReduce::TempStorage temp_storage;
 
   // Get thread index

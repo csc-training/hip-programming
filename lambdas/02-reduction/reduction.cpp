@@ -19,10 +19,10 @@ template <typename Lambda>
 __global__ void reduction_kernel(Lambda loop_body, const int loop_size, int *sum)
 {
   // Specialize BlockReduce for a 1D block of BLOCKSIZE threads of type int
-  #error add here cub typedef
+  #error add here hipcub typedef
   
-  // Use shared memory for the cub library temporary storage
-  #error define the shared memory used by the cub library here
+  // Use shared memory for the hipcub library temporary storage
+  #error define the shared memory used by the hipcub library here
 
   // Get thread index
   const int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -38,7 +38,7 @@ __global__ void reduction_kernel(Lambda loop_body, const int loop_size, int *sum
   
     // Compute the block-wide sum (aggregate) for the first thread of each block
     int aggregate;
-    #error call the cub function to perform block-wide sum and store the result into 'aggregate'
+    #error call the hipcub function to perform block-wide sum and store the result into 'aggregate'
 
     // The first thread of each block stores the block-wide aggregate to 'sum' using atomics
     if(threadIdx.x == 0) 
