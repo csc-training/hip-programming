@@ -81,7 +81,7 @@ int main(void)
 - Wavefront (cf. CUDA warp)
     - collection of threads that execute in lockstep and execute the same
       instructions
-    - each wavefront has 64 threads
+    - each wavefront has fixed number of threads (AMD: 64, NVIDIA 32)
     - number of wavefronts per workgroup is chosen at kernel launch
       (up to 16)
 - Workgroup (cf. CUDA thread block)
@@ -121,10 +121,11 @@ int main(void)
 
 # Kernels
 
-- Kernel is a (device) function to be executed by the GPU
-- Function should be of `void` type and needs to be declared with the
-  `__global__` or `__device__` attribute
-- All pointers passed to the kernel need to point to memory accessible from
+- Kernel is a function to be executed by the GPU
+- A kernel definition should be of `void` type and must be declared with the
+  `__global__` attribute
+- Any function called from a kernel must be declared with `__device__` attribute
+- All pointers passed to a kernel should point to memory accessible from
   the device
 - Unique thread and block IDs can be used to distribute work
 
@@ -166,22 +167,22 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 
 # Launching kernels
 
-- Kernels are launched with the function call `hipLaunchKernelGGL`
-    - grid dimensions need to be defined (two vectors of type `dim3`)
-    - execution is asynchronous
+- Kernels are launched with one of the two following options:
+  - CUDA syntax (recommended, because it works on CUDA and HIP both):
+  ```cpp
+  somekernel<<<blocks, threads, shmem, stream>>>(args)
+  ```
+  
+  - Native HIP syntax:
+  ```cpp
+  hipLaunchKernelGGL(somekernel, blocks, threads, shmem, stream, args)
+  ```
 
-```cpp
-dim3 blocks(32);
-dim3 threads(256);
+- Grid dimensions are obligatory, `shmem`, and `stream` are optional arguments for CUDA syntax, and can be `0` for the native HIP syntax
+  - Must have an integer type or vector type of `dim3`
+- Kernel execution is asynchronous with the host
 
-hipLaunchKernelGGL(somekernel, blocks, threads, 0, 0, ...)
-```
 
-- Compared with the CUDA syntax:
-
-```cpp
-somekernel<<<blocks, threads, 0, 0>>>(...)
-```
 
 
 # Simple memory management
@@ -204,19 +205,34 @@ hipMemcpy(x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
 ```
 
 
-# Error handling
+# Error checking
+<small>
 
-- Most HIP API functions return error codes
-- Good idea to **always** check for success (`hipSuccess`),
-  e.g. with a macro such as:
+* Always use HIP error checking with larger codebases!
+  * It has low overhead, and can save a lot of debugging time!
 
 ```cpp
-#define HIP_SAFECALL(x) {      \
-  hipError_t status = x;       \
-  if (status != hipSuccess) {  \
-    printf("HIP Error: %s\n", hipGetErrorString(status));  \
-  } }
+#define HIP_ERR(err) (hip_error(err, __FILE__, __LINE__))
+inline static void hip_error(hipError_t err, const char *file, int line) {
+  if (err != hipSuccess) {
+    printf("\n\n%s in %s at line %d\n", hipGetErrorString(err), file, line);
+    exit(1);
+  }
+}
 ```
+* Here we wrap a HIP call into the above defined HIP_ERR macro:
+```cpp
+inline static void* alloc(size_t bytes) {
+  void* ptr;
+  HIP_ERR(hipMallocManaged(&ptr, bytes));
+  return ptr;
+}
+
+```
+
+* For simplicity, most exercises of this course do not have error checking, but error checking is strongly recommended when building bigger projects.
+
+</small>
 
 
 # Example: fill (complete device code and launch)
@@ -271,9 +287,8 @@ int main(void)
 # Summary
 
 - HIP supports both AMD and NVIDIA GPUs
-- HIP contains both API functions and declarations etc. needed to write GPU
-  kernels
-- Kernels are launched by multiple threads in a grid
-    - in wavefronts of 64 threads
-- Kernels need to be declared `void` and `__global__` and are launched with
-  `hipLaunchKernelGGL()`
+- HIP contains API functions for writing GPU code
+  - Some functions are callable from host, some from device
+- Kernels launch grid of blocks, each block consists of many threads
+    - Each block is executed in wavefronts of 64 (AMD) or 32 (NVIDIA) threads
+- Kernels need to be declared `__global__` and `void` and are launched with special syntaxes
