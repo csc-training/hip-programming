@@ -22,7 +22,7 @@ part of the PRACE Training Center (PTC) activities at CSC.
 ### Memory allocations, access, and unified memory
 
 - [Memory management strategies](memory/01-prefetch)
-- [The stream-ordered memory allocator and memory pools](streams/02-mempools)
+- [The stream-ordered memory allocator and memory pools](memory/02-mempools)
 - [Unified memory and structs](memory/03-struct)
 
 ### Fortran and HIP
@@ -36,8 +36,8 @@ part of the PRACE Training Center (PTC) activities at CSC.
 
 ### Multi-GPU programming and HIP+MPI
 
-- [Vector sum on two GPUs without MPI](multi-gpu/02-vecotr-sum)
 - [Peer to peer device access](multi-gpu/01-p2pcopy)
+- [Vector sum on two GPUs without MPI](multi-gpu/02-vector-sum)
 - [Ping-pong with multiple GPUs and MPI](multi-gpu/03-mpi)
 
 ### Bonus

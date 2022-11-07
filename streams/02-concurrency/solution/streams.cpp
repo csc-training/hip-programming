@@ -136,7 +136,7 @@ void case_2(hipEvent_t *start_event, hipEvent_t *stop_event, hipStream_t *stream
   print_results("Case 2 - Duration for asynchronous transfers+kernels", timing, max_error(a, n_total), n_streams);
 }
 
-// Case 2: Distribute the memory copies and the kernel for multiple streams (scheduling order 2)
+// Case 3: Distribute the memory copies and the kernel for multiple streams (scheduling order 2)
 void case_3(hipEvent_t *start_event, hipEvent_t *stop_event, hipStream_t *stream, float *a, float *d_a, int n_streams, int gridsize, int blocksize, int n_total) 
 {
   // Calculate per-stream problem size and byte size
