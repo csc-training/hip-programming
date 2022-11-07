@@ -1,7 +1,9 @@
 ---
-title:  Introduction to GPUs in HPC
-event:  CSC Summer School in High-Performance Computing 2022
-lang:   en
+title:  Introduction
+subtitle: GPU programming with HIP
+author:   CSC Training
+date:     2022-11
+lang:     en
 ---
 
 
@@ -12,7 +14,6 @@ lang:   en
 - High performance computing is fueled by ever increasing performance
 - Increasing performance allows  breakthroughs in many major challenges that
   humankind faces today
-- Not only hardware performance, algorithmic improvements have also added orders of magnitude of real performance
 
 </div>
 
@@ -25,9 +26,9 @@ lang:   en
 <div class="column" width=55%>
 - Achieving performance has been based on various strategies throughout the years
     - Frequency, vectorization, multi-node, multi-core ...
-    - Now performance is mostly limited by power consumption
+    - Now performance is mostly limited by power consumption and thermal output
 - Accelerators provide compute resources based on a very high level of parallelism to reach
-  high performance at low relative power consumption
+  high performance at low relative power consumption 
 </div>
 
 <div class="column" width=43%>
@@ -51,13 +52,14 @@ lang:   en
 # Accelerator model today
 
 
-![](img/gpu-bws.png){width=100%}
-
-- GPU is connected to CPUs via PCIe
 - Local memory in GPU
     - Smaller than main memory (32 GB in Puhti, 128 GB in LUMI)
     - Very high bandwidth (up to 3200 GB/s in LUMI)
     - Latency high compared to compute performance
+
+![](img/gpu-bws.png){width=100%}
+
+- GPUs are connected to CPUs via PCIe
 - Data must be copied from CPU to GPU over the PCIe bus
 
 
@@ -71,8 +73,8 @@ lang:   en
 <div class="column" width=56%>
 - Designed for running tens of thousands of threads simultaneously on
   thousands of cores
-- Very small penalty for switching threads
 - Running large amounts of threads hides memory access penalties
+- Very small penalty for context switching
 - Very expensive to synchronize all threads
 </div>
 
