@@ -7,33 +7,38 @@ part of the PRACE Training Center (PTC) activities at CSC.
 
 [General instructions](exercise-instructions.md)
 
-### Basics
+### Introduction and GPU kernels
 
-- [Hello world](hello-world)
-- [Kernel: saxpy](kernel-saxpy)
-- [Kernel: copy2d](kernel-copy2d)
+- [Hello world](kernels/01-hello-world)
+- [Error checking](kernels/02-error-checking)
+- [Kernel saxpy](kernels/03-kernel-saxpy)
+- [Kernel copy2d](kernels/04-kernel-copy2d)
 
-### Synchronisation and streams
+### Streams, events, and synchronization
 
-- [Investigating streams and events](streams)
+- [Understanding asynchronity using events](streams/01-event-record)
+- [Investigating streams and events](streams/02-concurrency)
 
-### Memory management
+### Memory allocations, access, and unified memory
 
-- [Memory management strategies](memory/prefetch)
-- [Unified memory and structs](memory/struct)
+- [Memory management strategies](memory/01-prefetch)
+- [The stream-ordered memory allocator and memory pools](streams/02-mempools)
+- [Unified memory and structs](memory/03-struct)
 
 ### Fortran and HIP
 
-- [hipfort](hipfort)
+- [Hipfort exercise](hipfort)
 
-### Optimisation
+### Optimization
 
-- [Matrix Transpose](matrix_transpose)
-- [Nbody](nbody)
+- [Matrix Transpose](optimization/01-matrix_transpose)
+- [Nbody](optimization/02-nbody)
 
-### Multi-GPU programming
+### Multi-GPU programming and HIP+MPI
 
-- [Multi-GPU exercise without MPI](multi-gpu/multigpu)
-- [Multi-GPU exercise with MPI](multi-gpu/mpi)
-- [Peer to peer device access](multi-gpu/p2pcopy)
-- [Bonus: Heat equation with HIP](heat-equation)
+- [Vector sum on two GPUs without MPI](multi-gpu/02-vecotr-sum)
+- [Peer to peer device access](multi-gpu/01-p2pcopy)
+- [Ping-pong with multiple GPUs and MPI](multi-gpu/03-mpi)
+
+### Bonus
+- [Heat equation with HIP](bonus/heat-equation)
