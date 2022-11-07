@@ -71,6 +71,7 @@ int main(){
 <small>
 <div class="column">
 
+* .cpp file
 ```cpp
 /* HAVE_DEF determines which accelerator backend 
  * is used (and is checked only ONCE) */
@@ -98,6 +99,7 @@ int main(){
 
 <div class="column">
 
+* .h files (headers)
 ```cpp
 /* arch_hip.h */
 #include <hip/hip_runtime.h>
@@ -171,13 +173,17 @@ i = -9 (captured value), j = 2 (passed value)
 <small>
 <div class="column">
 
+* .cpp file
 ```cpp
-#include "arch_hip.h"
+#if defined(HAVE_HIP)
+  #include "arch_hip.h"
+#else
+  #include "arch_host.h"
+#endif
 
 int main(){
   int n_array = 10;
   int* array = (int*) arch::alloc(n_array * sizeof(int));
-  
   /* Run on host or on a device depending
    * on the chosen compile configuration */
   arch::parallel_for(n_array, 
@@ -185,7 +191,6 @@ int main(){
       array[i] *= 2;
     }
   );
-
   arch::dealloc(array);
 }
 ```
@@ -195,6 +200,7 @@ int main(){
 
 <div class="column">
 
+* .h file (device header)
 ```cpp
 /* arch_hip.h */
 #include <hip/hip_runtime.h>
@@ -227,13 +233,17 @@ namespace arch{
 <small>
 <div class="column">
 
+* .cpp file
 ```cpp
-#include "arch_host.h"
+#if defined(HAVE_HIP)
+  #include "arch_hip.h"
+#else
+  #include "arch_host.h"
+#endif
 
 int main(){
   int n_array = 10;
   int* array = (int*) arch::alloc(n_array * sizeof(int));
-  
   /* Run on host or on a device depending
    * on the chosen compile configuration */
   arch::parallel_for(n_array, 
@@ -241,7 +251,6 @@ int main(){
       array[i] *= 2;
     }
   );
-
   arch::dealloc(array);
 }
 ```
@@ -250,6 +259,7 @@ int main(){
 
 <div class="column">
 
+* .h file (host header)
 ```cpp
 /* arch_host.h */
 #define LAMBDA [=]
@@ -273,13 +283,17 @@ namespace arch{
 <small>
 <div class="column">
 
+* .cpp file
 ```cpp
-#include "arch_hip.h"
+#if defined(HAVE_HIP)
+  #include "arch_hip.h"
+#else
+  #include "arch_host.h"
+#endif
 
 int main(){
   int n_array = 10;
-  int* array = (int*) arch_alloc(n_array * sizeof(int));
-  
+  int* array = (int*) arch_alloc(n_array * sizeof(int)); 
   /* Run on host or on a device depending
    * on the chosen compile configuration */
   int i;
@@ -287,7 +301,6 @@ int main(){
   {
       array[i] *= 2;
   });
-
   arch_dealloc(array);
 }
 ```
@@ -297,6 +310,7 @@ int main(){
 
 <div class="column">
 
+* .h file (device header)
 ```cpp
 /* arch_hip.h */
 #include <hip/hip_runtime.h>
@@ -464,7 +478,7 @@ overland flow
 * Although most CUDA expressions are supported, manual intervention may be required
   * For example, a CUDA macro ```__CUDA_ARCH__``` is not translated
     * If the purpose of ```__CUDA_ARCH__``` is to distinguish between host and device code path, it can be replaced with ```__HIP_DEVICE_COMPILE__```
-    * If ```__CUDA_ARCH__``` is used to determine architectural feature support, anther solution is required, eg, ```__HIP_ARCH_HAS_DOUBLES__```
+    * If ```__CUDA_ARCH__``` is used to determine architectural feature support, another solution is required, eg, ```__HIP_ARCH_HAS_DOUBLES__```
 
 
 # Hipify-tools - translating CUDA to HIP
@@ -507,10 +521,10 @@ overland flow
 ```cpp
 #define HIP_ERR(err) (hip_error(err, __FILE__, __LINE__))
 inline static void hip_error(hipError_t err, const char *file, int line) {
-	if (err != hipSuccess) {
-		printf("\n\n%s in %s at line %d\n", hipGetErrorString(err), file, line);
-		exit(1);
-	}
+  if (err != hipSuccess) {
+    printf("\n\n%s in %s at line %d\n", hipGetErrorString(err), file, line);
+    exit(1);
+  }
 }
 ```
 * Here we wrap a hip call into the above defined HIP_ERR macro:

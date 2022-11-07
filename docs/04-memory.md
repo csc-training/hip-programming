@@ -239,7 +239,7 @@ int main() {
 - To overlap copying and program execution, asynchronous functions are required
     - Such functions have Async suffix, eg, `hipMemcpyAsync()`
 - User has to synchronize the program execution
-- Requires page-locked memory
+- Asynchronous memory copies require page-locked memory
 
 # The stream-ordered memory allocator and memory pools
 <small>
