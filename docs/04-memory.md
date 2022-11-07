@@ -309,60 +309,6 @@ hipStreamSynchronize(stream);
 </div>
 </small>
 
-# Global memory access in device code
-
-- Global memory access from the device is slow
-- Threads are executed in warps, memory operations are grouped in a similar
-  fashion
-- Memory access is optimized for coalesced access where threads read from and
-  write to successive memory locations
-- Exact alignment rules and performance issues depend on the architecture
-
-# Coalesced memory access
-
-<div class="column">
-- The global memory loads and stores consist of transactions of a certain size
-  (eg, 32 bytes)
-- If the threads within a warp access data within such a block of 32 bytes,
-  only one global memory transaction is needed
-</div>
-
-<div class="column">
-- Now, 32 threads within a warp can each read a different 4-byte integer value
-  with just 4 transactions
-- When the stride between each 4-byte integer is increased, more transactions
-  are required (up to 32 for the worst case)!
-</div>
-
-# Coalesced memory access example
-
-<div class="column">
-```
-__global__ void memAccess(float *out, float *in)
-{
- int tid = blockIdx.x*blockDim.x + threadIdx.x;
- if(tid != 12) out[tid + 16] = in[tid + 16];
-}
-```
-![](img/coalesced_access_4.png){width=80%}
-
-* If the tx size is 32B, 4 txs are required in this case
-</div>
-
-<div class="column">
-```
-__global__ void memAccess(float *out, float *in)
-{
- int tid = blockIdx.x*blockDim.x + threadIdx.x;
- out[tid + 1] = in[tid + 1];
-}
-```
-![](img/coalesced_access_3.png){width=80%}
-
-* If the tx size is 32B, 5 txs are required in this case
-</div>
-
-
 # Summary
 
 - Host and device have separate physical memories
@@ -373,5 +319,4 @@ __global__ void memAccess(float *out, float *in)
       prefetching to mitigate page faults is beneficial
 - Recurring allocation and deallocation is slow, use memory pools instead 
   - Libraries provide pooled Unified Memory support as well (eg, Umpire)
-- Coalesced memory access in kernels results in better
-  performance
+

@@ -89,89 +89,59 @@ cases.
 
 * Get familiar with the GPU hardware
 * Compute units, memory etc.
-* Using 240 blocks (2 x 120 CUs) and 256 threads per block provides good
+* Using 220 blocks (2 x 110 CUs) and 256 threads per block provides good
   performance, maybe additional tuning required
 
 
-# Rocprofiler (I)
 
-* Profiling tool developed by AMD
-* It is not for scalability purposes
-* Its API is available to other profiling tools such as HPCToolkit, TAU,
-  SCORE-P
-* Profile statistics: `rocprof --stats ./binary`
-* Trace HIP: `rocprof --hip-trace ./binary`
-* Trace HSA: `rocprof --hsa-trace ./binary`
+# Global memory access in device code
 
+- Global memory access from the device is sexpensive
+- Threads are executed in warps, memory operations are grouped in a similar
+  fashion
+- Memory access is optimized for coalesced access where threads read from and
+  write to successive memory locations
+- Exact alignment rules and performance issues depend on the architecture
 
-# Rocprofiler (II)
-
-* Instrumenting with metrics:
-
-```
-rocprof -i metrics.txt -o output.csv ./binary
-```
-
-* where for example, metrics.txt:
-
-```
-pmc: TCC_EA_WRREQ_sum, TCC_EA_RDREQ_sum
-range: 0:1
-gpu: 0
-kernel: copy_kernel
-```
-
-
-# Rocprofiler (III)
-
-* **pmc** is the lines with the counters:
-    * TCC_EA_WRREQ_sum: Number of transactions (either 32-byte or 64-byte)
-      going over the TC_EA_wrreq interface. Sum over TCC instances
-    * TCC_EA_RDREQ_sumi: Number of TCC/EA read requests (either 32-byte or
-      64-byte). Sum over TCC instances.
-    * Find metrics information in: /opt/rocm/rocprofiler/lib/metrics.xml
-* **range** is the range of the kernels but her eis executed only once
-* **gpu** is the GPU id //adjust for the GPU that you use
-* **kernel** is the kernel name, if you need to add a second one let an empty
-  space
-
-
-# Various useful metrics (I)
-
-* GPUBusy: The percentage of time GPU was busy
-*  Wavefronts: Total wavefronts
-* VALUInsts: The average number of vector ALU instructions executed per
-  work-item (affected by flow control).
-* VALUUtilization: The percentage of active vector ALU threads in a wave. A
-  lower number can mean either more thread divergence in a wave or that the
-  work-group size is not a multiple of 64. Value range: 0% (bad), 100%
-  (ideal - no thread divergence).
-
-
-# Various useful metrics (II)
-
-* VALUBusy: The percentage of GPUTime vector ALU instructions are processed.
-  Value range: 0% (bad) to 100% (optimal).
-* L2CacheHit: The percentage of fetch, write, atomic, and other instructions
-  that hit the data in L2 cache. Value range: 0% (no hit) to 100% (optimal).
-* LDSBankConflict: The percentage of GPUTime LDS is stalled by bank conflicts.
-  Value range: 0% (optimal) to 100% (bad).
-
-
-# Visualize Traces
-
-![](./img/perfetto.png){width=1600px}
+# Coalesced memory access
 
 <div class="column">
-* Execute the `--hip-trace` profiling
-* Go to the link https://ui.perfetto.dev/
+- The global memory loads and stores consist of transactions of a certain size
+  (eg. 32 bytes)
+- If the threads within a warp access data within such a block of 32 bytes,
+  only one global memory transaction is needed
 </div>
 
 <div class="column">
-* Click on the left "Open trace file"
-* Select the file which was create from rocprof with extension `.json`
+- Now, 32 threads within a warp can each read a different 4-byte integer value
+  with just 4 transactions
+- When the stride between each 4-byte integer is increased, more transactions
+  are required (up to 32 for the worst case)!
 </div>
 
+# Coalesced memory access example
+
+<div class="column">
+```
+__global__ void memAccess(float *out, float *in)
+{
+ int tid = blockIdx.x*blockDim.x + threadIdx.x;
+ if(tid != 12) out[tid + 16] = in[tid + 16];
+}
+```
+![](img/coalesced_access_4.png){width=80%}
+</div>
+
+<div class="column">
+```
+__global__ void memAccess(float *out, float *in)
+{
+ int tid = blockIdx.x*blockDim.x + threadIdx.x;
+ out[tid + 1] = in[tid + 1];
+}
+```
+![](img/coalesced_access_3.png){width=80%}
+</div>
 
 # Optimizing matrix operations {.section}
 
@@ -332,3 +302,9 @@ VALUUtilization,VALUBusy,SALUBusy,L2CacheHit,WriteUnitStalled,LDSBankConflict
 * Do the nbody exercise, also profile and visualize 
 * Execute the presented exercise
 * Copy the streams exercise, profile it and visualize the json file.
+
+# Summary
+
+- Uses existing provided libraries: `hipBLAS`, `hipFFT`, ...
+- Coalesced memory access in kernels results in better
+  performance
