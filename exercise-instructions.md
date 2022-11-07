@@ -3,7 +3,7 @@
 For most of the exercises, skeleton codes are provided to serve as a starting
 point. Some may have sections marked with `// TODO` or `#error` to indicate a place in the code where something is missing or needs to be changed.
 
-In addition, all of the exercises have example solutions in a `solution`
+In addition, most exercises have example solutions in a `solution`
 subdirectory. Note that these are seldom the only or even the best way to
 solve the problem.
 
