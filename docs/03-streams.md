@@ -1,5 +1,5 @@
 ---
-title:    Synchronisation and streams
+title:    Streams, events, and synchronization
 subtitle: GPU programming with HIP
 author:   CSC Training
 date:     2022-11
@@ -12,13 +12,12 @@ lang:     en
 * Events
 * Synchronization
 
-# Streams
+# What is a stream?
 
-- What is a stream?
-    - A sequence of operations that execute in order on the GPU
-    - Operations in different streams may run concurrently
+- A sequence of operations that execute in order on the GPU
+- Operations in different streams may run concurrently if sufficient resources are available
 
-![](./img/streams.png){width=1100px}
+![](./img/streams.png){width=1000px}
 
 - In figure, the kernel and D-to-H copy is split into 4 streams
 
@@ -133,75 +132,89 @@ for (int i = 0; i < 3; ++i){
 
 * Create `event` object
 ```cpp
-​cudaError_t cudaEventCreate ( cudaEvent_t* event ) 
+​hipError_t hipEventCreate ( hipEvent_t* event ) 
 ```
 
 * Captures in `event` the contents of `stream` at the time of this call
 ```cpp
-cudaError_t cudaEventRecord ( cudaEvent_t event, cudaStream_t stream ) 
+hipError_t hipEventRecord ( hipEvent_t event, hipStream_t stream ) 
 ``` 
 
 * Computes the elapsed time in milliseconds between `start` and `end` events
 ```cpp
-cudaError_t cudaEventElapsedTime ( float* ms, cudaEvent_t start, cudaEvent_t end ) 
+hipError_t hipEventElapsedTime ( float* ms, hipEvent_t start, hipEvent_t end ) 
 ``` 
 
 * Makes all future work submitted to `stream` wait for all work captured in `event`
 ```cpp
-​cudaError_t cudaStreamWaitEvent ( cudaStream_t stream, cudaEvent_t event, unsigned int  flags = 0 ) 
+​hipError_t hipStreamWaitEvent ( hipStream_t stream, hipEvent_t event, unsigned int  flags = 0 ) 
 ```
 
 * Wait for `event` to complete
 ```cpp
-cudaError_t cudaEventSynchronize ( cudaEvent_t event ) 
+hipError_t hipEventSynchronize ( hipEvent_t event ) 
 ``` 
 
 * Destroy `event` object
 ```cpp
-cudaError_t cudaEventDestroy ( cudaEvent_t event ) 
+hipError_t hipEventDestroy ( hipEvent_t event ) 
 ```
 
 </small>
 
-# Synchronization and memory
+# Why events?
 
-hipStreamSynchronize
-  : host waits for all commands in the specified stream to complete
+<small>
 
-hipDeviceSynchronize
-  : host waits for all commands in all streams on the specified device to
-    complete
+* Events provide a mechanism to signal when operations have occurred
+in a stream
+  * Useful for inter-stream synchronization and timing asynchronous events
+* Events have a boolean state: occurred / not occurred
+  * Important: the default state = occurred
 
-hipEventSynchronize
-  : host waits for the specified event to complete
-
-hipStreamWaitEvent
-  : stream waits for the specified event to complete
-
-
-
-
-
-
-# Example: data transfer and compute
-
-- Serial
+<div class="column">
 
 ```cpp
-hipEventRecord(startEvent,0);
+  // Start timed GPU kernel
+  clock_t start_kernel_clock = clock();
+  kernel<<<gridsize, blocksize, 0, stream>>>(d_a, n_total);
 
-hipMemcpy(d_a, a, bytes, hipMemcpyHostToDevice);
-hipLaunchKernelGGL(kernel, n/blockSize, blockSize, 0, 0, d_a, 0);
-hipMemcpy(a, d_a, bytes, hipMemcpyDeviceToHost);
+  // Start timed device-to-host memcopy
+  clock_t start_d2h_clock = clock();
+  hipMemcpyAsync(a, d_a, bytes, hipMemcpyDeviceToHost, stream);
 
-hipEventRecord(stopEvent, 0);
-hipEventSynchronize(stopEvent);
-
-hipEventElapsedTime(&duration, startEvent, stopEvent);
-printf("Duration of sequential transfer and execute (ms): %f\n", duration);
+  // Stop timing
+  clock_t stop_clock = clock();
+  hipStreamSynchronize(stream);
 ```
 
-# Synchronization (I)
+* This code snippet can measure how quick the CPU is throwing asynchronous tasks into a queue for the GPU
+
+</div>
+<div class="column">
+
+```cpp
+  // Start timed GPU kernel
+  hipEventRecord(start_kernel_event, stream);
+  kernel<<<gridsize, blocksize, 0, stream>>>(d_a, n_total);
+
+  // Start timed device-to-host memcopy
+  hipEventRecord(start_d2h_event, stream);
+  hipMemcpyAsync(a, d_a, bytes, hipMemcpyDeviceToHost, stream);
+
+  // Stop timing
+  hipEventRecord(stop_event, stream);
+  hipEventSynchronize(stop_event);
+```
+
+* This code snippet can measure the duration of each asynchronous task on the GPU
+
+</div>
+</small>
+
+# Synchronization
+
+<small>
 
 * Synchronize the host with a specific stream
 ```cpp
@@ -210,54 +223,56 @@ printf("Duration of sequential transfer and execute (ms): %f\n", duration);
 
 * Synchronize the host with a specific event
 ```cpp
-​cudaError_t cudaEventSynchronize ( cudaEvent_t event )
+​hipError_t hipEventSynchronize ( hipEvent_t event )
 ``` 
 
 * Synchronize a specific stream with a specific event (the event can be in another stream) 
 ```cpp
-​cudaError_t cudaStreamWaitEvent ( cudaStream_t stream, cudaEvent_t event, unsigned int  flags = 0 ) 
+​hipError_t hipStreamWaitEvent ( hipStream_t stream, hipEvent_t event, unsigned int  flags = 0 ) 
 ``` 
 
 * Synchronize the host with the whole device (wait until all device tasks are finished)
 ```cpp
-cudaError_t cudaDeviceSynchronize ( void ) 
+hipError_t hipDeviceSynchronize ( void ) 
 ``` 
 
-# Synchronization (II)
+* In-kernel blockwise synchronization across threads (not between host/device)
+```cpp
+__syncthreads()
+```
 
-- Synchronize using Events
-    - Create an event
-    ```cpp
-    hipEvent_t stopEvent
-    hipEventCreate(&stopEvent)
-    ```
-
-    - Record an event in a specific stream and wait until ready
-    ```cpp
-    hipEventRecord(stopEvent,0)
-    hipEventSynchronize(stopEvent)
-    ```
-
-    - Make a stream wait for a specific event
-    ```cpp
-    hipStreamWaitEvent(stream[i], stopEvent, unsigned int flags)
-    ```
-
+</small>
 
 # Synchronization in the kernel
 
-`__syncthreads()`
-  : synchronize threads within a block inside a kernel
+* The device function `__syncthreads()` synchronizes threads within a block inside a kernel
+* Often used with shared memory (keyword `__shared__`) which is memory shared between each thread in a block 
 
 <br>
+<small>
 
 ```cpp
+#define BLOCKSIZE 256
 __global__ void reverse(double *d_a) {
-    __shared__ double s_a[256]; /* array of doubles, shared in this block */
+    __shared__ double s_a[BLOCKSIZE]; /* array of doubles, shared in this block */
     int tid = threadIdx.x;
-    s_a[tid] = d_a[tid];     /* each thread fills one entry */
-    __syncthreads();         /* all wavefronts must reach this point before
-                                any wavefront is allowed to continue. */
-    d_a[tid] = s_a[255-tid]; /* safe to write out array in reverse order */
+    s_a[tid] = d_a[tid];              /* each thread fills one entry */
+    __syncthreads();                  /* all threads in a block must reach this point before 
+                                         any thread in that block is allowed to continue. */
+    d_a[tid] = s_a[BLOCKSIZE-tid];    /* safe to write out array in reverse order */
 }
 ```
+
+</small>
+
+# Summary
+
+* Streams provide a mechanism to evaluate tasks on the GPU concurrently and asynchronously with the host
+  * Asynchronous functions requiring a stream argument are required
+  * Kernels are always asynchronous with the host
+  * Default stream is by `0` (no stream creation required)
+* Events provide a mechanism to signal when operations have occurred
+in a stream
+  * Good for inter-stream sychronization and timing events
+* Many host/device synchronizations functions for different purposes
+  * The device function `__syncthreads()` is only for in-kernel synchronization between threads in a same block (does not synch threads across blocks)
