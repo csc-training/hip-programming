@@ -14,46 +14,70 @@ lang:     en
 
 # What is a stream?
 
-- A sequence of operations that execute in order on the GPU
-- Operations in different streams may run concurrently if sufficient resources are available
+* A sequence of operations that execute in order on the GPU
+* Operations in different streams may run concurrently if sufficient resources are available
 
-![](./img/streams.png){width=1000px}
+<small>
+<div class="column">
+![](./img/streams.png){width=800px}
 
-- In figure, the kernel and D-to-H copy is split into 4 streams
+* H-to-D copy runs in a single stream, and the kernel and D-to-H copy are split into 4 streams
 
+</div>
+<div class="column">
+![](./img/streams2.png){width=800px}
 
-# Streams
+* H-to-D copy, kernel, and D-to-H copy are split into 4 streams
 
-![](./img/streams2.png){width=1600px}
-
-- In this figure, H-to-D copy, kernel, and D-to-H copy is split into 4 streams
-
+</div>
+</small>
 
 # Asynchronous funtions and the default stream
 
 <small>
 
-- The functions without `Async`-postfix run on the default stream, and are synchronizing with host
+* The functions without `Async`-postfix run on the default stream, and are synchronizing with host
+  ```cpp
+  ​hipError_t hipMalloc ( void** devPtr, size_t size )
+  ​hipError_t hipMemcpy ( void* dst, const void* src, size_t count, hipMemcpyKind kind )
+  ​hipError_t hipFree ( void* devPtr ) 
+  ```
 
-```cpp
-​hipError_t hipMalloc ( void** devPtr, size_t size )
-​hipError_t hipMemcpy ( void* dst, const void* src, size_t count, hipMemcpyKind kind )
-​hipError_t hipFree ( void* devPtr ) 
-```
+* When using non-default streams, functions with `Async`-postfix are needed
+  * These functions take the stream as an additional argument (`0` denotes the default stream)
+  ```cpp
+  hipError_t hipMallocAsync ( void** devPtr, size_t size, hipStream_t stream ) 
+  hipError_t hipMemcpyAsync ( void* dst, const void* src, size_t count, hipMemcpyKind kind, hipStream_t stream) 
+  hipError_t hipFreeAsync ( void* devPtr, hipStream_t stream ) 
+  ```
 
-- When using non-default streams, functions with `Async`-postfix are needed
-  - These functions take the stream as an additional argument (`0` denotes the default stream)
+ * Asynchronous memory copies require page-locked host memory (more in Memory lectures)
+   * Allocate with `hipMallocHost()` or `hipHostAlloc()` instead of `malloc()`:
+  ```cpp
+  hipError_t hipMallocHost ( void** ptr, size_t size ) 
+  ```
+  ```cpp
+  ​hipError_t hipHostAlloc ( void** pHost, size_t size, unsigned int  flags ) 
+  ```
+  
+   * Deallocate with `hipFreeHost()`:
+  ```cpp
+  ​hipError_t hipFreeHost ( void* ptr ) 
+  ```
 
-```cpp
-hipError_t hipMallocAsync ( void** devPtr, size_t size, hipStream_t stream ) 
-hipError_t hipMemcpyAsync ( void* dst, const void* src, size_t count, hipMemcpyKind kind, hipStream_t stream) 
-hipError_t hipFreeAsync ( void* devPtr, hipStream_t stream ) 
+  </small>
 
-```
+# Asynchronisity and kernels
 
-- Kernels are always asynchronous, and require explicit synchronization
-  - If no stream is specified in the kernel launch, the default stream is used
-  - The fourth kernel argument is reserved for the stream 
+
+
+* Kernels are always asynchronous with host, and require explicit synchronization
+  * If no stream is specified in the kernel launch, the default stream is used
+  * The fourth kernel argument is reserved for the stream 
+* Running kernels concurrently require placing them in different streams
+  * Default stream has special synchronization rules and cannot run concurrently with other streams (applies to all API calls)
+
+<small>
 
 ```cpp
 // Use the default stream
@@ -63,7 +87,6 @@ hipkernel<<<grid, block, bytes, 0>>>(args);
 // Use the stream strm[i]
 hipkernel<<<grid, block, bytes, strm[i]>>>(args);
 ```
-
 </small>
 
 # Stream creation, synchronization, and destruction
@@ -135,17 +158,17 @@ for (int i = 0; i < 3; ++i){
 ​hipError_t hipEventCreate ( hipEvent_t* event ) 
 ```
 
-* Captures in `event` the contents of `stream` at the time of this call
+* Capture in `event` the contents of `stream` at the time of this call
 ```cpp
 hipError_t hipEventRecord ( hipEvent_t event, hipStream_t stream ) 
 ``` 
 
-* Computes the elapsed time in milliseconds between `start` and `end` events
+* Compute the elapsed time in milliseconds between `start` and `end` events
 ```cpp
 hipError_t hipEventElapsedTime ( float* ms, hipEvent_t start, hipEvent_t end ) 
 ``` 
 
-* Makes all future work submitted to `stream` wait for all work captured in `event`
+* Make all future work submitted to `stream` wait for all work captured in `event`
 ```cpp
 ​hipError_t hipStreamWaitEvent ( hipStream_t stream, hipEvent_t event, unsigned int  flags = 0 ) 
 ```
@@ -243,12 +266,11 @@ __syncthreads()
 
 </small>
 
-# Synchronization in the kernel
+# Synchronization in a kernel
 
 * The device function `__syncthreads()` synchronizes threads within a block inside a kernel
 * Often used with shared memory (keyword `__shared__`) which is memory shared between each thread in a block 
 
-<br>
 <small>
 
 ```cpp
@@ -263,6 +285,7 @@ __global__ void reverse(double *d_a) {
 }
 ```
 
+* A simple kernel example for reversing the order of the entries of a block-sized array
 </small>
 
 # Summary
