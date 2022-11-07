@@ -103,7 +103,7 @@ int main(void)
 
 # Grid: thread hierarchy
 
-<div class="column">
+<div class="column"  width=44%>
 - Kernels are executed on a 3D *grid* of threads
     - threads are partitioned into equal-sized *blocks*
 - Code is executed by the threads, the grid is just a way to organise the
@@ -111,8 +111,8 @@ int main(void)
 - Dimension of the grid are set at kernel launch
 </div>
 
-<div class="column">
-![](img/grid-threads.png)
+<div class="column"  width=54%>
+![](img/ThreadExecution_new.jpg){.center width=56%}
 
 - Built-in variables to be used within a kernel:
     - `threadIdx`, `blockIDx`, `blockDim`, `gridDim`
@@ -193,7 +193,7 @@ somekernel<<<blocks, threads, 0, 0>>>(...)
 
 ```cpp
 double *x_
-hipMalloc(&x_, sizeof(double) * n);
+hipMalloc((void **) &x_, sizeof(double) * n);
 ```
 
 - To copy data to/from device, one can use `hipMemcpy()`:
