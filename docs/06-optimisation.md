@@ -29,11 +29,6 @@ lang:     en
 | NCCL   |         | RCCL    | Communications Primitives Library based on the MPI equivalents                |
 
 
-# hipBLAS
-
-![](./img/hipblas.png){width=1600px}
-
-
 # Kernels
 
 You can call a kernel with the command:
@@ -51,22 +46,6 @@ kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
 * 0 for bytes of dynamic LDS space
 * 0 for stream
 * kernel arguments
-
-
-# Exercise Nbody
-
-
-* 32768 number of small particles, 2000 time steps
-* Executing the code on an NVIDIA V100 GPU, the execution time is 68.5
-  seconds.
-* Compile and execute the code Nbody on an AMD MI100 GPU
-    * `hip-programming/nbody`
-
-
-# AMD MI100 architecture
-
-![](./img/mi100_arch.png){width=1200px}
-
 
 # Compute Units (CU)
 
@@ -89,7 +68,11 @@ cases, though in general more tuning is required
 
 # Global memory access in device code
 
+<<<<<<< HEAD
 - Global memory access from the device has high latency
+=======
+- Global memory access from the device is expensive
+>>>>>>> 51c95e3e58c49d02f2bdc06a0d331b16e703e8be
 - Threads are executed in warps, memory operations are grouped in a similar
   fashion
 - Memory access is optimized for coalesced access where threads read from and write to successive memory locations
@@ -117,7 +100,7 @@ __global__ void memAccess(float *out, float *in)
  int tid = blockIdx.x*blockDim.x + threadIdx.x;
  if(tid != 12) out[tid + 16] = in[tid + 16];
 }
-``` 
+```
 ![](img/coalesced_access_4.png){width=80%}
 </div>
 
@@ -147,7 +130,6 @@ __global__ void memAccess(float *out, float *in)
 ![](img/BankConflicts.jpeg){width=100%}
 </div>
 
-### Example
 
 # Shared Memory III
 - Can be used as user controled cache
