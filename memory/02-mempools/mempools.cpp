@@ -99,6 +99,10 @@ void recurringAllocNoMemPools(int nSteps, int size)
 /* Run using memory pooling but no recurring syncs */
 void recurringAllocMemPoolNoSync(int nSteps, int size)
 {
+  // Create HIP stream
+  hipStream_t stream;
+  hipStreamCreate(&stream);
+
   // Determine grid and block size
   const int blocksize = BLOCKSIZE;
   const int gridsize = (size - 1 + blocksize) / blocksize;
@@ -109,21 +113,28 @@ void recurringAllocMemPoolNoSync(int nSteps, int size)
   {
     int *d_A;
     // Allocate pinned device memory
-    #error allocate memory with cudaMallocAsync for d_A of size in the default stream
+    #error allocate memory with cudaMallocAsync for d_A of size in stream
     // Launch GPU kernel
-    hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
+    hipKernel<<<gridsize, blocksize, 0, stream>>>(d_A, size);
     // Free allocation
-    #error free d_A allocation using cudaFreeAsync in the default stream
+    #error free d_A allocation using cudaFreeAsync in stream
   }
   // Synchronization
-  #error synchronize the default stream here
+  #error synchronize stream here
   // Check results and print timings
   checkTiming("recurringAllocMemPoolNoSync", (double)(clock() - tStart) / CLOCKS_PER_SEC);
+
+  // Destroy the stream
+  hipStreamDestroy(stream);
 }
 
 /* Run using memory pooling and recurring syncs */
 void recurringAllocMemPoolSync(int nSteps, int size)
 {
+  // Create HIP stream
+  hipStream_t stream;
+  hipStreamCreate(&stream);
+
   // Determine grid and block size
   const int blocksize = BLOCKSIZE;
   const int gridsize = (size - 1 + blocksize) / blocksize;
@@ -134,16 +145,19 @@ void recurringAllocMemPoolSync(int nSteps, int size)
   {
     int *d_A;
     // Allocate pinned device memory
-    #error allocate memory with cudaMallocAsync for d_A of size in the default stream
+    #error allocate memory with cudaMallocAsync for d_A of size in stream
     // Launch GPU kernel
-    hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
+    hipKernel<<<gridsize, blocksize, 0, stream>>>(d_A, size);
     // Free allocation
-    #error free d_A allocation using cudaFreeAsync in the default stream
+    #error free d_A allocation using cudaFreeAsync in stream
     // Synchronization
-    #error synchronize the default stream here
+    #error synchronize the stream here
   }
   // Check results and print timings
   checkTiming("recurringAllocMemPoolSync", (double)(clock() - tStart) / CLOCKS_PER_SEC);
+
+  // Destroy the stream
+  hipStreamDestroy(stream);
 }
 
 /* The main function */
