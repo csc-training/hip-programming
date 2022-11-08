@@ -4,6 +4,16 @@
 
 The HIP header file [devices_hip.h](src/devices_hip.h) has disappeared from the [src](src/) folder. Fortunately, the respective CUDA header, [devices_cuda.h](src/devices_cuda.h), is still present. The task is to use hipify tools to translate [devices_cuda.h](src/devices_cuda.h) to [devices_hip.h](src/devices_hip.h). What does the hipify tool translate? Is there anything that is not translated properly? You may compare the result with the original HIP header named [solution.h](src/solution.h). Instructions to compile the code with HIP are found below. 
 
+IMPORTANT NOTE on hipify-clang module usage on Puhti! Load hipify-clang to hipify CUDA code by 
+```
+ml hipify-clang
+```
+and after loading hipify-clang, you must do the following before trying to compile any HIP code
+```
+ml purge
+ml hip
+```
+Otherwise the compilation fails (you cannot compile HIP while having hipify-clang module loaded).
 ## Code description
 
 This example uses the Monte Carlo method to simulate the value of Bessel's correction that minimizes the root mean squared error in the calculation of the sample standard deviation and variance for the chosen sample and population sizes. The sample standard deviation is typically calculated as $$s = \sqrt{\frac{1}{N - \beta}\sum_{i=1}^{N}(x_i - \bar{x})^2}$$ where $$\beta = 1.$$ The simulation calculates the root mean squared error for different values of $\beta$.
