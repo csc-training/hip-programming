@@ -96,7 +96,7 @@ cases.
 
 # Global memory access in device code
 
-- Global memory access from the device is sexpensive
+- Global memory access from the device is expensive
 - Threads are executed in warps, memory operations are grouped in a similar
   fashion
 - Memory access is optimized for coalesced access where threads read from and
