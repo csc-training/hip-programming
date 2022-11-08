@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         printf("Not enough MPI tasks! Need at least 2.\n");
         exit(EXIT_FAILURE);
     } else if (devcount == 0) {
-        printf("Could now find any GPU devices.\n");
+        printf("Could not find any GPU devices.\n");
         exit(EXIT_FAILURE);
     } else {
         printf("MPI rank %d: Found %d GPU devices, using GPU %d\n",
