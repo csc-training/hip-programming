@@ -43,7 +43,7 @@ part of the PRACE Training Center (PTC) activities at CSC.
 ### Code design, conditional compilation, lambdas, hipify
 
 - [Host-device lambda functions and general kernels](lambdas/01-lambda)
-- [Reductions with host-device lambdas and hipCUB](lambdas/03-reduction)
+- [Reductions with host-device lambdas and hipCUB](lambdas/02-reduction)
 - [Monte Carlo simulation with hipRAND library](lambdas/03-hipify)
 
 ### Bonus
