@@ -16,9 +16,6 @@ compare the execution times.
 To compile, just load the required modules and type `make`. On Puhti, a HIP-aware MPI is
 available with:
 ```
-ml purge
-ml .unsupported
-ml gcc cuda openmpi hip
+ml openmpi/4.1.4-cuda
 ```
-For running, one should use two GPUs and two MPI tasks.
-
+For running, one should use two GPUs and two MPI processes.
