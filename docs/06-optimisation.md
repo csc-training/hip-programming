@@ -117,7 +117,7 @@ __global__ void memAccess(float *out, float *in)
  int tid = blockIdx.x*blockDim.x + threadIdx.x;
  if(tid != 12) out[tid + 16] = in[tid + 16];
 }
-```
+``` 
 ![](img/coalesced_access_4.png){width=80%}
 </div>
 
