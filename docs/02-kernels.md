@@ -24,7 +24,8 @@ lang:     en
 - Built-in variables: `threadIdx.x`, `blockIdx.y`, ...
 - Vector types: `int3`, `float2`, `dim3`, ...
 - Math functions: `sqrt`, `powf`, `sinh`, ...
-- Intrinsic functions: synchronisation, memory-fences etc.
+- Arithmetic functions: `atomicAdd`, `atomicMin`, ...
+- Intrinsic functions: `__syncthreads`, `__threadfence`, ...
 
 
 # HIP API
@@ -83,7 +84,6 @@ int main(void)
       instructions
     - each wavefront has fixed number of threads (AMD: 64, NVIDIA 32)
     - number of wavefronts per workgroup is chosen at kernel launch
-      (up to 16)
 - Workgroup (cf. CUDA thread block)
     - group of wavefronts (threads) that are on the GPU at the same time and
       are part of the same compute unit (CU)
@@ -122,8 +122,7 @@ int main(void)
 # Kernels
 
 - Kernel is a function to be executed by the GPU
-- A kernel definition should be of `void` type and must be declared with the
-  `__global__` attribute
+- A kernel definition should be of `void` type and must be declared with the `__global__` attribute
 - Any function called from a kernel must be declared with `__device__` attribute
 - All pointers passed to a kernel should point to memory accessible from
   the device

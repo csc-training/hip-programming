@@ -312,6 +312,7 @@ hipStreamSynchronize(stream);
 # Summary
 
 - Host and device have separate physical memories
+- Memory management can be explicit (managed by the user) or automatic (managed by the Unified Memory driver)
 - Using Unified Memory can improve developer productivity and result in a
   cleaner implementation
 - The number of data copies between CPU and GPU should be minimized

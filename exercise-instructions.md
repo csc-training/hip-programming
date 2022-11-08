@@ -18,9 +18,7 @@ then your fork.
 
 ### Puhti
 
-As a backup option, we have also provided you with access to CSC's Puhti
-system that has NVIDIA's V100 GPUs, but has a working HIP installation to
-support code porting activities.
+We provide you with access to CSC's Puhti system that has NVIDIA's V100 GPUs, but has a working HIP installation to support code porting activities.
 
 To get started with Puhti, you should log in to Puhti and load the appropriate modules to get working with HIP:
 ```shell
@@ -46,10 +44,10 @@ following project as your account: `--account=project_2000745`.
 
 We have also reserved some GPU nodes for the course. In order to use these
 dedicated nodes, you need to run your job with the option
-`--reservation=hip2022`, such as
+`--reservation=HIPtraining`, such as
 
 ```shell
-srun --reservation=hip2022 -n1 -p gpu --gres=gpu:v100:1 --account=project_2000745 ./my_program
+srun --reservation=HIPtraining -n1 -p gpu --gres=gpu:v100:1 --account=project_2000745 ./my_program
 ```
 
 Please note that the normal GPU partition (`-p gpu`) needs to be used with
