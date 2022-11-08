@@ -29,6 +29,11 @@ lang:     en
 | NCCL   |         | RCCL    | Communications Primitives Library based on the MPI equivalents                |
 
 
+# hipBLAS
+
+![](./img/hipblas.png){width=1600px}
+
+
 # Kernels
 
 You can call a kernel with the command:
@@ -46,6 +51,22 @@ kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
 * 0 for bytes of dynamic LDS space
 * 0 for stream
 * kernel arguments
+
+
+# Exercise Nbody
+
+
+* 32768 number of small particles, 2000 time steps
+* Executing the code on an NVIDIA V100 GPU, the execution time is 68.5
+  seconds.
+* Compile and execute the code Nbody on an AMD MI100 GPU
+    * `hip-programming/nbody`
+
+
+# AMD MI100 architecture
+
+![](./img/mi100_arch.png){width=1200px}
+
 
 # Compute Units (CU)
 
@@ -126,6 +147,7 @@ __global__ void memAccess(float *out, float *in)
 ![](img/BankConflicts.jpeg){width=100%}
 </div>
 
+### Example
 
 # Shared Memory III
 - Can be used as user controled cache
