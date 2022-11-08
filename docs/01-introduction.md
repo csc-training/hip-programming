@@ -12,7 +12,7 @@ lang:     en
 <div class="column">
 
 - High performance computing is fueled by ever increasing performance
-- Increasing performance allows  breakthroughs in many major challenges that
+- Increasing performance allows breakthroughs in many major challenges that
   humankind faces today
 
 </div>
@@ -25,10 +25,8 @@ lang:     en
 
 <div class="column" width=55%>
 - Achieving performance has been based on various strategies throughout the years
-    - Frequency, vectorization, multi-node, multi-core ...
-    - Now performance is mostly limited by power consumption and thermal output
-- Accelerators provide compute resources based on a very high level of parallelism to reach
-  high performance at low relative power consumption 
+    - Frequency, vectorization, multi-node, multi-core, etc.
+- Accelerators provide compute resources based on a very high level of parallelism to reach high performance at low relative power consumption 
 </div>
 
 <div class="column" width=43%>
@@ -38,7 +36,7 @@ lang:     en
 
 # Accelerators
 
-- Specialized parallel hardware for floating point operations
+- Specialized parallel hardware for compute-intensive operations
     - Co-processors for traditional CPUs
     - Based on highly parallel architectures
     - Graphics processing units (GPU) have been the most common
@@ -71,11 +69,11 @@ lang:     en
 # GPU architecture
 
 <div class="column" width=56%>
-- Designed for running tens of thousands of threads simultaneously on
-  thousands of cores
+- Designed for running thousands or tens of thousands of threads simultaneously
 - Running large amounts of threads hides memory access penalties
-- Very small penalty for context switching
-- Very expensive to synchronize all threads
+    - The relative benefit of using a GPU often increases with an increasing job size
+- Recurring data movement between CPU and GPU is often a bottleneck
+- The penalty for context switching is relatively small
 </div>
 
 <div class="column" width=42%>
@@ -161,18 +159,19 @@ More difficult, but more opportunities
 # GPUs @ CSC
 
 - **Puhti-AI**: 80 nodes, total peak performance of 2.7 Petaflops
-    - Four Nvidia V100 GPUs, two 20 cores Intel Xeon processors, 3.2 TB fast local storage, network connectivity of  200Gbps aggregate bandwidth  
+    - Four Nvidia V100 GPUs, two 20-core Intel Xeon processors, 3.2 TB fast local storage, network connectivity of 200Gbps aggregate bandwidth  
 - **Mahti-AI**: 24 nodes, total peak performance of 2. Petaflops
-    - Four Nvidia A100 GPUs, two 64 cores AMD Epyc processors, 3.8 TB fast local storage,  network connectivity of  200Gbps aggregate bandwidth   
+    - Four Nvidia A100 GPUs, two 64-core AMD Epyc processors, 3.8 TB fast local storage,  network connectivity of 200Gbps aggregate bandwidth   
 - **LUMI-G**: 2560 nodes, total peak performance of 500 Petaflops
-    - Four AMD MI250X GPUs, one 64 cores AMD Epyc processors, 2x3 TB fast local storage, network connectivity of  800Gbps aggregate bandwidth
+    - Four AMD MI250X GPUs, one 64-core AMD Epyc processor, 2x3 TB fast local storage, network connectivity of 800Gbps aggregate bandwidth
 
 # Summary
 
-- GPUs provide significant speed ups for certain applications
+- GPUs can provide significant speed-up for many applications
+    - High amount of parallelism required for efficient utilization of GPUs
 - GPUs are co-processors to CPUs
-   - CPU offloads computations and manages memory
-- High amount of parallelism required for efficient utilization of GPUs
-- Programming GPUs
-    - Directive based methods
-    - CUDA, HIP
+   - CPU offloads computations to GPUs and manages memory
+- Programming models for GPUs
+    - Directive based methods: OpenACC, OpenMP
+    - Frameworks: Kokkos, SYCL
+    - C++ language extensions: CUDA, HIP
