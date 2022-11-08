@@ -8,7 +8,7 @@ IMPORTANT NOTE on hipify-clang module usage on Puhti! Load hipify-clang to hipif
 ```
 ml hipify-clang
 ```
-and after loading hipify-clang, you must do the following before trying to compile any HIP code
+and after loading and using hipify-clang, you must do the following before trying to compile any HIP code
 ```
 ml purge
 ml hip
