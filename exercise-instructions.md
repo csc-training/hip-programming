@@ -18,9 +18,7 @@ then your fork.
 
 ### Puhti
 
-As a backup option, we have also provided you with access to CSC's Puhti
-system that has NVIDIA's V100 GPUs, but has a working HIP installation to
-support code porting activities.
+We provide you with access to CSC's Puhti system that has NVIDIA's V100 GPUs, but has a working HIP installation to support code porting activities.
 
 To get started with Puhti, you should log in to Puhti and load the appropriate modules to get working with HIP:
 ```shell

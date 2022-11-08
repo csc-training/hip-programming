@@ -4,12 +4,11 @@
 
 __global__ void saxpy_(int n, float a, float *x, float *y)
 {
-    int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    int stride = gridDim.x * blockDim.x;
+  int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
-    for (; tid < n; tid += stride) {
-        y[tid] += a * x[tid];
-    }
+  if(tid < n) {
+    y[tid] += a * x[tid];
+  }
 }
 
 int main(void)
@@ -34,9 +33,9 @@ int main(void)
     hipMemcpy(y_, y, sizeof(float) * n, hipMemcpyHostToDevice);
 
     // define grid dimensions + launch the device kernel
-    dim3 blocks(32);
-    dim3 threads(256);
-    hipLaunchKernelGGL(saxpy_, blocks, threads, 0, 0, n, a, x_, y_);
+    const int threads = 256;
+    const int blocks = (n - 1 + threads) / threads;
+    saxpy_<<<blocks, threads>>>(n, a, x_, y_);
 
     // copy results back to CPU
     hipMemcpy(y, y_, sizeof(float) * n, hipMemcpyDeviceToHost);

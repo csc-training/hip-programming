@@ -24,7 +24,6 @@ int main(void)
 
     // TODO: define grid dimensions
     // TODO: launch the device kernel
-    hipLaunchKernelGGL(...);
 
     // TODO: copy results back to CPU (y_ -> y)
 
