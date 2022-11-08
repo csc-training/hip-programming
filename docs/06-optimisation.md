@@ -140,17 +140,17 @@ __global__ void memAccess(float *out, float *in)
 # Low level optimizations
 - Avoid branching
   - All threads in  wavefront should execute the sme instruction
-    - `if(tid%2==0)` would result in 32 branches
+    - `if(tid%2==0)` would result in 32(16) branches
+    -  better use `if(tid<N/2)`
 - Sometimes recomputing can be faster than reading from the memory
-- Depeding on the problem, consider using lower precision instead of `double` 
+- Depeding on the problem, consider using lower precision instead of `double` (math functions are availebale for `single` and `half` precision )
 
 # Optimizing matrix operations. `B(i,j)=A(j,i)` 
 ![](img/transpose_img.png){.center width=70%}
 
 
-# Optimizing matrix operations. Copy matrix
+# Copy Operation as Base
 
-* Simple copy operation as base
 ```cpp
 __global__ void copy_kernel(float *in, float *out, int width, int height) {
   int x_index = blockIdx.x * tile_dim + threadIdx.x;
@@ -172,32 +172,6 @@ __global__ void copy_kernel(float *in, float *out, int width, int height) {
 ```
 
 
-# Profile the code
-
-```shell
-rocprof --stats ./copy
-```
-
-```shell
-cat results.stats.csv
-"Name","Calls","TotalDurationNs","AverageNs","Percentage"
-"copy_kernel(float*, float*, int, int) [clone .kd]",1,165920,165920,100.0
-```
-
-So the duration of the Copy kernel is 165920 ns
-
-```shell
-rocprof -i metrics_copy_kernel.txt -o metrics_copy.csv ./copy
-```
-
-```shell
-cat metrics_copy.csv
-GPUBusy,Wavefronts,VALUInsts,SALUInsts,SFetchInsts,MemUnitStalled,
-VALUUtilization,VALUBusy,SALUBusy,L2CacheHit,WriteUnitStalled,LDSBankConflict
-100,262144,11,1,2,13,100,13,1,0,6,0
-```
-
-
 # Matrix transpose naive
 
 ```cpp
@@ -212,35 +186,15 @@ __global__ void transpose_kernel(float *in, float *out, int width, int height) {
 }
 ```
 
-```shell
-rocprof --stats ./matrix_transpose_naive
-```
-
-```shell
-cat results.stats.csv
-"Name","Calls","TotalDurationNs","AverageNs","Percentage"
-"transpose_kernel(float*, float*, int, int) [clone .kd]",1,418083,418083,100.0
-```
 
 The duration is 418083 ns, 2.5 times slower
 
 
-# Profile counters
-
-```shell
-rocprof -i metrics_matrix_transpose_naive_kernel.txt -o metrics_naive.csv ./matrix_transpose_naive
-```
-
-```shell
-cat metrics_naive.csv
-GPUBusy,Wavefronts,VALUInsts,SALUInsts,SFetchInsts,MemUnitStalled,
-VALUUtilization,VALUBusy,SALUBusy,L2CacheHit,WriteUnitStalled,LDSBankConflict
-100,262144,16,0,2,83,100,6,0,77,0,0
-```
 
 
-# Matrix transpose LDS
+# Matrix transpose with shared memory
 
+<small>
 ```cpp
 __global__ void transpose_lds_kernel(float *in, float *out, int width,
                                      int height) {
@@ -261,52 +215,37 @@ __global__ void transpose_lds_kernel(float *in, float *out, int width,
   out[out_index] = tile[threadIdx.x][threadIdx.y];
 }
 ```
+</small>
 
+# Matrix transpose with shared memory without bank conflicts
 
-# Profile statistics
+<small>
+```cpp
+__global__ void transpose_lds_kernel(float *in, float *out, int width,
+                                     int height) {
+  __shared__ float tile[tile_dim][tile_dim+1];
 
-```shell
-rocprof --stats ./matrix_transpose_lds
+  int x_tile_index = blockIdx.x * tile_dim;
+  int y_tile_index = blockIdx.y * tile_dim;
+
+  int in_index =
+      (y_tile_index + threadIdx.y) * width + (x_tile_index + threadIdx.x);
+  int out_index =
+      (x_tile_index + threadIdx.y) * height + (y_tile_index + threadIdx.x);
+
+  tile[threadIdx.y][threadIdx.x] = in[in_index];
+
+  __syncthreads();
+
+  out[out_index] = tile[threadIdx.x][threadIdx.y];
+}
 ```
-
-```shell
-cat results.stats.csv
-"Name","Calls","TotalDurationNs","AverageNs","Percentage"
-"transpose_lds_kernel(float*, float*, int, int) [clone .kd]",1,227522,227522,100.0
-```
-
-The duration is 227522, which is 1.37 time slower instead of 2.5 times
-
-
-# Profile Metrics
-
-```shell
-rocprof -i metrics_matrix_transpose_lds_kernel.txt -o metrics_lds.csv ./matrix_transpose_lds
-```
-
-```shell
-cat metrics_lds.csv
-GPUBusy,Wavefronts,VALUInsts,SALUInsts,SFetchInsts,MemUnitStalled,
-VALUUtilization,VALUBusy,SALUBusy,L2CacheHit,WriteUnitStalled,LDSBankConflict
-100,262144,20,2,2,26,100,26,2,0,0,67
-```
-
-
-# Explanation
-
-* There is need for more optimization
-* There are LDS bank conflicts
-
-
-# Exercise
-
-* Do the hipfort exercise
-* Do the nbody exercise, also profile and visualize 
-* Execute the presented exercise
-* Copy the streams exercise, profile it and visualize the json file.
+</small>
 
 # Summary
 
 - Uses existing provided libraries: `hipBLAS`, `hipFFT`, ...
 - Coalesced memory access in kernels results in better
   performance
+- Use shared memory to reduce the global memory access or to make coalesced, but watch out for bank conflicts
+- Try to avoid branching of the threads inside a wavefront
