@@ -31,6 +31,7 @@ typedef struct {
 #if __cplusplus
   extern "C" {
 #endif
+
 /* Function prototypes */
 void set_field_dimensions(field *temperature, int nx, int ny,
                           parallel_data *parallel);

@@ -9,6 +9,15 @@
 
 #include "heat.h"
 
+/* CUDA error handling macro */
+#define CUDA_ERR(err) (cuda_errchk(err, __FILE__, __LINE__ ))
+static inline void cuda_errchk(cudaError_t err, const char *file, int line) {
+  if (err != cudaSuccess) {
+    printf("\n\n%s in %s at line %d\n", cudaGetErrorString(err), file, line);
+    exit(EXIT_FAILURE);
+  }
+}
+
 /* Update the temperature values using five-point stencil */
 __global__ void evolve_kernel(double *currdata, double *prevdata, double a, double dt, int nx, int ny,
                        double dx2, double dy2)
@@ -54,7 +63,7 @@ void evolve(field *curr, field *prev, double a, double dt)
                  (nx + 2 + blocksize - 1) / blocksize);
 
     evolve_kernel<<<dimGrid, dimBlock>>>(curr->devdata, prev->devdata, a, dt, nx, ny, dx2, dy2);
-    cudaDeviceSynchronize();
+    CUDA_ERR(cudaDeviceSynchronize());
 }
 
 void enter_data(field *temperature1, field *temperature2)
@@ -63,11 +72,11 @@ void enter_data(field *temperature1, field *temperature2)
 
     datasize = (temperature1->nx + 2) * (temperature1->ny + 2) * sizeof(double);
 
-    cudaMalloc(&temperature1->devdata, datasize);
-    cudaMalloc(&temperature2->devdata, datasize);
+    CUDA_ERR(cudaMalloc(&temperature1->devdata, datasize));
+    CUDA_ERR(cudaMalloc(&temperature2->devdata, datasize));
 
-    cudaMemcpy(temperature1->devdata, temperature1->data, datasize, cudaMemcpyHostToDevice);
-    cudaMemcpy(temperature2->devdata, temperature2->data, datasize, cudaMemcpyHostToDevice);
+    CUDA_ERR(cudaMemcpy(temperature1->devdata, temperature1->data, datasize, cudaMemcpyHostToDevice));
+    CUDA_ERR(cudaMemcpy(temperature2->devdata, temperature2->data, datasize, cudaMemcpyHostToDevice));
 }
 
 /* Copy a temperature field from the device to the host */
@@ -76,7 +85,7 @@ void update_host(field *temperature)
     size_t datasize;
 
     datasize = (temperature->nx + 2) * (temperature->ny + 2) * sizeof(double);
-    cudaMemcpy(temperature->data, temperature->devdata, datasize, cudaMemcpyDeviceToHost);
+    CUDA_ERR(cudaMemcpy(temperature->data, temperature->devdata, datasize, cudaMemcpyDeviceToHost));
 }
 
 /* Copy a temperature field from the host to the device */
@@ -85,6 +94,6 @@ void update_device(field *temperature)
     size_t datasize;
 
     datasize = (temperature->nx + 2) * (temperature->ny + 2) * sizeof(double);
-    cudaMemcpy(temperature->devdata, temperature->data, datasize, cudaMemcpyHostToDevice);
+    CUDA_ERR(cudaMemcpy(temperature->devdata, temperature->data, datasize, cudaMemcpyHostToDevice));
 }
 

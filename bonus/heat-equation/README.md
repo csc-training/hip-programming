@@ -6,11 +6,10 @@ Starting from a [serial heat equation solver](serial) (see below for details),
 port the code to GPUs using HIP. Main computational routine is the time
 evolution loop in the `core.cpp` file.
 
-The [CUDA+MPI version](cuda) in the `cuda` folder is out of order and can be ignored.
+Alternatively, you may start from a [CUDA+MPI version](cuda) and hipify the code to jump start the work.
 
 Note: You may need to comment out the PNG generation parts, if the system you
 are using doesn't have libpng installed.
-
 
 ## Heat equation solver
 

@@ -8,7 +8,7 @@ ifeq ($(COMP),pgi)
 CXX=mpicxx
 CC=pgcc
 NVCC=nvcc -ccbin pgc++
-NVCCFLAGS=-g -O3 -I$(COMMONDIR)
+NVCCFLAGS=-g -O3 -gencode=arch=compute_70,code=sm_70 -gencode=arch=compute_80,code=sm_80 -I$(COMMONDIR)
 CCFLAGS=-g -O3 -I$(COMMONDIR)
 LDFLAGS=-L$(CUDA_INSTALL_ROOT)/lib64
 LIBS=-lpng -lcudart
@@ -18,7 +18,7 @@ ifeq ($(COMP),gnu)
 CXX=mpicxx
 CC=gcc
 NVCC=nvcc
-NVCCFLAGS=-g -O3 -I$(COMMONDIR)
+NVCCFLAGS=-g -O3 -gencode=arch=compute_70,code=sm_70 -gencode=arch=compute_80,code=sm_80 -I$(COMMONDIR)
 CCFLAGS=-g -O3 -Wall -I$(COMMONDIR)
 LDFLAGS=
 LIBS=-lpng -lcudart
