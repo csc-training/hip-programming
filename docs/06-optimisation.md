@@ -63,16 +63,11 @@ kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
 </div>
 * Using 256 threads per block would give the best performance in many
 cases, though in general more tuning is required
-* Similarly on Nvidia cards
-
 
 # Global memory access in device code
 
-<<<<<<< HEAD
 - Global memory access from the device has high latency
-=======
-- Global memory access from the device is expensive
->>>>>>> 51c95e3e58c49d02f2bdc06a0d331b16e703e8be
+
 - Threads are executed in warps, memory operations are grouped in a similar
   fashion
 - Memory access is optimized for coalesced access where threads read from and write to successive memory locations
@@ -115,14 +110,14 @@ __global__ void memAccess(float *out, float *in)
 ![](img/coalesced_access_3.png){width=80%}
 </div>
 
-# Shared Memory I
+# Shared memory I
 - Fast memory on the CU
 - Shared memory is divided into banks
 - Each bank can service one address per cycle
 - Conflicting accesses are serialized
 - Conflicts solved by padding
 
-# Shared Memory II
+# Shared memory II
 <div class="column">
 ![](img/NoBankConflicts.jpeg){width=100%}
 </div>
@@ -131,7 +126,7 @@ __global__ void memAccess(float *out, float *in)
 </div>
 
 
-# Shared Memory III
+# Shared memory III
 - Can be used as user controled cache
 - Useful to reduce the amount of global memory operations
 - Can be used as buffer to transform uncoalesced operations in coalesced 
@@ -149,7 +144,7 @@ __global__ void memAccess(float *out, float *in)
 ![](img/transpose_img.png){.center width=70%}
 
 
-# Copy Operation as Base
+# Copy operation as base
 
 ```cpp
 __global__ void copy_kernel(float *in, float *out, int width, int height) {
@@ -170,7 +165,8 @@ __global__ void copy_kernel(float *in, float *out, int width, int height) {
                       height);
    hipDeviceSynchronize();
 ```
-
+The duration is `0.174 ms`  and the effective bandwidth `717 GB/s`
+Theoretical bandwidth of `V100` is `900 GB/s`.
 
 # Matrix transpose naive
 
@@ -187,7 +183,7 @@ __global__ void transpose_kernel(float *in, float *out, int width, int height) {
 ```
 
 
-The duration is 418083 ns, 2.5 times slower
+The duration is `0.401 ms`  and the effective bandwidth `311 GB/s`
 
 
 
@@ -217,6 +213,9 @@ __global__ void transpose_lds_kernel(float *in, float *out, int width,
 ```
 </small>
 
+The duration is `0.185 ms`  and the effective bandwidth `674 GB/s`
+
+
 # Matrix transpose with shared memory without bank conflicts
 
 <small>
@@ -242,10 +241,19 @@ __global__ void transpose_lds_kernel(float *in, float *out, int width,
 ```
 </small>
 
+The duration is `0.179 ms`  and the effective bandwidth `697 GB/s`
+
+
+
+# Other examples where shared memory is critical 
+- Matrix-matrix/vector multiplication
+- N-body problem
+- reductions
+
 # Summary
 
 - Uses existing provided libraries: `hipBLAS`, `hipFFT`, ...
 - Coalesced memory access in kernels results in better
   performance
-- Use shared memory to reduce the global memory access or to make coalesced, but watch out for bank conflicts
+- Use shared memory to reduce duplicate global memory accesses or make the acceses coalesced, but watch out for bank conflicts
 - Try to avoid branching of the threads inside a wavefront
