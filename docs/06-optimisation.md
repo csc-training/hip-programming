@@ -1,5 +1,5 @@
 ---
-title:    Kernel optimisation and profiling
+title:    Kernel optimisation
 subtitle: GPU programming with HIP
 author:   CSC Training
 date:     2022-11
@@ -70,53 +70,42 @@ kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
 
 # Compute Units (CU)
 
-
+<div class="column" width=75%>
 * Each CU is a 64-wide execution unit, so multiple of 64 as the thread limit.
     * The 64-wide execution is sub-divided into 4 SIMD units of 16 elements.
     * For a 16-wide SIMD instruction, the best possible latency is 4 cycles.
     * So, you need at least 4 SIMD instructions in flight to saturate the
       SIMD units.
 
-Finally, using 256 threads per block would give the best performance in most
-cases.
+</div>
 
-* Change the threads per block to 256 for the all the calls to launch kernel
-  at Nbody exercise and discuss what is the performance improvement.
-* Is the workload enough to stress the AMD MI100 GPUs?
-
-
-# Tips
-
-* Get familiar with the GPU hardware
-* Compute units, memory etc.
-* Using 220 blocks (2 x 110 CUs) and 256 threads per block provides good
-  performance, maybe additional tuning required
-
+<div class="column" width=23%>
+![](img/CUgray.png){width=140%}
+</div>
+* Using 256 threads per block would give the best performance in many
+cases, though in general more tuning is required
+* Similarly on Nvidia cards
 
 
 # Global memory access in device code
 
-- Global memory access from the device is expensive
+- Global memory access from the device has high latency
 - Threads are executed in warps, memory operations are grouped in a similar
   fashion
-- Memory access is optimized for coalesced access where threads read from and
-  write to successive memory locations
+- Memory access is optimized for coalesced access where threads read from and write to successive memory locations
 - Exact alignment rules and performance issues depend on the architecture
 
 # Coalesced memory access
 
 <div class="column">
-- The global memory loads and stores consist of transactions of a certain size
-  (eg. 32 bytes)
+- The global memory loads and stores consist of transactions of a certain size (eg. 32 bytes)
 - If the threads within a warp access data within such a block of 32 bytes,
   only one global memory transaction is needed
 </div>
 
 <div class="column">
-- Now, 32 threads within a warp can each read a different 4-byte integer value
-  with just 4 transactions
-- When the stride between each 4-byte integer is increased, more transactions
-  are required (up to 32 for the worst case)!
+- Now, 32 threads within a warp can each read a different 4-byte integer value with just 4 transactions
+- When the stride between each 4-byte integer is increased, more transactions are required (up to 32 for the worst case)!
 </div>
 
 # Coalesced memory access example
@@ -143,12 +132,43 @@ __global__ void memAccess(float *out, float *in)
 ![](img/coalesced_access_3.png){width=80%}
 </div>
 
-# Optimizing matrix operations {.section}
+# Shared Memory I
+- Fast memory on the CU
+- Shared memory is divided into banks
+- Each bank can service one address per cycle
+- Conflicting accesses are serialized
+- Conflicts solved by padding
 
-# Copy matrix
+# Shared Memory II
+<div class="column">
+![](img/NoBankConflicts.jpeg){width=100%}
+</div>
+<div class="column">
+![](img/BankConflicts.jpeg){width=100%}
+</div>
 
 ### Example
 
+# Shared Memory III
+- Can be used as user controled cache
+- Useful to reduce the amount of global memory operations
+- Can be used as buffer to transform uncoalesced operations in coalesced 
+- Limited resources per CU
+
+# Low level optimizations
+- Avoid branching
+  - All threads in  wavefront should execute the sme instruction
+    - `if(tid%2==0)` would result in 32 branches
+- Sometimes recomputing can be faster than reading from the memory
+- Depeding on the problem, consider using lower precision instead of `double` 
+
+# Optimizing matrix operations. `B(i,j)=A(j,i)` 
+![](img/transpose_img.png){.center width=70%}
+
+
+# Optimizing matrix operations. Copy matrix
+
+* Simple copy operation as base
 ```cpp
 __global__ void copy_kernel(float *in, float *out, int width, int height) {
   int x_index = blockIdx.x * tile_dim + threadIdx.x;
