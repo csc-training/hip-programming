@@ -1,26 +1,20 @@
-#include <hip/hip_runtime.h>
 #include <stdio.h>
 #include <math.h>
+#include <hip/hip_runtime.h>
 
 /* copy all elements using threads in a 2D grid */
 __global__ void copy2d_(int n, int m, double *src, double *tgt)
 {
-    int tidx = threadIdx.x + blockIdx.x * blockDim.x;
-    int tidy = threadIdx.y + blockIdx.y * blockDim.y;
-    int stridex = gridDim.x * blockDim.x;
-    int stridey = gridDim.y * blockDim.y;
-
-    for (; tidx < n; tidx += stridex) {
-        for (; tidy < m; tidy += stridey) {
-            tgt[tidx * m + tidy] = src[tidx * m + tidy];
-        }
-    }
+  int tidx = threadIdx.x + blockIdx.x * blockDim.x;
+  int tidy = threadIdx.y + blockIdx.y * blockDim.y;  
+  
+  if (tidy < m && tidx < n) 
+    tgt[tidy * n + tidx] = src[tidy * n + tidx];
 }
 
 
 int main(void)
 {
-    int i, j;
     const int n = 600;
     const int m = 400;
     const int size = n * m;
@@ -28,15 +22,15 @@ int main(void)
     double *x_, *y_;
 
     // initialise data
-    for (i=0; i < size; i++) {
+    for (int i=0; i < size; i++) {
         x[i] = (double) i / 1000.0;
         y[i] = 0.0;
     }
     // copy reference values (C ordered)
-    for (i=0; i < n; i++) {
-        for (j=0; j < m; j++) {
-            y_ref[i * m + j] = x[i * m + j];
-        }
+    for (int j=0; j < m; j++) {
+      for (int i=0; i < n; i++) {
+        y_ref[j * n + i] = x[j * n + i];
+      }
     }
 
     // allocate + copy initial values
@@ -46,17 +40,22 @@ int main(void)
     hipMemcpy(y_, y, sizeof(double) * size, hipMemcpyHostToDevice);
 
     // define grid dimensions + launch the device kernel
-    dim3 blocks(10, 12, 1);
-    dim3 threads(64, 4, 1);
-    hipLaunchKernelGGL(copy2d_, blocks, threads, 0, 0,
-                       n, m, x_, y_);
+    const int blocksize_x = 64;
+    const int blocksize_y = 4;
+
+    dim3 threads(blocksize_x, blocksize_y, 1);
+    dim3 blocks(
+        (n - 1 + blocksize_x) / blocksize_x, 
+        (m - 1 + blocksize_y) / blocksize_y, 
+        1);
+    copy2d_<<<blocks, threads>>>(n, m, x_, y_);
 
     // copy results back to CPU
     hipMemcpy(y, y_, sizeof(double) * size, hipMemcpyDeviceToHost);
 
     // confirm that results are correct
     double error = 0.0;
-    for (i=0; i < size; i++) {
+    for (int i=0; i < size; i++) {
         error += abs(y_ref[i] - y[i]);
     }
     printf("total error: %f\n", error);
