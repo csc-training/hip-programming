@@ -6,7 +6,7 @@
 __global__ void kernel(int *d_a, int n_total)
 {
   const int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  for(int i = 0; i <= n_total; ++i)
+  if(idx < n_total)
     d_a[idx] = idx;
 }
 
