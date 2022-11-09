@@ -1,5 +1,5 @@
 HIPCC = hipcc
-HIPFLAGS=--offload-arch=gfx908
+HIPFLAGS=--gpu-architecture=sm_70
 SRC1 = BarnzNhutt_optimal.cpp
 EXE1 = nbody
 
