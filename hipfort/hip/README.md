@@ -10,7 +10,7 @@ module load gcc hip
 ```
 git clone https://github.com/ROCmSoftwarePlatform/hipfort.git
 cd hipfort; mkdir build ; cd build
-cmake -DHIPFORT_INSTALL_DIR=<install_dir> ..
+cmake -DHIPFORT_INSTALL_DIR=<hipfort_install_folder> ..
 make install
 ```
 # Compilation
