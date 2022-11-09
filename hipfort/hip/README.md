@@ -24,4 +24,4 @@ hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_70" -I<hipf
 Now the executable `a.out` can be executed as a normal gpu program. 
 
 # Exercise
-Inspect the codes in the repository folder `hipfort` containing the example (test) codes `.../hipfort/test/f2003`. See how the memory management (allocations and transfers) are done and how  various `hipxxx` libraries are called in `Fortran` programs.
+Apply the above procedure to the saxpy code and inspect the codes in the repository folder `hipfort` containing the example (test) codes `.../hipfort/test/f2003`. See how the memory management (allocations and transfers) are done and how  various `hipxxx` libraries are called in `Fortran` programs.
