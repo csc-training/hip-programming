@@ -7,7 +7,7 @@ const static int width = 4096;
 const static int height = 4096;
 const static int tile_dim = 16;
 
-__global__ void transpose_kernel(float *in, float *out, int width, int height) {
+__global__ void transpose_naive_kernel(float *in, float *out, int width, int height) {
   int x_index = blockIdx.x * tile_dim + threadIdx.x;
   int y_index = blockIdx.y * tile_dim + threadIdx.y;
 
@@ -57,14 +57,14 @@ int main() {
 
 
   for(int i=1;i<=10;i++){
-    hipLaunchKernelGGL(transpose_kernel, dim3(block_x, block_y),
+    hipLaunchKernelGGL(transpose_naive_kernel, dim3(block_x, block_y),
                       dim3(tile_dim, tile_dim), 0, 0, d_in, d_out, width,
                       height);}
 
 
   hipEventRecord(start_kernel_event, 0);
   for(int i=1;i<=10;i++){
-    hipLaunchKernelGGL(transpose_kernel, dim3(block_x, block_y),
+    hipLaunchKernelGGL(transpose_naive_kernel, dim3(block_x, block_y),
                       dim3(tile_dim, tile_dim), 0, 0, d_in, d_out, width,
                       height);}
   
