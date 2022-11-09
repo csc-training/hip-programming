@@ -3,6 +3,18 @@
 Assuming a matrix `a` of size `(NxM)` how to improve matrix operations on GPU? In particular the transposing operation `b(i,j)=a(j,i)`. We will compare the execution times and the effective bandwidth between a simple `copy` kernel, a  `naive` transpose implementation, and two more optimized versions using `shared memory` (with and without bank conflicts). The time is mesured using the `events` as shown in section [Streams, events, and synchronization](../../docs/03-streams.md). The effective bandwidth is computed as the ratio between the total memory read and written by the kernel (`2 x Total size of the Matrix in Gbytes`)  and the execution time in seconds. 
 
 ## Copy
+The base line for our experiment is the simple copy kernel. 
+```
+__global__ void copy_kernel(float *in, float *out, int width, int height) {
+  int x_index = blockIdx.x * tile_dim + threadIdx.x;
+  int y_index = blockIdx.y * tile_dim + threadIdx.y;
+
+  int index = y_index * width + x_index;
+
+  out[index] = in[index];
+}
+```
+This kernel is only reading the data from the input matrix to the output matrix. No optimizations are needed except for minor tuning in the  number of threads per block. All reads from and write to the GPU memory are coalesced and it maximum bandwidth that one could achive on a given machine in a kernel.
 
 ### Read the copy.cpp file, compile and execute it.
 
