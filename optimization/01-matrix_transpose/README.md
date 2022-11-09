@@ -80,7 +80,7 @@ __global__ void transpose_SM_kernel_nobc(float *in, float *out, int width,
 }
 ``` 
 
-For the optimizations exercise get aquitend with the code, compiler and execute it. For each case try to tune the threads per block (by changing `tile_dim`) and find the configuration which improve the performance and also the ones which do not. AS a reference the `V100` has 84 Streaming Multiprocessors (nvidia equivalent of CU) and a peak bandwidth of `900 GB/s`.
+For the optimizations exercise get aquinted with the code, compile them and execute them. For each case try to tune the threads per block (by changing `tile_dim`) and find the configuration which improve the performance  the most and also the ones which do not. As a reference the `V100` has 84 Streaming Multiprocessors (nvidia equivalent of CU) and a peak bandwidth of `900 GB/s`.
 
 
 In this exercise it is pretty intuitive what is needed to be done to improve the performance.  Measuring the time by events is suficient, but in general  in order to obtain more information about how various parts of the application behave a **profiler** is recommended. `HIP` does not provide us with profilers, they are provided by the back end on top of which they are running. On Nvidia platforms we can use the tools [Nsight Systems](https://docs.csc.fi/computing/nsys/) and [Nsight Compute](https://docs.csc.fi/computing/ncu/).
