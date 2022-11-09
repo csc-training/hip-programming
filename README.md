@@ -36,7 +36,7 @@ part of the PRACE Training Center (PTC) activities at CSC.
 | 13:45-13:30 | Exercises |
 | 13:30-14:15 | Code design, conditional compilation, lambdas, hipify  |
 | 14:15-15:45 | Exercises & Break |
-| 15:45-16:00 | Day summary | 
+| 15:45-16:00 | Close-up | 
 
 ## Exercises
 
