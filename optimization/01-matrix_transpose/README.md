@@ -1,6 +1,6 @@
 # Matrix Transpose
 
-* How to improve matrix operations on AMD MI100, credits to AMD tutorials
+* How to improve matrix operations on GPU
 
 ## Copy
 
