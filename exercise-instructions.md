@@ -51,6 +51,8 @@ dedicated nodes, you need to run your job with the option
 srun --reservation=HIPtraining -n1 -p gpu --gres=gpu:v100:1 --account=project_2000745 ./my_program
 ```
 For a multi-gpu application more cards can be requested. For example if 3 cards are needed one would use `--gres=gpu:v100:3`.
+The number of mpi processes can be as well controled by changing by the `-n` parameter. In order to assign cores for OpenMP theading the parameter `--cpus-per-task`must be set as well.
+
 Please note that the normal GPU partition (`-p gpu`) needs to be used with
 the reservation. Otherwise you may use the `gputest` partition for rapid fire
 testing.
