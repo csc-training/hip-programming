@@ -10,10 +10,12 @@ module load gcc hip
 ```
 git clone https://github.com/ROCmSoftwarePlatform/hipfort.git
 cd hipfort; mkdir build ; cd build
-cmake -DHIPFORT_INSTALL_DIR=<install_dir> ..
+cmake -DHIPFORT_INSTALL_DIR=<hipfort_install_folder> ..
 make install
 ```
 # Compilation
+The repository folder `hipfort` contains a set of example (test) codes `.../hipfort/test/f2003`. One can start with the `vecadd` example:
+
 ```
 hipcc "--gpu-architecture=sm_70" --x cu -c hip_implementation.cpp -o hip_implementation.o
 gfortran -cpp -I<hipfort_install_folder>/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\""  -c main.f03 -o main.o 
@@ -21,38 +23,5 @@ hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_70" -I<hipf
 ```
 Now the executable `a.out` can be executed as a normal gpu program. 
 
-
-# Compilation
-
-## AMD
-
-If the Makefile.hipfort had no issues:
-
-```
-export HIPFORT_ARCHGPU=amdgcn-gfx908
-make
-```
-
-However, execute:
-
-```
-export PATH=/opt/rocm-4.5.0/hipfort/bin:$PATH
-hipfc --offload-arch=gfx908 hipsaxpy.cpp main.f03
-```
-
-
-## NVIDIA
-
-If the Makefile.hipfort had no issues:
-
-```
-export HIPFORT_ARCHGPU=nvptx-sm_70
-make
-```
-
-Use:
-
-```
-export PATH=/opt/rocm/hipfort/bin:$PATH
-hipfc -x cu --gpu-architecture=sm_70 hipsaxpy.cpp main.f03
-```
+# Exercise
+Inspect the codes in the repository folder `hipfort` contains a set of example (test) codes `.../hipfort/test/f2003`. See how the memory managenent (allocations and transfers) are done and how  various `hipxxx` libraries are called in `Fortran` programs.
