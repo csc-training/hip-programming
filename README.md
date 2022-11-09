@@ -68,7 +68,6 @@ Link to [slides](https://kannu.csc.fi/s/gZSBE8DbeEKZjRw)
 ### Optimization
 
 - [Matrix Transpose](optimization/01-matrix_transpose)
-- [Nbody](optimization/02-nbody)
 
 ### Multi-GPU programming and HIP+MPI
 
