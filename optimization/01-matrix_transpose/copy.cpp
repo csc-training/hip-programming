@@ -5,7 +5,7 @@
 
 const static int width = 4096;
 const static int height = 4096;
-const static int tile_dim = 32;
+const static int tile_dim = 16;
 
 __global__ void copy_kernel(float *in, float *out, int width, int height) {
   int x_index = blockIdx.x * tile_dim + threadIdx.x;
@@ -43,14 +43,38 @@ int main() {
   printf("Setup complete. Launching kernel \n");
   int block_x = width / tile_dim;
   int block_y = height / tile_dim;
+  
 
+  // Create events
+  hipEvent_t start_kernel_event;
+  hipEventCreate(&start_kernel_event);
+  hipEvent_t end_kernel_event;
+  hipEventCreate(&end_kernel_event);
 
-   hipLaunchKernelGGL(copy_kernel, dim3(block_x, block_y),
+  printf("Warm up the gpu!\n");
+  for(int i=1;i<=10;i++){
+    hipLaunchKernelGGL(copy_kernel, dim3(block_x, block_y),
                       dim3(tile_dim, tile_dim), 0, 0, d_in, d_out, width,
-                      height);
-   hipDeviceSynchronize();
+                      height);}
 
-   printf("Kernel execution complete \n");
+  hipEventRecord(start_kernel_event, 0);
+
+  
+  for(int i=1;i<=10;i++){
+    hipLaunchKernelGGL(copy_kernel, dim3(block_x, block_y),
+                      dim3(tile_dim, tile_dim), 0, 0, d_in, d_out, width,
+                      height);}
+  
+  hipEventRecord(end_kernel_event, 0);
+  hipEventSynchronize(end_kernel_event);
+
+  hipDeviceSynchronize();
+  float time_kernel;
+  hipEventElapsedTime(&time_kernel, start_kernel_event, end_kernel_event);
+
+  printf("Kernel execution complete \n");
+  printf("Event timings:\n");
+  printf("  %.6f ms - copy \n  Bandwidth %.6f GB/s\n", time_kernel/10, 2.0*10000*(((double)(width)*(double)height)*sizeof(float))/(time_kernel*1024*1024*1024));
  
    hipMemcpy(matrix_out.data(), d_out, width * height * sizeof(float),
             hipMemcpyDeviceToHost);
@@ -58,4 +82,3 @@ int main() {
 
   return 0;
 }
-
