@@ -84,7 +84,7 @@ int main() {
 
    printf("Kernel execution complete \n");
   printf("Event timings:\n");
-  printf("  %.6f ms - shared \n  Bandwidth %.6f GB/s\n", time_kernel/10, 2.0*10000*(((double)(width)*(double)height)*sizeof(float))/(time_kernel*1024*1024*1024));
+  printf("  %.6f ms - shared memory with no bank conflicts \n  Bandwidth %.6f GB/s\n", time_kernel/10, 2.0*10000*(((double)(width)*(double)height)*sizeof(float))/(time_kernel*1024*1024*1024));
  
    hipMemcpy(matrix_out.data(), d_out, width * height * sizeof(float),
             hipMemcpyDeviceToHost);
