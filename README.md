@@ -1,7 +1,7 @@
 # GPU programming with HIP
 
 Course material for the CSC course "GPU programming with HIP". The course is
-part of the PRACE Training Center (PTC) activities at CSC.
+part of the EuroCC training activities at CSC.
 
 ## Agenda
 
@@ -38,6 +38,7 @@ part of the PRACE Training Center (PTC) activities at CSC.
 | 14:15-15:45 | Exercises & Break |
 | 15:45-16:00 | Close-up | 
 
+Link to [slides](https://kannu.csc.fi/s/gZSBE8DbeEKZjRw)
 ## Exercises
 
 [General instructions](exercise-instructions.md)
