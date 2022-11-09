@@ -9,8 +9,7 @@ lang:     en
 # Fortran
 
 * No native GPU support in Fortran:
-    - HIP functions are callable from C, using `extern C`
-    - compile HIP functions (containing kernels) with hipcc
+    - HIP functions are callable from C, using `extern C`, compile hipcc
     - interoperability with Fortran via `iso_c_binding` 
 * Fortran + HIP:
     - link with Fortran
