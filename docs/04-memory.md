@@ -13,7 +13,6 @@ lang:     en
 * Memory management strategies
 * Page-locked memory
 * The stream-ordered memory allocator and memory pools
-* Coalesced memory access in device kernels
 
 # Memory model
 

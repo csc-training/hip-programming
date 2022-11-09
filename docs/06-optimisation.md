@@ -22,7 +22,7 @@ lang:     en
 
 | NVIDIA | HIP     | ROCm    | Description                                                                   |
 | ------ | ------- | ------- | ----------------------------------------------------------------------------- |
-| CUB    | hipCUB  | rocPRIM | Low level Optimized Parllel Primitives                                        |
+| CUB    | hipCUB  | rocPRIM | Low level Optimized Parallel Primitives                                        |
 | cuDNN  |         | MIOpen  | Deep learning solver library                                                  |
 | cuRAND | hipRAND | rocRAND | Random number generator library                                               |
 | EIGEN  | EIGEN   | EIGEN   | C++ template library for linear algebra: matrices, vectors, numerical solvers |
@@ -41,50 +41,43 @@ or
 ```cpp
 kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
 ```
-* where blocks are for the 3D dimensions of the grid of blocks dimensions
+* blocks are for the 3D dimensions of the grid of blocks dimensions
 * threads for the 3D dimentions of a block of threads
-* 0 for bytes of dynamic LDS space
-* 0 for stream
-* kernel arguments
+* 0 for bytes of dynamic LDS space, 0 for stream, kernel arguments
+
+ **Knowledge of the hardware is required for best performance!!!**
 
 # Compute Units (CU)
 
-<div class="column" width=75%>
-* Each CU is a 64-wide execution unit, so multiple of 64 as the thread limit.
-    * The 64-wide execution is sub-divided into 4 SIMD units of 16 elements.
-    * For a 16-wide SIMD instruction, the best possible latency is 4 cycles.
-    * So, you need at least 4 SIMD instructions in flight to saturate the
-      SIMD units.
+<div class="column" width=78%>
+* Each AMD CU is a 64-wide execution unit, so multiple of 64 as the thread limit.
+    * The 64-wide execution is sub-divided into 4 SIMD units.
+    * Each SIMD unit executes a full wavefront instruction in 4 cycles.
+    * Heavily dependent of the architecture.
 
 </div>
 
-<div class="column" width=23%>
-![](img/CUgray.png){width=140%}
+<div class="column" width=20%>
+![](img/CUgray.png){width=100%}
 </div>
-* Using 256 threads per block would give the best performance in many
-cases, though in general more tuning is required
+* Minimum 256 threads per block is required for the best performance, in general more tuning  (architecture dependent) is required.
 
 # Global memory access in device code
 
 - Global memory access from the device has high latency
 
-- Threads are executed in warps, memory operations are grouped in a similar
+- Threads are executed in wavefronts/warps, memory operations are grouped in a similar
   fashion
 - Memory access is optimized for coalesced access where threads read from and write to successive memory locations
 - Exact alignment rules and performance issues depend on the architecture
 
 # Coalesced memory access
 
-<div class="column">
-- The global memory loads and stores consist of transactions of a certain size (eg. 32 bytes)
-- If the threads within a warp access data within such a block of 32 bytes,
-  only one global memory transaction is needed
-</div>
+- The global memory loads and stores consist of transactions of a certain size 
+- If the threads within a wavefront access data within such a block,
+only one global memory transaction is needed
 
-<div class="column">
-- Now, 32 threads within a warp can each read a different 4-byte integer value with just 4 transactions
-- When the stride between each 4-byte integer is increased, more transactions are required (up to 32 for the worst case)!
-</div>
+- Irregular access patterns result in  more transactions!
 
 # Coalesced memory access example
 
@@ -138,7 +131,7 @@ __global__ void memAccess(float *out, float *in)
     - `if(tid%2==0)` would result in 2 branches
     -  better use `if(tid<N/2)`
 - Sometimes recomputing can be faster than reading from the memory
-- Depeding on the problem, consider using lower precision instead of `double` (math functions are availebale for `single` and `half` precision )
+- Depeding on the problem, consider using lower precision instead of `double` (math functions are available for `single` and `half` precision )
 
 # Optimizing matrix operations. `B(i,j)=A(j,i)` 
 ![](img/transpose_img.png){.center width=60%}
