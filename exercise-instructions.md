@@ -26,6 +26,7 @@ ssh -Y trainingXXX@puhti.csc.fi
 module load gcc cuda hip
 ```
 
+For the November 2022 the `xxx` is `141-164`. Password will be provided on-site. 
 For more detailed instructions, please refer to the system documentation at
 [Docs CSC](https://docs.csc.fi/).
 

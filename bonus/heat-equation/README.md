@@ -6,12 +6,10 @@ Starting from a [serial heat equation solver](serial) (see below for details),
 port the code to GPUs using HIP. Main computational routine is the time
 evolution loop in the `core.cpp` file.
 
-Alternatively, you may start from a [CUDA+MPI version](cuda) and hipify the
-code to jump start the work.
+Alternatively, you may start from a [CUDA+MPI version](cuda) and hipify the code to jump start the work.
 
 Note: You may need to comment out the PNG generation parts, if the system you
 are using doesn't have libpng installed.
-
 
 ## Heat equation solver
 
@@ -44,15 +42,14 @@ via input files. Examples on how to run the binary:
 - `./heat`
   No arguments - the program will run with the default arguments: 200 x 200
   grid and 500 time steps
-- `./heat bottle.dat`
-  One argument - start from a temperature grid provided in the file bottle.dat
-  for the default number of time steps.
-- `./heat bottle.dat 1000`
+- `./heat ../common/bottle.dat`
+  One argument - start from a temperature grid provided in the given file
+  for the default number of time steps
+- `./heat ../common/bottle.dat 1000`
   Two arguments - will run the program starting from a temperature grid
-  provided in the file bottle.dat for 1000 time steps
+  provided in the given file for 1000 time steps
 - `./heat 1024 2048 1000`
-  Three arguments - will run the program in a 1024x2048 grid for 1000 time
-  steps.
+  Three arguments - will run the program using the grid dimensions (1024 x 2048) and the number of time steps (1000) specified by the arguments
 
 The program will produce a `.png` image of the temperature field after every
 100 iterations. You can change that from the parameter `image_interval`. You

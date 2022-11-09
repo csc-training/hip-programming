@@ -9,8 +9,16 @@
 
 #include "heat.h"
 
-
 #define NSTEPS 500  // Default number of iteration steps
+
+/* CUDA error handling macro */
+#define CUDA_ERR(err) (cuda_errchk(err, __FILE__, __LINE__ ))
+static inline void cuda_errchk(cudaError_t err, const char *file, int line) {
+  if (err != cudaSuccess) {
+    printf("\n\n%s in %s at line %d\n", cudaGetErrorString(err), file, line);
+    exit(EXIT_FAILURE);
+  }
+}
 
 /* Initialize the heat equation solver */
 void initialize(int argc, char *argv[], field *current,
@@ -179,14 +187,14 @@ void parallel_set_dimensions(parallel_data *parallel, int nx, int ny)
 
     MPI_Comm_free(&intranodecomm);
 
-    cudaGetDeviceCount(&devCount);
+    CUDA_ERR(cudaGetDeviceCount(&devCount));
 
     if (nodeProcs > devCount) {
         printf("Not enough GPUs for all processes in the node.\n");
         MPI_Abort(MPI_COMM_WORLD, -2);
     }
 
-    cudaSetDevice(nodeRank);
+    CUDA_ERR(cudaSetDevice(nodeRank));
 
 }
 
