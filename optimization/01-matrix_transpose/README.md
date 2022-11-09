@@ -1,6 +1,7 @@
 # Matrix Transpose
 
-* How to improve matrix operations on GPU
+* How to improve matrix operations on GPU. We will compare the exeution times and the effective bandwidth between a simple `copy` kernel, a  `naive` transpose implementation, and two more optimized versions using `shared memory` (with and without bank conflicts). The time is mesured using the `events` as shown in section [Streams, events, and synchronization](../../docs/03-streams.md). The effective bandwidth is computed as the ratio between the total memory read and written by the kernel (`2 x Total size of the Matrix in Gbytes`)  and the execution time in seconds. 
+
 
 ## Copy
 
