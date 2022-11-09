@@ -6,7 +6,7 @@ module load gcc hip
 ```
 
 - make a directory in your working directory for installing it and get the absolute path, <hipfort_install_folder>.
-- clone the package:
+- clone & compile the package:
 ```
 git clone https://github.com/ROCmSoftwarePlatform/hipfort.git
 cd hipfort; mkdir build ; cd build
