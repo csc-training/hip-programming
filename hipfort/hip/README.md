@@ -1,5 +1,5 @@
 # HIPFORT installation
-HIPFORT package at the moment is nto installed on Puhti. It is straightforward to compile and use it:
+HIPFORT package at the moment is not installed on Puhti. It is straightforward to compile and use it:
 - load `hip` module:
 ```
 module load gcc hip
