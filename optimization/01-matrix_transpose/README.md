@@ -1,7 +1,6 @@
 # Matrix Transpose
 
-* How to improve matrix operations on GPU. We will compare the exeution times and the effective bandwidth between a simple `copy` kernel, a  `naive` transpose implementation, and two more optimized versions using `shared memory` (with and without bank conflicts). The time is mesured using the `events` as shown in section [Streams, events, and synchronization](../../docs/03-streams.md). The effective bandwidth is computed as the ratio between the total memory read and written by the kernel (`2 x Total size of the Matrix in Gbytes`)  and the execution time in seconds. 
-
+Assuming a matrix `a` of size `(NxM)` how to improve matrix operations on GPU? In particular the transposing operation `b(i,j)=a(j,i)`. We will compare the execution times and the effective bandwidth between a simple `copy` kernel, a  `naive` transpose implementation, and two more optimized versions using `shared memory` (with and without bank conflicts). The time is mesured using the `events` as shown in section [Streams, events, and synchronization](../../docs/03-streams.md). The effective bandwidth is computed as the ratio between the total memory read and written by the kernel (`2 x Total size of the Matrix in Gbytes`)  and the execution time in seconds. 
 
 ## Copy
 
@@ -182,3 +181,6 @@ TCC_EA_WRREQ_sum: 1048576
 TCC_EA_RDREQ_sum: 1054958
 
 It is 1.4 times slower than Copy
+
+
+For the scope of the present exercise measuring the time by events is suficient, but in general in order to obtain more information about how various parts of the application behave a profiler is recommended. `HIP` does not provide us with profilers, they are provided by the back end on top of which they are running. On Nvidia platforms we can use the tools [Nsight Systems](https://docs.csc.fi/computing/nsys/) and [Nsight Compute](https://docs.csc.fi/computing/ncu/).
