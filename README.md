@@ -3,6 +3,41 @@
 Course material for the CSC course "GPU programming with HIP". The course is
 part of the PRACE Training Center (PTC) activities at CSC.
 
+## Agenda
+
+### Day 1
+
+| Time | Topic |
+| ---- | ----- |
+| 09:00–09:35 | Welcome & Introduction to GPU programming |
+| 09:35–09:45 | Break |
+| 09:45-10:30 | HIP and GPU kernels |
+| 10:30–10:45 | Break & Snacks |
+| 10:45-11:30 | Exercises |
+| 11:30-12:15 | Streams, events, and synchronization |
+| 12:15-13:00 | Lunch |
+| 13:45-13:30 | Exercises |
+| 13:30-14:15 | Memory allocations, access and unified memory  |
+| 14:15-15:45 | Exercises & Break |
+| 15:45-16:00 | Day summary |
+
+
+### Day 2
+
+| Time | Topic |
+| ---- | ----- |
+| 09:00–09:35 | Fortran and HIP |
+| 09:35–09:45 | Break |
+| 09:45-10:30 | Multi-GPU programming, HIP+MPI |
+| 10:30–10:45 | Break & Snacks |
+| 10:45-11:30 | Exercises |
+| 11:30-12:15 | Kernel optimizations |
+| 12:15-13:00 | Lunch |
+| 13:45-13:30 | Exercises |
+| 13:30-14:15 | Code design, conditional compilation, lambdas, hipify  |
+| 14:15-15:45 | Exercises & Break |
+| 15:45-16:00 | Day summary | 
+
 ## Exercises
 
 [General instructions](exercise-instructions.md)
