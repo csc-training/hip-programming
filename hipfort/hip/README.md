@@ -14,7 +14,7 @@ cmake -DHIPFORT_INSTALL_DIR=<hipfort_install_folder> ..
 make install
 ```
 # Compilation
-The repository folder `hipfort` contains a set of example (test) codes `.../hipfort/test/f2003`. One can start with the `vecadd` example:
+The `rocm` repository folder `hipfort` contains a set of example (test) codes `.../hipfort/test/f2003`. One can start with the `vecadd` example:
 
 ```
 hipcc "--gpu-architecture=sm_70" --x cu -c hip_implementation.cpp -o hip_implementation.o
@@ -24,4 +24,4 @@ hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_70" -I<hipf
 Now the executable `a.out` can be executed as a normal gpu program. 
 
 # Exercise
-Apply the above procedure to the saxpy code and inspect the codes in the repository folder `hipfort` containing the example (test) codes `.../hipfort/test/f2003`. See how the memory management (allocations and transfers) are done and how  various `hipxxx` libraries are called in `Fortran` programs.
+Apply the above procedure to the `saxpy`  code in the present folder  and inspect the codes in the `rocm` repository folder `hipfort` containing the example (test) codes `.../hipfort/test/f2003`. See how the memory management (allocations and transfers) are done and how  various `hipxxx` libraries are called in `Fortran` programs.
