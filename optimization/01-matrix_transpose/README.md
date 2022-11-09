@@ -34,6 +34,53 @@ __global__ void transpose_kernel(float *in, float *out, int width, int height) {
 The index `in_index` increases with `threadIdx.x`, two adjacent threads, `threadIdx.x` and `threadIdx.x+1`, access elements near each other in the gloabl memory. This ensures coalesced reads. On the other hand the writing is strided. Two adjacent threads write to location in memory far away from each other by `height`.
 
 ## Transpose with shared memory and bank conflicts
+Shared Memory (SM) can be used in order to avoid the uncoalesced writing mentioned above.
+```
+__global__ void transpose_SM_kernel(float *in, float *out, int width,
+                                     int height) {
+  __shared__ float tile[tile_dim][tile_dim];
+
+  int x_tile_index = blockIdx.x * tile_dim;
+  int y_tile_index = blockIdx.y * tile_dim;
+
+  int in_index =
+      (y_tile_index + threadIdx.y) * width + (x_tile_index + threadIdx.x);
+  int out_index =
+      (x_tile_index + threadIdx.y) * height + (y_tile_index + threadIdx.x);
+
+  tile[threadIdx.y][threadIdx.x] = in[in_index];
+
+  __syncthreads();
+
+  out[out_index] = tile[threadIdx.x][threadIdx.y];
+}
+``` 
+The shared memory is local to each CU with about 100 time slower latency than the global memory. While there is an extra synchronization needed to ensure that the data has been saved locally, the gain in switching from uncoalesced to coalesced accesses outweights the loss. The reading and writing of SM can be done in any order as long as there are no bank conflicts. While the first SM access `tile[threadIdx.y][threadIdx.x] = in[in_index];` is free on bank conflicts the secone one `out[out_index] = tile[threadIdx.x][threadIdx.y];`. When bank conflicts occur the access to the data is serialized. Even so the gain of using SM is quite big.  
+
+## Transpose with shared memory and bank conflicts
+The bank conflicts in this case can be solved in a very simple way. We pad the shared matrix. Instead of `__shared__ float tile[tile_dim][tile_dim];` we use `__shared__ float tile[tile_dim][tile_dim+1];`. Effectively this shifts the data in the banks. Hopefully this does not create other banks conflicts!!!!
+```
+__global__ void transpose_SM_kernel_nobc(float *in, float *out, int width,
+                                     int height) {
+  __shared__ float tile[tile_dim][tile_dim+1];
+
+  int x_tile_index = blockIdx.x * tile_dim;
+  int y_tile_index = blockIdx.y * tile_dim;
+
+  int in_index =
+      (y_tile_index + threadIdx.y) * width + (x_tile_index + threadIdx.x);
+  int out_index =
+      (x_tile_index + threadIdx.y) * height + (y_tile_index + threadIdx.x);
+
+  tile[threadIdx.y][threadIdx.x] = in[in_index];
+
+  __syncthreads();
+
+  out[out_index] = tile[threadIdx.x][threadIdx.y];
+}
+``` 
+
+For the optimizations exercise get aquitend with the code, compiler and execute it. For each case try to tune the threads per block (by changing `tile_dim`) and find the configuration which improve the performance and also the ones which do not. AS a reference the `V100` has 84 Streaming Multiprocessors (nvidia equivalent of CU) and a peak bandwidth of `900 GB/s`.
 
 
-For the scope of the present exercise measuring the time by events is suficient, but in general in order to obtain more information about how various parts of the application behave a profiler is recommended. `HIP` does not provide us with profilers, they are provided by the back end on top of which they are running. On Nvidia platforms we can use the tools [Nsight Systems](https://docs.csc.fi/computing/nsys/) and [Nsight Compute](https://docs.csc.fi/computing/ncu/).
+In this exercise it is pretty intuitive what is needed to be done to improve the performance.  Measuring the time by events is suficient, but in general  in order to obtain more information about how various parts of the application behave a **profiler** is recommended. `HIP` does not provide us with profilers, they are provided by the back end on top of which they are running. On Nvidia platforms we can use the tools [Nsight Systems](https://docs.csc.fi/computing/nsys/) and [Nsight Compute](https://docs.csc.fi/computing/ncu/).
