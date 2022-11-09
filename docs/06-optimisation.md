@@ -127,11 +127,11 @@ __global__ void memAccess(float *out, float *in)
 
 # Low level optimizations
 - Avoid branching
-  - All threads in  wavefront should execute the sme instruction
+  - All threads in  wavefront should execute the same instruction
     - `if(tid%2==0)` would result in 2 branches
     -  better use `if(tid<N/2)`
 - Sometimes recomputing can be faster than reading from the memory
-- Depeding on the problem, consider using lower precision instead of `double` (math functions are available for `single` and `half` precision )
+- Depending on the problem, consider using lower precision instead of `double` (math functions are available for `single` and `half` precision )
 
 # Optimizing matrix operations. `B(i,j)=A(j,i)` 
 ![](img/transpose_img.png){.center width=60%}
