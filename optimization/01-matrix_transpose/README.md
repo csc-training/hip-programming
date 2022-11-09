@@ -33,7 +33,7 @@ __global__ void transpose__naive_kernel(float *in, float *out, int width, int he
 ```
 The index `in_index` increases with `threadIdx.x`, two adjacent threads, `threadIdx.x` and `threadIdx.x+1`, access elements near each other in the gloabl memory. This ensures coalesced reads. On the other hand the writing is strided. Two adjacent threads write to location in memory far away from each other by `height`.
 
-## Transpose with shared memory and bank conflicts
+## Transpose with shared memory
 Shared Memory (SM) can be used in order to avoid the uncoalesced writing mentioned above.
 ```
 __global__ void transpose_SM_kernel(float *in, float *out, int width,
@@ -57,7 +57,7 @@ __global__ void transpose_SM_kernel(float *in, float *out, int width,
 ``` 
 The shared memory is local to each CU with about 100 time slower latency than the global memory. While there is an extra synchronization needed to ensure that the data has been saved locally, the gain in switching from uncoalesced to coalesced accesses outweights the loss. The reading and writing of SM can be done in any order as long as there are no bank conflicts. While the first SM access `tile[threadIdx.y][threadIdx.x] = in[in_index];` is free on bank conflicts the secone one `out[out_index] = tile[threadIdx.x][threadIdx.y];`. When bank conflicts occur the access to the data is serialized. Even so the gain of using SM is quite big.  
 
-## Transpose with shared memory and bank conflicts
+## Transpose with shared memory and no bank conflicts
 The bank conflicts in this case can be solved in a very simple way. We pad the shared matrix. Instead of `__shared__ float tile[tile_dim][tile_dim];` we use `__shared__ float tile[tile_dim][tile_dim+1];`. Effectively this shifts the data in the banks. Hopefully this does not create other banks conflicts!!!!
 ```
 __global__ void transpose_SM_nobc_kernel(float *in, float *out, int width,
