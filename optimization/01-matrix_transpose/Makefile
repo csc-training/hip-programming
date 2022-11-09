@@ -1,5 +1,5 @@
 HIPCC = hipcc
-HIPFLAGS=--offload-arch=gfx908
+HIPFLAGS=--gpu-architecture=sm_70
 SRC1 = copy.cpp
 EXE1 = copy
 SRC2 = matrix_transpose_naive.cpp
