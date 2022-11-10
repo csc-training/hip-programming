@@ -282,8 +282,8 @@ for (int i = 0; i < 100; i++) {
   // Deallocate memory here
   hipFree(ptr); 
 }
-// Synchronize stream, does not influence memory allocations
-hipStreamSynchronize(stream); 
+// Synchronize the default stream (no influence to memory allocations)
+hipStreamSynchronize(0); 
 ```
 * Allocating and deallocating memory in a loop is slow, and can have a significant impact on the performance
 </div>
