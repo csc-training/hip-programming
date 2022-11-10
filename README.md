@@ -16,7 +16,7 @@ part of the EuroCC training activities at CSC.
 | 10:45-11:30 | Exercises |
 | 11:30-12:15 | Streams, events, and synchronization |
 | 12:15-13:00 | Lunch |
-| 13:45-13:30 | Exercises |
+| 13:00-13:30 | Exercises |
 | 13:30-14:15 | Memory allocations, access and unified memory  |
 | 14:15-15:45 | Exercises & Break |
 | 15:45-16:00 | Day summary |
@@ -33,7 +33,7 @@ part of the EuroCC training activities at CSC.
 | 10:45-11:30 | Exercises |
 | 11:30-12:15 | Kernel optimizations |
 | 12:15-13:00 | Lunch |
-| 13:45-13:30 | Exercises |
+| 13:00-13:30 | Exercises |
 | 13:30-14:15 | Code design, conditional compilation, lambdas, hipify  |
 | 14:15-15:45 | Exercises & Break |
 | 15:45-16:00 | Close-up | 
