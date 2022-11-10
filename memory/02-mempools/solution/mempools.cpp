@@ -61,9 +61,9 @@ void noRecurringAlloc(int nSteps, int size)
   {    
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
-    // Synchronization
-    hipStreamSynchronize(0);
   }
+  // Synchronization
+  hipStreamSynchronize(0);
   // Check results and print timings
   checkTiming("noRecurringAlloc", (double)(clock() - tStart) / CLOCKS_PER_SEC);
 
@@ -87,17 +87,17 @@ void recurringAllocNoMemPools(int nSteps, int size)
     hipMalloc((void**)&d_A, size);
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
-    // Synchronization
-    hipStreamSynchronize(0);
     // Free allocation
     hipFree(d_A);
   }
+  // Synchronization
+  hipStreamSynchronize(0);
   // Check results and print timings
   checkTiming("recurringAllocNoMemPools", (double)(clock() - tStart) / CLOCKS_PER_SEC);
 }
 
-/* Run using memory pooling but no recurring syncs */
-void recurringAllocMemPoolNoSync(int nSteps, int size)
+/* Do recurring allocation with memory pooling */
+void recurringAllocMemPool(int nSteps, int size)
 {
   // Create HIP stream
   hipStream_t stream;
@@ -128,38 +128,6 @@ void recurringAllocMemPoolNoSync(int nSteps, int size)
   hipStreamDestroy(stream);
 }
 
-/* Run using memory pooling and recurring syncs */
-void recurringAllocMemPoolSync(int nSteps, int size)
-{
-  // Create HIP stream
-  hipStream_t stream;
-  hipStreamCreate(&stream);
-
-  // Determine grid and block size
-  const int blocksize = BLOCKSIZE;
-  const int gridsize = (size - 1 + blocksize) / blocksize;
-
-  // Start timer and begin stepping loop
-  clock_t tStart = clock();
-  for(unsigned int i = 0; i < nSteps; i++)
-  {
-    int *d_A;
-    // Allocate pinned device memory
-    cudaMallocAsync((void**)&d_A, size, stream);
-    // Launch GPU kernel
-    hipKernel<<<gridsize, blocksize, 0, stream>>>(d_A, size);
-    // Free allocation
-    cudaFreeAsync(d_A, stream);
-    // Synchronization
-    hipStreamSynchronize(stream);
-  }
-  // Check results and print timings
-  checkTiming("recurringAllocMemPoolSync", (double)(clock() - tStart) / CLOCKS_PER_SEC);
-
-  // Destroy the stream
-  hipStreamDestroy(stream);
-}
-
 /* The main function */
 int main(int argc, char* argv[])
 {
@@ -172,6 +140,5 @@ int main(int argc, char* argv[])
   // Run with different memory allocatins strategies
   noRecurringAlloc(nSteps, size);
   recurringAllocNoMemPools(nSteps, size);
-  recurringAllocMemPoolNoSync(nSteps, size);
-  recurringAllocMemPoolSync(nSteps, size);
+  recurringAllocMemPool(nSteps, size);
 }

@@ -279,11 +279,11 @@ for (int i = 0; i < 100; i++) {
   hipMalloc(&ptr, size); 
   // Run GPU kernel
   kernel<<<..., stream>>>(ptr);
-  // Synchronize stream, does not influence memory allocations
-  hipStreamSynchronize(stream); 
   // Deallocate memory here
   hipFree(ptr); 
 }
+// Synchronize stream, does not influence memory allocations
+hipStreamSynchronize(stream); 
 ```
 * Allocating and deallocating memory in a loop is slow, and can have a significant impact on the performance
 </div>
