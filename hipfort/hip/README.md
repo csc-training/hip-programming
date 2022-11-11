@@ -13,6 +13,7 @@ cd hipfort; mkdir build ; cd build
 cmake -DHIPFORT_INSTALL_DIR=<hipfort_install_folder> ..
 make install
 ```
+For this training try  replacing `<hipfort_install_folder>` with  `/scratch/project_2000745/training160/hip-programming/hipfort/hipfort/build/hipfort_install` 
 # Compilation
 The `rocm` repository folder `hipfort` contains a set of example (test) codes `.../hipfort/test/f2003`. One can start with the `vecadd` example:
 
