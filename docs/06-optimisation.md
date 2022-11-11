@@ -62,26 +62,99 @@ kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
 </div>
 * Minimum 256 threads per block is required for the best performance, in general more tuning  (architecture dependent) is required.
 
+# Device memory hierarchy
+
+<div class="column">
+- Registers (per-thread-access)
+- Local memory (per-thread-access)
+- Shared memory (per-block-access)
+- Global memory (global access)
+</div>
+
+<div class="column">
+![](img/memlayout.png){width=80%}
+</div>
+
+
+# Device memory hierarchy
+
+<div class="column">
+- Registers (per-thread-access)
+    - Used automatically
+    - Size on the order of kilobytes
+    - Very fast access
+- Local memory (per-thread-access)
+    - Used automatically if all registers are reserved
+    - Local memory resides in global memory
+    - Very slow access
+</div>
+
+<div class="column">
+- Shared memory (per-block-access)
+    - Usage must be explicitly programmed
+    - Size on the order of kilobytes
+    - Fast access
+- Global memory (per-device-access)
+    - Managed by the host through HIP API
+    - Size on the order of gigabytes
+    - Very slow access
+</div>
+
+
 # Global memory access in device code
+<small>
 
 - Global memory access from the device has high latency
 
 - Threads are executed in wavefronts/warps, memory operations are grouped in a similar
   fashion
+
 - Memory access is optimized for coalesced access where threads read from and write to successive memory locations
+
 - Exact alignment rules and performance issues depend on the architecture
 
-# Coalesced memory access
-
 - The global memory loads and stores consist of transactions of a certain size 
+
 - If the threads within a wavefront access data within such a block,
 only one global memory transaction is needed
 
 - Irregular access patterns result in  more transactions!
+</small> 
 
-# Coalesced memory access example
+# Coalesced  &  strided memory access 
 
 <div class="column">
+<small>
+```
+__global__ void memAccess(float *out, float *in)
+{
+ int tid = blockIdx.x*blockDim.x + threadIdx.x;
+ if(tid != 12) out[tid] = in[tid];
+}
+```
+</small>
+![](img/01.png){width=80%}
+</div>
+
+<div class="column">
+<small>
+```
+__global__ void memAccess(float *out, float *in)
+{
+ int tid = (blockIdx.x*blockDim.x + threadIdx.x)*stride;;
+ out[tid ] = in[tid];
+}
+```
+</small>
+![](img/coalesced_access_1.png){width=80%}
+</div>
+
+
+
+# Misaligned memory access 
+
+<div class="column">
+<small>
 ```
 __global__ void memAccess(float *out, float *in)
 {
@@ -89,10 +162,12 @@ __global__ void memAccess(float *out, float *in)
  if(tid != 12) out[tid + 16] = in[tid + 16];
 }
 ```
+</small>
 ![](img/coalesced_access_4.png){width=80%}
 </div>
 
 <div class="column">
+<small>
 ```
 __global__ void memAccess(float *out, float *in)
 {
@@ -100,6 +175,7 @@ __global__ void memAccess(float *out, float *in)
  out[tid + 1] = in[tid + 1];
 }
 ```
+</small>
 ![](img/coalesced_access_3.png){width=80%}
 </div>
 
