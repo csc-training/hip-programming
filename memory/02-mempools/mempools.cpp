@@ -29,7 +29,7 @@ void ignoreTiming(int nSteps, int size)
 
   int *d_A;
   // Allocate pinned device memory
-  hipMalloc((void**)&d_A, size);
+  hipMalloc((void**)&d_A, sizeof(int) * size);
 
   // Start timer and begin stepping loop
   clock_t tStart = clock();
@@ -53,7 +53,7 @@ void noRecurringAlloc(int nSteps, int size)
 
   int *d_A;
   // Allocate pinned device memory
-  #error allocate memory with hipMalloc for d_A of size
+  #error allocate memory with hipMalloc for d_A of size ints
 
   // Start timer and begin stepping loop
   clock_t tStart = clock();
@@ -84,7 +84,7 @@ void recurringAllocNoMemPools(int nSteps, int size)
   {
     int *d_A;
     // Allocate pinned device memory
-    #error allocate memory with hipMalloc for d_A of size
+    #error allocate memory with hipMalloc for d_A of size ints
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
     // Free allocation
@@ -97,7 +97,7 @@ void recurringAllocNoMemPools(int nSteps, int size)
 }
 
 /* Do recurring allocation with memory pooling */
-void recurringAllocMemPool(int nSteps, int size)
+void recurringAllocMallocAsync(int nSteps, int size)
 {
   // Create HIP stream
   hipStream_t stream;
@@ -113,7 +113,7 @@ void recurringAllocMemPool(int nSteps, int size)
   {
     int *d_A;
     // Allocate pinned device memory
-    #error allocate memory with cudaMallocAsync for d_A of size in stream
+    #error allocate memory with cudaMallocAsync for d_A of size ints in stream
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, stream>>>(d_A, size);
     // Free allocation
@@ -122,7 +122,7 @@ void recurringAllocMemPool(int nSteps, int size)
   // Synchronization
   #error synchronize stream here
   // Check results and print timings
-  checkTiming("recurringAllocMemPoolNoSync", (double)(clock() - tStart) / CLOCKS_PER_SEC);
+  checkTiming("recurringAllocMallocAsync", (double)(clock() - tStart) / CLOCKS_PER_SEC);
 
   // Destroy the stream
   hipStreamDestroy(stream);
@@ -132,7 +132,7 @@ void recurringAllocMemPool(int nSteps, int size)
 int main(int argc, char* argv[])
 {
   // Set the number of steps and 1D grid dimensions
-  int nSteps = 1e6, size = 1e6;
+  int nSteps = 1e4, size = 1e6;
   
   // Ignore first run, first kernel is slower
   ignoreTiming(nSteps, size);
@@ -140,5 +140,5 @@ int main(int argc, char* argv[])
   // Run with different memory allocatins strategies
   noRecurringAlloc(nSteps, size);
   recurringAllocNoMemPools(nSteps, size);
-  recurringAllocMemPool(nSteps, size);
+  recurringAllocMallocAsync(nSteps, size);
 }
