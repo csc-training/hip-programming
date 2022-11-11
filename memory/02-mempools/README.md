@@ -12,3 +12,20 @@ IMPORTANT NOTE! Unfortunately, the support for memory pools was only recently ad
 
 * `hipMallocAsync` -> `cudaMallocAsync`
 * `hipFreeAsync` -> `cudaFreeAsync`
+
+### Bonus (optional) - Implement an additional case using Umpire library
+
+Umpire is available at https://github.com/LLNL/Umpire/. Install Umpire with 
+
+```
+git clone --recursive https://github.com/LLNL/Umpire.git
+cd Umpire && mkdir build && cd build
+cmake ../ -DUMPIRE_ENABLE_C=On -DENABLE_CUDA=On -DCMAKE_INSTALL_PREFIX=/path
+make
+make install
+```
+
+Compile the exercise with 
+```
+hipcc --gpu-architecture=sm_70 -DHAVE_UMPIRE=1 mempools.cpp -I/path/umpire/include/ -L/path/umpire/lib/ -lcamp -lumpire
+```
