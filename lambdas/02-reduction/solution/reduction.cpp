@@ -56,7 +56,7 @@ void parallel_reduce_gpu(const uint loop_size, Lambda loop_body, int *sum) {
   // Create GPU buffer for the reduction variable
   int* d_buf;
   hipMalloc(&d_buf, sizeof(int));
-  hipMemcpy(d_buf, sum, sizeof(int), hipMemcpyDeviceToDevice);
+  hipMemcpy(d_buf, sum, sizeof(int), hipMemcpyHostToDevice);
 
   // Launch the reduction kernel
   reduction_kernel<<<gridsize, blocksize>>>(loop_body, loop_size, d_buf);
