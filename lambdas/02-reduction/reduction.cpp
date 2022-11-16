@@ -27,23 +27,20 @@ __global__ void reduction_kernel(Lambda loop_body, const int loop_size, int *sum
   // Get thread index
   const int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
-  // Check loop limits
-  if (idx < loop_size) {
-   
-    // Local storage for the thread summation value
-    int thread_sum = 0;
-  
-    // Evaluate the loop body, the summation value is stored in thread_sum
-    loop_body(idx, thread_sum);
-  
-    // Compute the block-wide sum (aggregate) for the first thread of each block
-    int aggregate;
-    #error call the hipcub function to perform block-wide sum and store the result into 'aggregate'
+  // Local storage for the thread summation value
+  int thread_sum = 0;
 
-    // The first thread of each block stores the block-wide aggregate to 'sum' using atomics
-    if(threadIdx.x == 0) 
-      #error use HIP native atomiAdd() function to sum the 'aggregate' of each block into 'sum'
-  }
+  // Evaluate the loop body, the summation value is stored in thread_sum
+  if(idx < loop_size)
+    loop_body(idx, thread_sum);
+
+  // Compute the block-wide sum (aggregate) for the first thread of each block
+  int aggregate;
+  #error call the hipcub function to perform block-wide sum and store the result into 'aggregate'
+
+  // The first thread of each block stores the block-wide aggregate to 'sum' using atomics
+  if(threadIdx.x == 0) 
+    #error use HIP native atomiAdd() function to sum the 'aggregate' of each block into 'sum'
 }
 
 /* Wrapper for the GPU redution kernel */
