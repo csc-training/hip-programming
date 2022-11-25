@@ -83,7 +83,7 @@ void GPUtoGPUviaHost(int rank, double *hA, double *dA, int N, double &timer)
         // Launch kernel to increment values on the GPU
         int blocksize = 128;
         int gridsize = (N + blocksize - 1) / blocksize;
-        add_kernel<<<blocksize, gridsize>>> (dA, N);
+        add_kernel<<<gridsize, blocksize>>> (dA, N);
         hipMemcpy(hA, dA, sizeof(double) * N,
                     hipMemcpyDeviceToHost);
         // Copy vector to host and send it to rank 0
@@ -115,7 +115,7 @@ void GPUtoGPUdirect(int rank, double *dA, int N, double &timer)
         // Receive vector from rank 0
         MPI_Recv(dA, N, MPI_DOUBLE, 0, 11, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         // Launch kernel to increment values on the GPU
-        add_kernel<<<blocksize, gridsize>>> (dA, N);
+        add_kernel<<<gridsize, blocksize>>> (dA, N);
         hipStreamSynchronize(0);
         // Send vector to rank 0
         MPI_Send(dA, N, MPI_DOUBLE, 0, 12, MPI_COMM_WORLD);
