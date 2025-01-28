@@ -3,40 +3,46 @@
 Course material for the CSC course "GPU programming with HIP". The course is
 part of the EuroCC training activities at CSC.
 
-## Agenda
+## Agenda (WIP)
 
 ### Day 1
 
 | Time | Topic |
 | ---- | ----- |
-| 09:00–09:35 | Welcome & Introduction to GPU programming |
-| 09:35–09:45 | Break |
-| 09:45-10:30 | HIP and GPU kernels |
+| 09:00–10:30 | Welcome (lumi/mahti access, slurm etc) & Introduction to GPU programming w/ break (JL) (timing: WIP) |
 | 10:30–10:45 | Break & Snacks |
-| 10:45-11:30 | Exercises |
-| 11:30-12:15 | Streams, events, and synchronization |
+| 10:45-11:30 | HIP and GPU kernels (JL) |
+| 11:30-11:45 | Break |
+| 11:45-12:15 | Exercises |
 | 12:15-13:00 | Lunch |
-| 13:00-13:30 | Exercises |
-| 13:30-14:15 | Memory allocations, access and unified memory  |
-| 14:15-15:45 | Exercises & Break |
-| 15:45-16:00 | Day summary |
+| 13:00-13:45 | Streams, events, and synchronization (JK) |
+| 13:45-14:00 | Break |
+| 14:00-14:30 | Exercises |
+| 14:30-15:15 | Memory allocations, access and unified memory (JK) |
+| 15:15-15:30 | Break |
+| 15:30-16:00 | Exercises |
+| 16:00-16:15 | Day summary |
 
 
 ### Day 2
 
 | Time | Topic |
 | ---- | ----- |
-| 09:00–09:35 | Fortran and HIP |
-| 09:35–09:45 | Break |
-| 09:45-10:30 | Multi-GPU programming, HIP+MPI |
-| 10:30–10:45 | Break & Snacks |
-| 10:45-11:30 | Exercises |
-| 11:30-12:15 | Kernel optimizations |
+| 09:00–10:00 | Kernel optimizations (JK) |
+| 10:00–10:15 | Break & Snacks |
+| 10:15–10:45 | Exercises |
+| 10:45-11:30 | Multi-GPU programming, HIP+MPI (CA) |
+| 11:30-11:45 | Break |
+| 11:45-12:15 | Exercises |
 | 12:15-13:00 | Lunch |
-| 13:00-13:30 | Exercises |
-| 13:30-14:15 | Code design, conditional compilation, lambdas, hipify  |
-| 14:15-15:45 | Exercises & Break |
+| 13:00-13:30 | Fortran and HIP (CA) |
+| 13:30-13:45 | Break |
+| 13:45-14:15 | Exercises  |
+| 13:30-14:15 | cuda and hip compatibility: hipify, hop, diy ?? (CA) |
+| 14:15-14:30 | Break |
+| 14:30-15:45 | Exercises |
 | 15:45-16:00 | Close-up | 
+
 
 Link to [slides](https://kannu.csc.fi/s/gZSBE8DbeEKZjRw)
 ## Exercises
