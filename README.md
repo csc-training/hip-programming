@@ -1,7 +1,7 @@
 # GPU programming with HIP
 
 Course material for the CSC course "GPU programming with HIP". The course is
-part of the EuroCC training activities at CSC.
+part of the EuroCC training activities at CSC. 
 
 ## Agenda
 
