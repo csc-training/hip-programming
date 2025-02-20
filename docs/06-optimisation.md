@@ -15,7 +15,7 @@ lang:     en
 5. Avoid branching within warp
 6. Minimise number of active local variables
 
-# Libraries (I)
+# 1. Libraries (I)
 
 ::: notes
 
@@ -43,7 +43,7 @@ lang:     en
 | EIGEN  | EIGEN   | EIGEN   | C++ template library for linear algebra: matrices, vectors, numerical solvers |
 | NCCL   |         | RCCL    | Communications Primitives Library based on the MPI equivalents                |
 
-# Host-device data transfers
+# 2. Host-device data transfers
 
 ### Peak theoretical bandwidth
 
@@ -62,7 +62,9 @@ $^\star$ per GCD, MI250x has 2 GCDs
 
 :::
 
-# Device global memory access
+# 3. Device global memory access
+
+## Example
 
 - Matrix matrix multiplication: C = AB
 - Temporary variable avoids K-1 global memory accesses
@@ -91,34 +93,9 @@ $^\star$ per GCD, MI250x has 2 GCDs
 :::
 ::::::
 
-# Kernels (PRUNE)
+# 3. Device global memory access
 
-Recall kernel launch:
-
-```cpp
-hipLaunchKernelGGL(kernel_name, dim3 Blocks, dim3 Threads, size_t dynamicShared, hipStream_t stream, 
-                                arg1, arg2, ...);
-```
-or
-```cpp
-kernel_name<<<dim3 Blocks, dim3 Threads, size_t dynamicShared, hipStream_t stream>>>
-          (arg1,arg2,...);
-```
-- Memory is partitioned to `Blocks.x * Blocks.y * Blocks.z` blocks
-  - Each block contains `Threads.x * Threads.y * Threads.z` threads
-
-::: notes
-
-- Is dynamic LDS covered?
-- the hipLaunchKernelGGL syntax is useful with `hip-cpu` library if you don't have gpu
-  and still want to test HIP
-
-:::
-
-
- **Knowledge of the hardware is required for best performance!!!**
-
-# Device memory hierarchy
+## Device memory hierarchy
 
 <div class="column">
 - Registers (per-thread-access)
@@ -132,7 +109,9 @@ kernel_name<<<dim3 Blocks, dim3 Threads, size_t dynamicShared, hipStream_t strea
 </div>
 
 
-# Device memory hierarchy
+# 3. Device global memory access
+
+## Device memory hierarchy
 
 <div class="column">
 - Registers (per-thread-access)
@@ -156,26 +135,6 @@ kernel_name<<<dim3 Blocks, dim3 Threads, size_t dynamicShared, hipStream_t strea
     - Very slow access
 </div>
 
-
-# Global memory access in device code
-<small>
-
-- Global memory access from the device has high latency
-
-- Threads are executed in wavefronts/warps, memory operations are grouped in a similar
-  fashion
-
-- Memory access is optimized for coalesced access where threads read from and write to successive memory locations
-
-- Exact alignment rules and performance issues depend on the architecture
-
-- The global memory loads and stores consist of transactions of a certain size 
-
-- If the threads within a wavefront access data within such a block,
-only one global memory transaction is needed
-
-- Irregular access patterns result in  more transactions!
-</small> 
 
 # MI250x Compute Units (CU)
 
@@ -210,8 +169,28 @@ only one global memory transaction is needed
 :::
 
 
-# Uncoalesced memory access
+# 4. Optimise for coalesced memory access
 
+Memory is fetched in cache lines of 64/128 bytes from device memory
+
+- warp requests non-consecutive elements, cannot coalesce memory operations
+
+  ```cpp
+   int tid = blockIdx.x*blockDim.x + threadIdx.x;
+   if(tid < N) out[tid*8] = in[tid*8];
+  ```
+
+- consecutive elements, memory operations are coalesced
+
+  ```cpp
+   int tid = blockIdx.x*blockDim.x + threadIdx.x;
+   if(tid < N) out[tid] = in[tid];
+  ```
+
+
+---
+
+**Uncoalesced memory access**
 
 ::::::{.columns}
 :::{.column width="76%"}
@@ -226,7 +205,9 @@ only one global memory transaction is needed
 
 Each big arrow is memory read from global device memory.
 
-# Coalesced memory access
+---
+
+**Coalesced memory access**
 
 ::::::{.columns}
 :::{.column width="76%"}
@@ -240,66 +221,8 @@ Each big arrow is memory read from global device memory.
 
 4 read operations for 32 elements
 
+### Local data share
 
-# Coalesced  &  strided memory access 
-
-<div class="column">
-<small>
-```
-__global__ void memAccess(float *out, float *in)
-{
- int tid = blockIdx.x*blockDim.x + threadIdx.x;
- if(tid != 12) out[tid] = in[tid];
-}
-```
-</small>
-![](img/01.png){width=80%}
-</div>
-
-<div class="column">
-<small>
-```
-__global__ void memAccess(float *out, float *in)
-{
- int tid = (blockIdx.x*blockDim.x + threadIdx.x)*stride;;
- out[tid ] = in[tid];
-}
-```
-</small>
-![](img/coalesced_access_1.png){width=80%}
-</div>
-
-
-
-# Misaligned memory access 
-
-<div class="column">
-<small>
-```
-__global__ void memAccess(float *out, float *in)
-{
- int tid = blockIdx.x*blockDim.x + threadIdx.x;
- if(tid != 12) out[tid + 16] = in[tid + 16];
-}
-```
-</small>
-![](img/coalesced_access_4.png){width=80%}
-</div>
-
-<div class="column">
-<small>
-```
-__global__ void memAccess(float *out, float *in)
-{
- int tid = blockIdx.x*blockDim.x + threadIdx.x;
- out[tid + 1] = in[tid + 1];
-}
-```
-</small>
-![](img/coalesced_access_3.png){width=80%}
-</div>
-
-# Shared memory I
 - Fast memory on the CU
 - Shared memory is divided into banks
 - Each bank can service one address per cycle
