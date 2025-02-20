@@ -41,9 +41,9 @@ jobs:
           GIT_DATE=$(git show -s --format=%ci $GITHUB_SHA)
 
           ARGS=""
-          [[ "$INCLUDE_PDF" == "true" ]] && ARGS="--with-pdf"
+          [[ "$INCLUDE_PDF" == "true" ]] && ARGS="--with-pdf -t csc-2016-high-contrast"
 
-          slidefactory -t csc-2016-high-contrast pages about.yml build --info_content "Updated for [$GIT_SHORT_SHA]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA) ($GIT_DATE)" $ARGS
+          slidefactory pages about.yml build --info_content "Updated for [$GIT_SHORT_SHA]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$GITHUB_SHA) ($GIT_DATE)" $ARGS
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
