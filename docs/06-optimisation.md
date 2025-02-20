@@ -6,7 +6,22 @@ date:     2022-11
 lang:     en
 ---
 
+# Kernel optimisation strategies
+
+1. Use existing libraries
+2. Minimise host-device data transfers
+3. Minimise device memory-compute unit data transfers
+4. Optimise for coalesced memory access
+5. Avoid branching within warp
+6. Minimise number of active local variables
+
 # Libraries (I)
+
+::: notes
+
+- Before you optimize, use libraries
+
+:::
 
 | NVIDIA   | HIP       | ROCm       | Description                                                                         |
 | -------- | --------- | ---------- | ----------------------------------------------------------------------------------- |
@@ -28,39 +43,80 @@ lang:     en
 | EIGEN  | EIGEN   | EIGEN   | C++ template library for linear algebra: matrices, vectors, numerical solvers |
 | NCCL   |         | RCCL    | Communications Primitives Library based on the MPI equivalents                |
 
+# Host-device data transfers
 
-# Kernels
+### Peak theoretical bandwidth
 
-You can call a kernel with the command:
+| Link | Host-device | Device memory | 
+|------|------------:|--------------:|
+| LUMI-G MI250x | 36 GB/s$^{\star}$ | 3200 GB/s|
+| PCIE4.0 x16 | $\sim$ 32 GB/s |  |
+| A100 (Mahti) |  | 2000 GB/s |
+
+$^\star$ per GCD, MI250x has 2 GCDs
+
+::: notes
+
+- Dont be afraid of host-device memory copies
+- But be aware of the 2-order of magnitude BW difference
+
+:::
+
+# Device global memory access
+
+- Matrix matrix multiplication: C = AB
+- Temporary variable avoids K-1 global memory accesses
+- Fuse kernels if applicable
+
+::::::{.columns}
+:::{.column width=49%}
+```cpp
+  if (x < M && y < N) {
+    for(int i = 0; i < K; ++i) {
+      C[y+x*M] += A[x + i*M]*B[i + y*K];
+    }
+  }
+```
+:::
+:::{.column width=49%}
+```cpp
+  if (x < M && y < N) {
+    float tmp(0); 
+    for(int i = 0; i < K; ++i) {
+      tmp += A[x + i*M]*B[i + y*K];
+    }
+    C[y+x*M] = tmp;
+  }
+```
+:::
+::::::
+
+# Kernels (PRUNE)
+
+Recall kernel launch:
 
 ```cpp
-hipLaunchKernelGGL(kernel_name, dim3(Blocks), dim3(Threads), 0, 0, arg1, arg2, ...);
+hipLaunchKernelGGL(kernel_name, dim3 Blocks, dim3 Threads, size_t dynamicShared, hipStream_t stream, 
+                                arg1, arg2, ...);
 ```
-
 or
 ```cpp
-kernel_name<<<dim3(Blocks), dim3(Threads),0,0>>>(arg1,arg2,...);
+kernel_name<<<dim3 Blocks, dim3 Threads, size_t dynamicShared, hipStream_t stream>>>
+          (arg1,arg2,...);
 ```
-* blocks are for the 3D dimensions of the grid of blocks dimensions
-* threads for the 3D dimentions of a block of threads
-* 0 for bytes of dynamic LDS space, 0 for stream, kernel arguments
+- Memory is partitioned to `Blocks.x * Blocks.y * Blocks.z` blocks
+  - Each block contains `Threads.x * Threads.y * Threads.z` threads
+
+::: notes
+
+- Is dynamic LDS covered?
+- the hipLaunchKernelGGL syntax is useful with `hip-cpu` library if you don't have gpu
+  and still want to test HIP
+
+:::
+
 
  **Knowledge of the hardware is required for best performance!!!**
-
-# Compute Units (CU)
-
-<div class="column" width=78%>
-* Each AMD CU is a 64-wide execution unit, so multiple of 64 as the thread limit.
-    * The 64-wide execution is sub-divided into 4 SIMD units.
-    * Each SIMD unit executes a full wavefront instruction in 4 cycles.
-    * Heavily dependent of the architecture.
-
-</div>
-
-<div class="column" width=20%>
-![](img/CUgray.png){width=100%}
-</div>
-* Minimum 256 threads per block is required for the best performance, in general more tuning  (architecture dependent) is required.
 
 # Device memory hierarchy
 
@@ -120,6 +176,70 @@ only one global memory transaction is needed
 
 - Irregular access patterns result in  more transactions!
 </small> 
+
+# MI250x Compute Units (CU)
+
+::::::{.columns}
+:::{.column width="79%"}
+- Blocks are distributed over Compute Units (CUs)
+- CU partitions blocks to warps of 64 threads
+  - At most 32 warps at once
+- CU comprises of 4$\times$SIMD units each with dealing 16 threads
+  - 128 kiB register storage per SIMD unit<br>$\Rightarrow$ 512 kiB register storage on CU
+  - 512 4-byte registers per thread (2 kiB)
+  - *Mental note*: 2 kiB $\times$ 64 $\times$ 4 = 512 kiB 
+- 16 kiB of L1 cache
+- 64 kiB of local data share memory
+:::
+:::{.column width="19%" align="top"}
+![](img/CUgray.png){width=100%}
+:::
+::::::
+
+::: notes
+
+- Too busy slide!
+- The point is that physically blocks are further divided to wavefronts and
+  each block is always executed on same CU
+
+* Each AMD CU is a 64-wide execution unit, so multiple of 64 as the thread limit.
+    * The 64-wide execution is sub-divided into 4 SIMD units.
+    * Each SIMD unit executes a full wavefront instruction in 4 cycles.
+    * Heavily dependent of the architecture.
+    * 
+:::
+
+
+# Uncoalesced memory access
+
+
+::::::{.columns}
+:::{.column width="76%"}
+![](img/uncoalesced.svg){width="100%"}
+:::
+:::{.column width="23%"}
+<br>
+:::
+::::::
+
+9 read OPs for 9 elements
+
+Each big arrow is memory read from global device memory.
+
+# Coalesced memory access
+
+::::::{.columns}
+:::{.column width="76%"}
+![](./img/coalesced.svg){width="100%"}
+:::
+:::{.column width="23%"}
+<br>
+:::
+
+::::::
+
+4 read operations for 32 elements
+
 
 # Coalesced  &  strided memory access 
 
