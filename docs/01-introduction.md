@@ -23,13 +23,13 @@ lang:     en
 
 # HPC through the ages
 
-<div class="column" width=55%>
+<div class="column" width="55%">
 - Achieving performance has been based on various strategies throughout the years
     - Frequency, vectorization, multi-node, multi-core, etc.
 - Accelerators provide compute resources based on a very high level of parallelism to reach high performance at low relative power consumption 
 </div>
 
-<div class="column" width=43%>
+<div class="column" width="43%">
 ![](img/microprocessor-trend-data.png)
 </div>
 
