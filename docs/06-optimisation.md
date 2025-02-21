@@ -64,10 +64,7 @@ $^\star$ per GCD, MI250x has 2 GCDs
 
 # 3. Device global memory access
 
-## Example
-
-- Matrix matrix multiplication: C = AB
-- Temporary variable avoids K-1 global memory accesses
+- Matrix multiplication: temporary variable avoids K-1 global memory accesses
 - Fuse kernels if applicable
 
 ::::::{.columns}
@@ -78,6 +75,9 @@ $^\star$ per GCD, MI250x has 2 GCDs
       C[y+x*M] += A[x + i*M]*B[i + y*K];
     }
   }
+
+
+
 ```
 :::
 :::{.column width=49%}
@@ -137,35 +137,33 @@ $^\star$ per GCD, MI250x has 2 GCDs
 
 
 # MI250x Compute Units (CU)
-
 ::::::{.columns}
-:::{.column width="79%"}
-- Blocks are distributed over Compute Units (CUs)
-- CU partitions blocks to warps of 64 threads
-  - At most 32 warps at once
-- CU comprises of 4$\times$SIMD units each with dealing 16 threads
-  - 128 kiB register storage per SIMD unit<br>$\Rightarrow$ 512 kiB register storage on CU
-  - 512 4-byte registers per thread (2 kiB)
-  - *Mental note*: 2 kiB $\times$ 64 $\times$ 4 = 512 kiB 
+
+:::{.column width=44%}
+
+- 64 kiB of **local data share** (LDS) memory
+- 800 scalar registers (12.6 kiB)
+  - up to 102 per warp
+- Scalar unit
 - 16 kiB of L1 cache
-- 64 kiB of local data share memory
 :::
-:::{.column width="19%" align="top"}
-![](img/CUgray.png){width=100%}
+
+:::{.column width=54%}
+![](img/coarse_CU.svg){.center width=120%}
 :::
 ::::::
 
+- 4$\times$SIMD units, 16 threads per SIMD unit
+  - 128 kiB *vector* **register** (VGPR) storage per SIMD unit $\Rightarrow$ 512 kiB register storage on CU
+  - 512 4-byte registers per thread (2 kiB). 
+  - *Mental note*: 2 kiB $\times$ 64 $\times$ 4 = 512 kiB 
+
+
 ::: notes
-
-- Too busy slide!
-- The point is that physically blocks are further divided to wavefronts and
-  each block is always executed on same CU
-
-* Each AMD CU is a 64-wide execution unit, so multiple of 64 as the thread limit.
-    * The 64-wide execution is sub-divided into 4 SIMD units.
-    * Each SIMD unit executes a full wavefront instruction in 4 cycles.
-    * Heavily dependent of the architecture.
-    * 
+- Simplification
+- Ballpark sizes for registers, LDS and cache
+- MI250x GCD has 110 compute units
+- Lot of register storage
 :::
 
 
@@ -221,15 +219,27 @@ Each big arrow is memory read from global device memory.
 
 4 read operations for 32 elements
 
-### Local data share
+# Local data share
 
-- Fast memory on the CU
-- Shared memory is divided into banks
-- Each bank can service one address per cycle
-- Conflicting accesses are serialized
-- Conflicts solved by padding
+- Variable defined as `__shared__` is shared within block 
+- Divided into banks, each serve one address per cycle
+- Use cases:
+  - Nearby threads load/store to/from the same memory location $\Rightarrow$
+  reduce ovelapping global memory operations
+  - User controlled cache
+  - Transform uncoalesced memory OPs to coalesced
+- Usage:
+  ```cpp
+  __shared__ float buf[256];
+  ```
+- Remember to `__syncthreads()`!
 
-# Shared memory II
+# Local data share
+
+- **Advanced optimization**: avoid bank conflicts
+
+<br>
+
 <div class="column">
 ![](img/NoBankConflicts.jpeg){width=100%}
 </div>
@@ -237,14 +247,9 @@ Each big arrow is memory read from global device memory.
 ![](img/BankConflicts.jpeg){width=100%}
 </div>
 
+# non-renewed material follows {.section}
 
-# Shared memory III
-- Can be used as user controled cache
-- Useful to reduce the amount of global memory operations
-- Can be used as buffer to transform uncoalesced operations in coalesced 
-- Limited resources per CU
-
-# Low level optimizations
+# Low level optimizations 
 - Avoid branching
   - All threads in  wavefront should execute the same instruction
     - `if(tid%2==0)` would result in 2 branches
@@ -252,7 +257,7 @@ Each big arrow is memory read from global device memory.
 - Sometimes recomputing can be faster than reading from the memory
 - Depending on the problem, consider using lower precision instead of `double` (math functions are available for `single` and `half` precision )
 
-# Optimizing matrix operations. `B(i,j)=A(j,i)` 
+# Optimizing matrix operations. `B(i,j)=A(j,i)`  
 ![](img/transpose_img.png){.center width=60%}
 
 
