@@ -53,12 +53,12 @@ program saxpy
 
 <div class="column" width=53%>>
 ```cpp
-  call hipCheck(hipMalloc(dx,Nbytes))
-  call hipCheck(hipMalloc(dy,Nbytes))
-
   allocate(x(N));allocate(y(N))
 
   x = 1.0;y = 2.0
+
+  call hipCheck(hipMalloc(dx,Nbytes))
+  call hipCheck(hipMalloc(dy,Nbytes))
 
   call hipCheck(hipMemcpy(dx, c_loc(x), Nbytes, hipMemcpyHostToDevice))
   call hipCheck(hipMemcpy(dy, c_loc(y), Nbytes, hipMemcpyHostToDevice))
