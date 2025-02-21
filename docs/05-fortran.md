@@ -69,7 +69,7 @@ program saxpy
 
   call hipCheck(hipMemcpy(c_loc(y), dy, Nbytes, hipMemcpyDeviceToHost))
 
-  write(*,*) 'Max error: ', maxval(abs(y-4.0))
+  write(*,*) "Max error: ", maxval(abs(y-4.0))
 
   call hipCheck(hipFree(dx));call hipCheck(hipFree(dy))
 
