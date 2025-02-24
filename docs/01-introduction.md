@@ -610,7 +610,7 @@ Our responsibility: how many threads, in what configuration
 ::: incremental
 - 32768 threads in 1D
 - 32 x 1024 threads in 2D
-- 32 x 512 x 2 threads is 3D
+- 32 x 512 x 2 threads in 3D
 :::
 
 Device's responsibility: launch enough threads and call the supplied code for each
@@ -770,6 +770,22 @@ The grid maps to a single device (GPU): we're telling a single device to run som
 Each block of threads in the grid gets mapped to a single CU/SM.
 :::
 ![](img/block_sm_cu.png){.center width=100%}
+
+# Blocks - SM/CU, cont.
+
+::: notes
+Side note: Many blocks (from a single or multiple grids) may map to the same CU/SM.
+
+However, the reverse is not possible. One block always maps to a single CU/SM, never to multiple.
+:::
+::::::::: {.columns}
+:::::: {.column width="50%"}
+![](img/many_blocks_to_one_sm.png){.center width=80%}
+::::::
+:::::: {.column width="50%"}
+![](img/no_block_to_many_sm.png){.center width=100%}
+::::::
+:::::::::
 
 # Warps, wavefronts
 
