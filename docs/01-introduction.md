@@ -230,7 +230,23 @@ There are many more things to consider, and one should always make informed deci
 
 # Recap
 
-TODO
+::: notes
+Let's do a review:
+
+GPU is a massively parallel processor with its own memory space.
+
+You copy data from the CPU memory to the GPU memory and tell the GPU to do some computation on that data.
+
+The GPU can execute instructions on thousands of pieces of data at the same time.
+
+Using a GPU makes sense, if you have enough data to crunch. If not, it's better to do the computation locally with the CPU.
+:::
+::: incremental
+- massively parallel processor
+- own memory space --> requires data movement
+- performs instructions to multiple pieces of data at the same time
+- useful when you have a lot of data
+:::
 
 # Part 2: Model of GPU Hardware {.section}
 
@@ -354,9 +370,7 @@ inline __m256 mul8(const float* p1, const float* p2)
 # GPU as a collection of processors
 
 ::: notes
-Here we are again hitting the limits of our current model and need to expand it.
-
-The GPU isn't just a collection of independent vector units. It's more like a collection of independent and very simple processors, which contain vector units.
+An even better model of a GPU is a collection of independent and very simple processors, which contain vector units.
 
 AMD calls these processors Compute Units (CU), Nvidia calls them Streaming Multiprocessors (SM) and Intel has many names for them, one of which is Execution Unit (EU).
 
@@ -480,7 +494,7 @@ Again, the most important new thing here for a beginner programmer is the L1 Dat
 ::::::
 :::::::::
 
-# Recap of What is a GPU
+# Recap
 
 ::: notes
 Let's do a review:
@@ -558,8 +572,10 @@ Here there's no double loop. "Someone else" takes care of it. We're just concern
 :::
 ::::::::: {.columns}
 :::::: {.column width="40%"}
+::: incremental
 - No double loop: "someone else" takes care of it
 - Just index "fetching" and the operation $c_{ij} = a_{ij} + b_{ij}$
+:::
 ::::::
 :::::: {.column width="60%"}
 GPU version
@@ -572,3 +588,525 @@ void sum_arrays(float** a, float** b, float** c) {
 ```
 ::::::
 :::::::::
+
+# Division of responsibilities
+
+::: notes
+So who is this "someone else" taking care of the larger context?
+
+It's partly us, the programmer and partly the software stack (high level API, runtime library, device driver, etc.) and the hardware device that we're using.
+
+Our responsibility is telling the device how many threads we want to run, and in what configuration.
+
+Examples:
+- 32768 threads in 1D
+- 32 x 1024 threads in 2D
+- 32 x 512 x 2 threads is 3D
+
+After we've supplied this information to the device, it's its responsibility to launch enough threads and with correct thread indices and call the code we've supplied for each of those threads.
+:::
+Our responsibility: how many threads, in what configuration
+
+::: incremental
+- 32768 threads in 1D
+- 32 x 1024 threads in 2D
+- 32 x 512 x 2 threads is 3D
+:::
+
+Device's responsibility: launch enough threads and call the supplied code for each
+
+# Thread hierarchy
+
+::: notes
+On the software side, the API helps us with defining the configuration of threads we want the GPU to do work with, by defining three levels of hierarchy, the previous being the building block of the next one:
+
+- a thread
+- a block of threads
+- a grid of blocks
+
+:::
+Thread hierarchy, previous is the building block of the next level
+
+::: incremental
+- a thread
+- a block of threads
+- a grid of blocks
+:::
+
+# Thread
+
+::: notes
+A single thread is the smallest unit.
+:::
+::::::::: {.columns}
+:::::: {.column width="40%"}
+A single thread is the smallest unit
+::::::
+:::::: {.column width="60%"}
+![](img/thread.png){width=30%}
+::::::
+:::::::::
+
+# Block of threads
+
+::: notes
+A block of threads can be one, two or three dimensional. The dimensions of the block multiplied together gives the total number of threads in a single block.
+:::
+
+A block of threads can be 1D, 2D or 3D
+
+:::::: {.columns}
+::: {.column width="50%"}
+<small>
+```cpp
+// This struct is defined elsewhere by the API
+struct dim3 {
+	int32_t x;
+	int32_t y;
+	int32_t z;
+};
+
+// -----------------------------------------------
+// In our program we define the size of the block:
+
+// 1D block of 128 threads (128 x 1 x 1 = 128)
+dim3 block(128, 1, 1);
+
+// 2D block of 1024 threads (32 x 32 = 1024)
+dim3 block(32, 32, 1);
+
+// 3D block of 1024 threads (16 x 8 x 8 = 1024)
+dim3 block(16, 8, 8);
+```
+</small>
+:::
+::: {.column width="50%"}
+![](img/oned_block.png){width=80%}
+![](img/twod_block.png){width=45%}
+![](img/threed_block.png){width=45%}
+:::
+::::::
+
+# Grid of blocks
+
+::: notes
+Similarly, a grid of blocks can be one, two or three dimensional.
+
+Likewise, the dimensions multiplied together tell how many blocks there are in a grid.
+:::
+
+A grid of blocks can be 1D, 2D or 3D
+
+:::::: {.columns}
+::: {.column width="30%"}
+<small>
+```cpp
+// The same struct is used for
+// block size and grid size
+struct dim3 {
+	int32_t x;
+	int32_t y;
+	int32_t z;
+};
+
+// ------------------------
+// In our program we define
+// the size of the grid:
+
+// 1D grid of 4 blocks (4 x 1 x 1 = 4)
+dim3 grid(4, 1, 1);
+
+// 2D grid of 4 blocks (2 x 2 x 1 = 4)
+dim3 grid(2, 2, 1);
+```
+</small>
+:::
+::: {.column width="70%"}
+![](img/oned_grid.png){width=40%}
+![](img/twod_grid.png){width=55%}
+:::
+::::::
+
+# Threads, blocks, grids
+
+::: notes
+Multiplying the number of blocks in a grid by the number of threads in a block we get the number of threads in a grid.
+
+To run some code on the GPU, we give it a grid. The device performs the given computation for each thread in the grid.
+:::
+::::::::: {.columns}
+:::::: {.column width="50%"}
+```cpp
+dim3 block(8, 128, 1);
+dim3 grid(4, 1, 1);
+// Num threads = 8 x 128 x 4 = 4096
+
+// The code in "someKernel" is run
+// with 4096 threads
+someKernel<<<grid, block>>>(arguments);
+// We'll cover this^ special syntax later
+```
+::::::
+:::::: {.column width="50%"}
+::: incremental
+- threads/grid = threads/block $\times$ blocks/grid
+- device always operates over grids
+:::
+::::::
+:::::::::
+
+# Grid - Device
+
+::: notes
+So we've defined our grid and written some code. How do these software constructs (thread, block, grid) map to the hardware?
+
+The grid maps to a single device (GPU): we're telling a single device to run some code over a grid that we've defined.
+:::
+![](img/grid_gpu.png){.center width=100%}
+
+# Block - SM/CU
+
+::: notes
+Each block of threads in the grid gets mapped to a single CU/SM.
+:::
+![](img/block_sm_cu.png){.center width=100%}
+
+# Warps, wavefronts
+
+::: notes
+At the SM/CU, the blocks of threads are further broken down to warps of 32 threads (Nvidia), or wavefronts of 64 threads (AMD)
+
+Each warp/wavefront consists of consecutive 32/64 threads.
+:::
+SM/CU breaks blocks of threads to
+
+- *warps* of 32 consecutive threads (Nvidia), or
+- *wavefronts* of 64 consecutive threads (AMD)
+
+Then, the SM/CU maps each of these warps/wavefronts to a particular SMSP/SIMD unit
+
+# Warps, wavefronts, cont.
+
+<small>
+A 1D block of 256x1 threads gets partitioned to
+
+| warp/wavefront ID | thread ID (Nvidia) | thread ID (AMD) |
+|-------------------|--------------------|-----------------|
+| w0                | 0-31               | 0-63            |
+| w1                | 32-63              | 64-127          |
+| w2                | 64-95              | 128-191         |
+| w3                | 96-127             | 192-255         |
+| w4                | 128-159            | -               |
+| w5                | 160-191            | -               |
+| w6                | 192-223            | -               |
+| w7                | 224-255            | -               |
+</small>
+
+# Warp/Wavefront - SM/CU
+
+::: notes
+Then, the SM/CU maps each of these warps/wavefronts to a particular SMSP/SIMD unit
+:::
+![](img/warp_wavefron_smsp_simd.png){.center width=80%}
+
+# Thread - lane
+
+::: notes
+Finally, each thread of a warp/wavefront is mapped to a single lane of a SIMD unit or to a single core of the SMSP.
+:::
+![](img/thread_lane.png){.center width=80%}
+
+# Recap
+
+::: notes
+Let's do a review.
+
+The GPU is a massively parallel processor with its own memory space. The processing power of the GPU comes from tens or hundreds of simple processors (CU/SM) working independently and concurrently. These simple processors contain multiple vector units, which perform a single instruction for multiple pieces of data per cycle.
+
+To do some work on the GPU, we write some code from the perspective of a single thread and define a grid of threads using two levels of hierarchy defined by the API: a grid of blocks and a block of threads. We then ask the GPU to run our code for each thread in the grid.
+
+The device maps the grid of threads to its hardware components: all the threads run on the same GPU. The blocks of the grid are mapped to the CUs/SMs. These then break down the blocks to warps or wavefronts of 32/64 consecutive threads and map each warp/wavefront to a SIMD unit or SMSP.
+Each SIMD unit/SMSP executes a single instruction per cycle, doing this for all the lanes in the unit.
+:::
+
+<small>
+
+::: incremental
+- massively parallel processor
+- own memory space --> requires data movement
+- useful when you have a lot of data
+- consists of tens or hundreds of simple processors, with multiple vector units per processor
+- 1-2 orders of magnitude more instruction per cycle compared to CPUs
+- POV of a single thread
+- a grid of (blocks of) threads
+- grid <--> device
+- block <--> SM/CU
+- warp/wavefront <--> SMSP/SIMD
+- thread <--> lane
+:::
+</small>
+
+# Have we learned anything?
+
+::: notes
+Let's see if we've learned something.
+
+Say, we have the following GPU.
+:::
+![](img/model_gpu.png){.center width=65%}
+
+# Have we learned anything?
+
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+How many grids do we need, at least, to saturate the entire GPU?
+
+- 1
+- 2
+- 8
+- 32
+- 100000
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::: notes
+A grid maps to a device, so we need at least 1 grid to saturate the entire GPU.
+
+Of course it depends then on the number of blocks per grid and threads per block, whether or not the GPU is saturated, but we cannot do that with 0 grids, yet we may not need 2, if the single grid is large enough.
+:::
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+How many grids do we need, at least, to saturate the entire GPU?
+
+- 1
+- ~~2~~
+- ~~8~~
+- ~~32~~
+- ~~100000~~
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+How many blocks do we need, at least, to saturate the entire GPU?
+
+- 1
+- 2
+- 8
+- 32
+- 100000
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::: notes
+A block maps to a CU/SM, so we need at least 8 blocks, as there are 8 CUs/SMs.
+
+Again, it depends on the number of threads per block whether or not the GPU is saturated, but it cannot happen with 7 blocks.
+:::
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+How many blocks do we need, at least, to saturate the entire GPU?
+
+- ~~1~~
+- ~~2~~
+- 8
+- ~~32~~
+- ~~100000~~
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+How many warps/wavefronts do we need, at least, to saturate the entire GPU?
+
+- 1
+- 2
+- 8
+- 32
+- 100000
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::: notes
+A warp/wavefront maps to a SIMD unit/SMSP of a CU/SM, so we need at least 4 warps/wavefronts per block. So in total 32, as there are 8 CUs/SMs.
+:::
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+How many warps/wavefronts do we need, at least, to saturate the entire GPU?
+
+- ~~1~~
+- ~~2~~
+- ~~8~~
+- 32
+- ~~100000~~
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+If we assume a warp size of 32 threads, how many threads per block do we need to saturate a single CU/SM?
+
+- 1
+- 32
+- 64
+- 128
+- 1024
+- 100000
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::: notes
+With 32 threads per warp and 4 warps per CU/SM, we need at least 128 threads per block.
+:::
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+If we assume a warp size of 32 threads, how many threads per block do we need to saturate a single CU/SM?
+
+- ~~1~~
+- ~~32~~
+- ~~64~~
+- 128
+- ~~1024~~
+- ~~100000~~
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+If we assume a warp size of 32 threads and a single grid, how many threads per grid do we need to saturate the entire GPU?
+
+- 1
+- 32
+- 64
+- 128
+- 1024
+- 100000
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::: notes
+Extending the previous: at least 128 threads per block, and we need at least 8 blocks. So in total at least 1024 threads per grid, if we run only a single grid on the GPU.
+:::
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+If we assume a warp size of 32 threads and a single grid, how many threads per grid do we need to saturate the entire GPU?
+
+- ~~1~~
+- ~~32~~
+- ~~64~~
+- ~~128~~
+- 1024
+- ~~100000~~
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+If we assume a warp size of 32 threads and we define the block size to be 1024 threads, how many blocks do we need, at least, to saturate the entire GPU?
+
+- 1
+- 4
+- 8
+- 32
+- 1024
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Have we learned anything?
+
+::: notes
+Blocks are mapped to the CUs/SMs and we have 8 of them, so regardless of the size of the block or the warp, we need 8 blocks at least.
+:::
+::::::::: {.columns}
+:::::: {.column width="40%"}
+<small>
+If we assume a warp size of 32 threads and we define the block size to be 1024 threads, how many blocks do we need, at least, to saturate the entire GPU?
+
+- ~~1~~
+- ~~4~~
+- 8
+- ~~32~~
+- ~~1024~~
+</small>
+::::::
+:::::: {.column width="60%"}
+![](img/model_gpu.png){.center width=100%}
+::::::
+:::::::::
+
+# Questions?
