@@ -1,177 +1,217 @@
 ---
-title:  Introduction
-subtitle: GPU programming with HIP
+title:  Introduction to GPU programming
+subtitle: Mental model of a GPU
 author:   CSC Training
-date:     2022-11
+date:     2024-03
 lang:     en
 ---
 
+# Overview
 
-# High-performance computing
+We'll be constructing a mental model of a GPU
 
-<div class="column">
+We'll start simple and slowly add accuracy and complexity
 
-- High performance computing is fueled by ever increasing performance
-- Increasing performance allows breakthroughs in many major challenges that
-  humankind faces today
+# What is a GPU?
 
-</div>
+GPU is a processor with a dedicated memory area
 
-<div class="column">
-![](img/top500-perf-dev.png)
-</div>
+![](img/gpu-vs-cpu-level0.png){.center width=60%}
 
-# HPC through the ages
+::: notes
 
-<div class="column" width="55%">
-- Achieving performance has been based on various strategies throughout the years
-    - Frequency, vectorization, multi-node, multi-core, etc.
-- Accelerators provide compute resources based on a very high level of parallelism to reach high performance at low relative power consumption 
-</div>
+On the left we have the CPU with it's dedicated memory
 
-<div class="column" width="43%">
-![](img/microprocessor-trend-data.png)
-</div>
+On the right we have the GPU with it's dedicated memory
 
+:::
 
-# Accelerators
+# How do I use the GPU?
 
-- Specialized parallel hardware for compute-intensive operations
-    - Co-processors for traditional CPUs
-    - Based on highly parallel architectures
-    - Graphics processing units (GPU) have been the most common
-      accelerators during the last few years
-- Promises
-    - Very high performance per node
-- Usually major rewrites of programs required
+To use it, you have to
 
+# How do I use the GPU?
 
+1. Copy memory from CPU to GPU
 
-# Accelerator model today
+![](img/copy_h2d.png){.center width=60%}
 
+# How do I use the GPU?
 
-- Local memory in GPU
-    - Smaller than main memory (32 GB in Puhti, 128 GB in LUMI)
-    - Very high bandwidth (up to 3200 GB/s in LUMI)
-    - Latency high compared to compute performance
+2. Tell the GPU what to do with that data
 
-![](img/gpu-bws.png){width=100%}
+![](img/do_this_computation.png){.center width=60%}
 
-- GPUs are connected to CPUs via PCIe
-- Data must be copied from CPU to GPU over the PCIe bus
+# How do I use the GPU?
 
+3. Wait for the GPU to finish doing what you told it to do
 
-# Lumi - Pre-exascale system in Finland
+![](img/cpu_waits_on_gpu.png){.center width=60%}
 
- ![](img/lumi.png){.center width=50%}
+# How do I use the GPU?
 
+4. Copy memory from GPU back to the CPU
 
-# GPU architecture
+![](img/copy_d2h.png){.center width=60%}
 
-<div class="column" width=56%>
-- Designed for running thousands or tens of thousands of threads simultaneously
-- Running large amounts of threads hides memory access penalties
-    - The relative benefit of using a GPU often increases with an increasing job size
-- Recurring data movement between CPU and GPU is often a bottleneck
-- The penalty for context switching is relatively small
-</div>
+# Why?
 
-<div class="column" width=42%>
-![](img/amd_m200.png){.center width=60%}
-<div align="center"><small>      AMD Instinct MI200 architecture (source: AMD).  </small></div>
-</div>
+But why?
 
-# Challenges in using Accelerators
+Why move data back and forth from CPU to GPU to CPU?
 
-**Applicability**: Is your algorithm suitable for GPU?
+What's the benefit?
 
-**Programmability**: Is the programming effort acceptable?
+::: notes
+This begs the question(s):
 
-**Portability**: Rapidly evolving ecosystem and incompatibilities between vendors.
+What's the point of moving data to the GPU, doing the computation there, then moving it back, instead of just doing the computation locally by the CPU?
 
-**Availability**: Can you access a (large scale) system with GPUs?
+Do GPUs run faster that CPUs?
 
-**Scalability**: Can you scale the GPU software efficiently to several nodes?
+What's the benefit?
+:::
 
+# GPUs are massively parallel
 
-#  Heterogeneous Programming Model
+::: notes
+The answer to the penultimate question is no: GPUs usually have 2-3 times lower clock speeds than CPUs: 1 GHz vs 2-4 GHz.
 
-- GPUs are co-processors to the CPU
-- CPU controls the work flow:
-  - *offloads* computations to GPU by launching *kernels*
-  - allocates and deallocates the memory on GPUs
-  - handles the data transfers between CPU and GPUs
-- CPU and GPU can work concurrently
-   - kernel launches are normally asynchronous
+It makes sense to move data to the GPU and let it do the computation, because, although they run slower, GPUs are ￼￼massively￼￼ parallel. GPUs are basically very, very wide SIMD or vector units. Think thousands of lanes wide.
+:::
 
-# Using GPUs
+GPUs are basically very very wide SIMD or vector units
 
-<div class="column">
-1. Use existing GPU applications
-2. Use accelerated libraries
-3. Directive based methods
-    - OpenMP, OpenACC
-4. Use native GPU language
-    - CUDA, **HIP**, SYCL, Kokkos,...
-</div>
-<div class="column" width=40%>
-Easier, but more limited
+![](img/gpu_as_a_wide_vector_unit.png){.center width=80%}
 
-![](img/arrow.png){.center width=20% }
+# SIMD
 
-More difficult, but more opportunities
+::: notes
+SIMD stands for Single Instruction, Multiple Data. This is literal: the vector unit performs the same exact instruction (e.g. +) for multiple pieces of data at the same time, i.e. during the same cycle.
 
-</div>
+So instead of doing c = a + b for a single a and a single b, yielding a singular c, you do it for vectors of values a and b. Then you get a vector of values c. This means the￼throughput, i.e. "how many elements you process in a given amount of time", of a vector unit is large.
 
+The concept of a vector unit is not novel, nor is it unique to the GPU. CPUs have vector units as well, but they are narrower than on a GPU.
+:::
 
+Element-wise add for arrays `a` and `b` resulting in array `c`
 
+:::::: {.columns}
+::: {.column width="50%"}
+Scalar version
+ \
+```cpp
 
-# Directive-based accelerator languages
+int a[4] = {1, 2, 3, 4};
+int b[4] = {5, 6, 7, 8};
+int c[4] = {0, 0, 0, 0};
 
-- Annotating code to pinpoint accelerator-offloadable regions
-- OpenACC
-    - created in 2011, latest version is 3.1 (November 2020)
-    - Mostly Nvidia
-- OpenMP
-    - Earlier only threading for CPUs
-    - initial support for accelerators in 4.0 (2013), significant improvements & extensions in 4.5 (2015), 5.0 (2018), 5.1 (2020 and 5.2 (2021)
+for (int i = 0; i < 4; i++) {
+    c[i] = a[i] + b[i];
+}
+printf("{}", c); // "6, 8, 10, 12"
+```
+Four cycles, four elements: throughput = 1
 
-- Focus on optimizing productivity
-- Reasonable performance with quite limited effort, but not guaranteed
+:::
+::: {.column width="50%"}
+SIMD version
+ \
+```cpp
+int a[4] = {1, 2, 3, 4};
+int b[4] = {5, 6, 7, 8};
+int c[4] = {0, 0, 0, 0};
 
+// A single instruction ("add") performed to
+four different elements, during the same cycle.
+simd_add(a, b, c);
+printf("{}", c); // "6, 8, 10, 12"
+```
+One cycle, four elements: throughput = 4
+:::
+::::::
 
+# SIMD
 
-# Native GPU code: HIP / CUDA
+:::::: {.columns}
+::: {.column width="50%"}
+Scalar version
+ \
+![](img/scalar_operation.png){.center width=80%}
+Four cycles, four elements: throughput = 1
 
-- CUDA
-    - has been the *de facto* standard for native GPU code for years
-    - extensive set of optimised libraries available
-    - custom syntax (extension of C++) supported only by CUDA compilers
-    - support only for NVIDIA devices
-- HIP
-    - AMD effort to offer a common programming interface that works on
-      both CUDA and ROCm devices
-    - standard C++ syntax, uses nvcc/hcc compiler in the background
-    - almost a one-on-one clone of CUDA from the user perspective
-    - ecosystem is new and developing fast
+:::
+::: {.column width="50%"}
+SIMD version
+ \
+![](img/vector_operation.png){.center width=80%}
+One cycle, four elements: throughput = 4
+:::
+::::::
 
+# Recap
 
-# GPUs @ CSC
+::: notes
+Let's gather our thoughts.
 
-- **Puhti-AI**: 80 nodes, total peak performance of 2.7 Petaflops
-    - Four Nvidia V100 GPUs, two 20-core Intel Xeon processors, 3.2 TB fast local storage, network connectivity of 200Gbps aggregate bandwidth  
-- **Mahti-AI**: 24 nodes, total peak performance of 2. Petaflops
-    - Four Nvidia A100 GPUs, two 64-core AMD Epyc processors, 3.8 TB fast local storage,  network connectivity of 200Gbps aggregate bandwidth   
-- **LUMI-G**: 2560 nodes, total peak performance of 500 Petaflops
-    - Four AMD MI250X GPUs, one 64-core AMD Epyc processor, 2x3 TB fast local storage, network connectivity of 800Gbps aggregate bandwidth
+- Moving data from the CPU memory to the GPU memory takes time
+- Doing the computation on the GPU takes time
+- Finally, moving the data back from the GPU memory to the CPU memory takes time
 
-# Summary
+This is all time that could be spent doing the computation on the CPU.
 
-- GPUs can provide significant speed-up for many applications
-    - High amount of parallelism required for efficient utilization of GPUs
-- GPUs are co-processors to CPUs
-   - CPU offloads computations to GPUs and manages memory
-- Programming models for GPUs
-    - Directive based methods: OpenACC, OpenMP
-    - Frameworks: Kokkos, SYCL
-    - C++ language extensions: CUDA, HIP
+But we just discovered, that the GPUs are massive parallel units, and thus they can perform the same instruction to multiple pieces of data at the same time.
+
+So which is faster:
+
+1. Doing the computation on the CPU, or
+2. Moving data back and forth and using the GPU to do the computation?
+
+A simple answer is: it depends on how much data you have.
+
+Let's take a look at a graph to help us understand this better.
+:::
+
+It takes time to
+
+- Move data to the GPU
+- Compute on the GPU
+- Move results to the CPU
+
+So which is faster:
+
+1. Doing the computation on the CPU, or
+2. Moving data back and forth and using the GPU to do the computation?
+
+# Runtimes of Axpy
+::: notes
+In this graph we have a plot of problem size (horizontal axis) vs runtime (vertical axis).
+
+The legend tells us there are four different versions of the computation:
+
+1. A completely serial computation
+2. OpenMP with two threads
+3. OpenMP with 64 threads
+4. GPU
+
+The serial part runs fastest, if we have less than $10^4$ elements.
+
+Then we see the OpenMP version with 64 threads dominate, if the number of elements is between $10^4$ and $3 \times 10^7$.
+
+Finally, once the problem size is larger than $3 \times 10^7$, the GPU version starts to dominate.
+
+We can also see the GPU and OMP64 versions having a constant runtime, when the number of elements is $< 3 \times 10^7$, even if the problem size increases.
+
+This indicates that the problem is too small to actually use all the available resources: scaling up the problem doesn't cost anything extra, because there are an abundance of free units for doing the work.
+
+Another thing visible is the runtime penalty of using GPUs and multithreaded CPUs:
+The runtime difference between the serial version and the other versions is the overhead of using the more parallel versions.
+
+This means it's actually much faster to just do the computation locally, with a single thread, than it is to either spin up a bunch of threads and distribute the problem among them, or copy the data to the massively parallel GPU and let it solve the problem.
+
+Now we are better equipped to understand why and when should we use a GPU and when to do the work locally.
+
+There are many more things to consider, and one should always make informed decisions by measuring the actual performance of the application instead of relying on generic guidelines. But guidelines serve as a starting point.
+:::
+
+![](img/runtimes_annotated.png){.center width=40%}
