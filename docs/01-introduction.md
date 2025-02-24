@@ -12,7 +12,7 @@ We are going to construct a mental model of a GPU
 
 We will start simple and slowly add accuracy and complexity
 
-# Part 1 {.section}
+# Part 1: What is a GPU? {.section}
 
 # What is a GPU?
 
@@ -93,13 +93,12 @@ So instead of doing c = a + b for a single a and a single b, yielding a singular
 The concept of a vector unit is not novel, nor is it unique to the GPU. CPUs have vector units as well, but they are narrower than on a GPU.
 :::
 
-SIMD = Single Instruction, Multiple Data
-
-Same exact instruction (e.g. "integer add") to multiple pieces of data
-
-Throughput: Width of unit $\times$ throughput of scalar unit
-
-CPUs & GPUs both use SIMD
+::: incremental
+- SIMD = Single Instruction, Multiple Data
+- Same exact instruction (e.g. "integer add") to multiple pieces of data
+- Throughput: Width of unit $\times$ throughput of scalar unit
+- CPUs & GPUs both use SIMD
+:::
 
 # Scalar addition
 
@@ -153,7 +152,7 @@ printf("{}", c); // "6, 8, 10, 12"
 
 1 cycle, 4 elements: throughput = 4
 
-# Recap
+# Which is faster, CPU or GPU?
 
 ::: notes
 Let's gather our thoughts.
@@ -214,9 +213,26 @@ There are many more things to consider, and one should always make informed deci
 :::
 
 
-![](img/runtimes_annotated.png){.center width=40%}
+::::::::: {.columns}
+:::::: {.column width="60%"}
+::: incremental
+- four different versions
+- serial, OMP64, GPU dominate at different problem sizes
+- idle resources, when problem is small
+- overhead of parallellizing
+- depends heavily on the type of the problem (profile, don't assume!)
+:::
+::::::
+:::::: {.column width="40%"}
+![](img/runtimes_annotated.png){.center width=100%}
+::::::
+:::::::::
 
-# Part 2 {.section}
+# Recap
+
+TODO
+
+# Part 2: Model of GPU Hardware {.section}
 
 # GPU as a wide SIMD unit
 
@@ -345,6 +361,10 @@ The GPU isn't just a collection of independent vector units. It's more like a co
 AMD calls these processors Compute Units (CU), Nvidia calls them Streaming Multiprocessors (SM) and Intel has many names for them, one of which is Execution Unit (EU).
 
 The "other hardware" block hides a lot of details. We don't need to understand those details to write correct GPU code, though it it useful to understand them to write performant GPU code.
+
+Let's compare this simple model to an actual schematic of two GPUs:
+
+MI250X from AMD, as found on LUMI and A100 from Nvidia, as found on Mahti.
 :::
 
 :::::: {.columns}
@@ -360,36 +380,6 @@ Tens or hundreds of simple processors
 - EU = Execution Unit (Intel)
 :::
 ::::::
-
-# Recap of What is a GPU
-
-::: notes
-Let's do a review:
-
-GPU is a massively parallel processor with its own memory space. You copy data from the CPU memory to the GPU memory and tell the GPU to do some computation on that data. This makes sense, if you have enough data to crunch. If not, it's better to do the computation locally with the CPU.
-
-The GPU gets it computational power from tens or hundreds of simple processors called compute units, streaming multiprocessors or execution units, depending on the hardware vendor. These simple processors have multiple vector units inside them (in addition to other hardware) and they can execute a single instruction per cycle per vector unit. The entire GPU can execute $10^3 - 10^4$ instructions per cycle. CPUs can execute $10^1 - 10^2$ instructions per cycle.
-:::
-
-::: incremental
-- massively parallel processor
-- own memory space --> requires data movement
-- useful when you have a lot of data
-- consists of tens or hundreds of simple processors, with multiple vector units per processor
-- 1-2 orders of magnitude more instruction per cycle compared to CPUs
-:::
-
-# Part 3 {.section}
-
-# GPU, simplified
-
-::: notes
-We've been dealing with a very simplified version of a GPU, gradually adding more complexity and accuracy to the mental model as we've hit the limits of the previous one. Now, let's take a look at the official schematics of two GPUs and their CUs/SMs:
-
-MI250X from AMD, as found on LUMI
-A100 from Nvidia, as found on Mahti
-:::
-![](img/gpu_as_cus_sms_eus.png){.center width=60%}
 
 # MI250X
 
@@ -489,6 +479,25 @@ Again, the most important new thing here for a beginner programmer is the L1 Dat
 :::
 ::::::
 :::::::::
+
+# Recap of What is a GPU
+
+::: notes
+Let's do a review:
+
+GPU is a massively parallel processor with its own memory space. You copy data from the CPU memory to the GPU memory and tell the GPU to do some computation on that data. This makes sense, if you have enough data to crunch. If not, it's better to do the computation locally with the CPU.
+
+The GPU gets it computational power from tens or hundreds of simple processors called compute units, streaming multiprocessors or execution units, depending on the hardware vendor. These simple processors have multiple vector units inside them (in addition to other hardware) and they can execute a single instruction per cycle per vector unit. The entire GPU can execute $10^3 - 10^4$ instructions per cycle. CPUs can execute $10^1 - 10^2$ instructions per cycle.
+:::
+
+::: incremental
+- massively parallel processor
+- own memory space --> requires data movement
+- useful when you have a lot of data
+- consists of tens or hundreds of simple processors, with multiple vector units per processor
+- 1-2 orders of magnitude more instruction per cycle compared to CPUs
+:::
+# Part 3: Programming GPUs {.section}
 
 # Programming GPUs
 
