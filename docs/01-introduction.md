@@ -18,7 +18,7 @@ We will start simple and slowly add accuracy and complexity
 
 GPU is a processor with a dedicated memory area
 
-![](img/gpu-vs-cpu-level0.png){.center width=60%}
+![](img/gpu_is_a_separate_processor_with_own_memory.png){.center width=50%}
 
 ::: notes
 
@@ -30,31 +30,61 @@ On the right we have the GPU with it's dedicated memory
 
 # How do I use the GPU?
 
+:::::: {.columns}
+::: {.column width="50%"}
 To use it, you have to
 
+1. Copy memory from CPU to GPU
+:::
+::: {.column width="50%"}
+![](img/copy_h2d.png){.center width=100%}
+:::
+::::::
+
 # How do I use the GPU?
+
+:::::: {.columns}
+::: {.column width="50%"}
+To use it, you have to
 
 1. Copy memory from CPU to GPU
-
-![](img/copy_h2d.png){.center width=60%}
-
-# How do I use the GPU?
-
 2. Tell the GPU what to do with that data
-
-![](img/do_this_computation.png){.center width=60%}
+:::
+::: {.column width="50%"}
+![](img/do_this_computation.png){.center width=100%}
+:::
+::::::
 
 # How do I use the GPU?
 
+:::::: {.columns}
+::: {.column width="50%"}
+To use it, you have to
+
+1. Copy memory from CPU to GPU
+2. Tell the GPU what to do with that data
 3. Wait for the GPU to finish doing what you told it to do
-
-![](img/cpu_waits_on_gpu.png){.center width=60%}
+:::
+::: {.column width="50%"}
+![](img/cpu_waits_on_gpu.png){.center width=100%}
+:::
+::::::
 
 # How do I use the GPU?
 
-4. Copy memory from GPU back to the CPU
+:::::: {.columns}
+::: {.column width="50%"}
+To use it, you have to
 
-![](img/copy_d2h.png){.center width=60%}
+1. Copy memory from CPU to GPU
+2. Tell the GPU what to do with that data
+3. Wait for the GPU to finish doing what you told it to do
+4. Copy memory from GPU back to the CPU
+:::
+::: {.column width="50%"}
+![](img/copy_d2h.png){.center width=100%}
+:::
+::::::
 
 # Why?
 
@@ -538,7 +568,7 @@ The point of view of a single thread is "I'm going to take this single value fro
 ::::::::: {.columns}
 :::::: {.column width="40%"}
 - Context: Execute some code over the size of the arrays using a douple loop
-- Single thread POV: Perform addition of two elements $c_{ij} = a_{ij} + b_{ij}$
+- Single thread point of view: Perform addition of two elements $c_{ij} = a_{ij} + b_{ij}$
 ::::::
 :::::: {.column width="60%"}
 ```cpp
@@ -853,7 +883,7 @@ Each SIMD unit/SMSP executes a single instruction per cycle, doing this for all 
 - useful when you have a lot of data
 - consists of tens or hundreds of simple processors, with multiple vector units per processor
 - 1-2 orders of magnitude more instruction per cycle compared to CPUs
-- POV of a single thread
+- point of view of a single thread
 - a grid of (blocks of) threads
 - grid <--> device
 - block <--> SM/CU
@@ -862,7 +892,7 @@ Each SIMD unit/SMSP executes a single instruction per cycle, doing this for all 
 :::
 </small>
 
-# Have we learned anything?
+# What have we learned?
 
 ::: notes
 Let's see if we've learned something.
@@ -871,7 +901,7 @@ Say, we have the following GPU.
 :::
 ![](img/model_gpu.png){.center width=65%}
 
-# Have we learned anything?
+# What have we learned?
 
 ::::::::: {.columns}
 :::::: {.column width="40%"}
@@ -890,7 +920,7 @@ How many grids do we need, at least, to saturate the entire GPU?
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::: notes
 A grid maps to a device, so we need at least 1 grid to saturate the entire GPU.
@@ -914,7 +944,7 @@ How many grids do we need, at least, to saturate the entire GPU?
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::::::::: {.columns}
 :::::: {.column width="40%"}
@@ -933,7 +963,7 @@ How many blocks do we need, at least, to saturate the entire GPU?
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::: notes
 A block maps to a CU/SM, so we need at least 8 blocks, as there are 8 CUs/SMs.
@@ -957,7 +987,7 @@ How many blocks do we need, at least, to saturate the entire GPU?
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::::::::: {.columns}
 :::::: {.column width="40%"}
@@ -976,7 +1006,7 @@ How many warps/wavefronts do we need, at least, to saturate the entire GPU?
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::: notes
 A warp/wavefront maps to a SIMD unit/SMSP of a CU/SM, so we need at least 4 warps/wavefronts per block. So in total 32, as there are 8 CUs/SMs.
@@ -998,7 +1028,7 @@ How many warps/wavefronts do we need, at least, to saturate the entire GPU?
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::::::::: {.columns}
 :::::: {.column width="40%"}
@@ -1018,7 +1048,7 @@ If we assume a warp size of 32 threads, how many threads per block do we need to
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::: notes
 With 32 threads per warp and 4 warps per CU/SM, we need at least 128 threads per block.
@@ -1041,7 +1071,7 @@ If we assume a warp size of 32 threads, how many threads per block do we need to
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::::::::: {.columns}
 :::::: {.column width="40%"}
@@ -1061,7 +1091,7 @@ If we assume a warp size of 32 threads and a single grid, how many threads per g
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::: notes
 Extending the previous: at least 128 threads per block, and we need at least 8 blocks. So in total at least 1024 threads per grid, if we run only a single grid on the GPU.
@@ -1084,7 +1114,7 @@ If we assume a warp size of 32 threads and a single grid, how many threads per g
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::::::::: {.columns}
 :::::: {.column width="40%"}
@@ -1103,7 +1133,7 @@ If we assume a warp size of 32 threads and we define the block size to be 1024 t
 ::::::
 :::::::::
 
-# Have we learned anything?
+# What have we learned?
 
 ::: notes
 Blocks are mapped to the CUs/SMs and we have 8 of them, so regardless of the size of the block or the warp, we need 8 blocks at least.
