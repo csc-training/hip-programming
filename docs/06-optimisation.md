@@ -49,7 +49,7 @@ lang:     en
 
 | Link | Host-device | Device memory | 
 |------|------------:|--------------:|
-| LUMI-G MI250x | 36 GB/s$^{\star}$ | 3200 GB/s|
+| LUMI-G MI250x | 36 GB/s$^{\star}$ | 1600 GB/s|
 | PCIE4.0 x16 | $\sim$ 32 GB/s |  |
 | A100 (Mahti) |  | 2000 GB/s |
 
@@ -135,28 +135,28 @@ $^\star$ per GCD, MI250x has 2 GCDs
     - Very slow access
 </div>
 
+---
 
-# MI250x Compute Units (CU)
+## MI250x Compute Units (CU)
 ::::::{.columns}
 
-:::{.column width=44%}
+:::{.column width=40%}
 
 - 64 kiB of **local data share** (LDS) memory
-- 800 scalar registers (12.6 kiB)
+- 800 *scalar registers* (**SGPR**, 12.6 kiB)
   - up to 102 per warp
-- Scalar unit
 - 16 kiB of L1 cache
 :::
 
-:::{.column width=54%}
+:::{.column width=59%}
 ![](img/coarse_CU.svg){.center width=120%}
 :::
 ::::::
 
 - 4$\times$SIMD units, 16 threads per SIMD unit
-  - 128 kiB *vector* **register** (VGPR) storage per SIMD unit $\Rightarrow$ 512 kiB register storage on CU
+  - 128 kiB *vector register* (**VGPR**) storage per SIMD unit $\Rightarrow$ 512 kiB register storage on CU
   - 512 4-byte registers per thread (2 kiB). 
-  - *Mental note*: 2 kiB $\times$ 64 $\times$ 4 = 512 kiB 
+- MI250x CU has matrix units, but they are tricky to program
 
 
 ::: notes
@@ -164,6 +164,7 @@ $^\star$ per GCD, MI250x has 2 GCDs
 - Ballpark sizes for registers, LDS and cache
 - MI250x GCD has 110 compute units
 - Lot of register storage
+- MI250x has also matrix units but they are tricker. Need intrinsics.
 :::
 
 
@@ -174,69 +175,75 @@ Memory is fetched in cache lines of 64/128 bytes from device memory
 - warp requests non-consecutive elements, cannot coalesce memory operations
 
   ```cpp
-   int tid = blockIdx.x*blockDim.x + threadIdx.x;
-   if(tid < N) out[tid*8] = in[tid*8];
+   int tid = gridDim.x*blockIdx.y + (threadIdx.y + blockIdx.x)*blockDim.x + 8*threadIdx.x;
+   if(tid < L) out[tid] = in[tid];
+   
   ```
 
 - consecutive elements, memory operations are coalesced
 
   ```cpp
-   int tid = blockIdx.x*blockDim.x + threadIdx.x;
-   if(tid < N) out[tid] = in[tid];
+   int tid = gridDim.x*blockIdx.y + (threadIdx.y + blockIdx.x)*blockDim.x + threadIdx.x;
+   if(tid < K) out[tid] = in[tid];
   ```
-
+- call: 
+  ```cpp
+     kernel<<<dim3(M,N,1), dim3(M_b, N_b, 1)>>>(float* in, float* out, size_t L);
+  ```
 
 ---
 
-**Uncoalesced memory access**
+## Uncoalesced memory access
 
 ::::::{.columns}
 :::{.column width="76%"}
 ![](img/uncoalesced.svg){width="100%"}
 :::
 :::{.column width="23%"}
-<br>
+<br> <br> <br> <br> <br> <br> <br>
+![](img/global-mem-arrow.svg){width="40%"}
 :::
 ::::::
 
 9 read OPs for 9 elements
 
-Each big arrow is memory read from global device memory.
-
 ---
 
-**Coalesced memory access**
+## Coalesced memory access
 
 ::::::{.columns}
 :::{.column width="76%"}
 ![](./img/coalesced.svg){width="100%"}
 :::
 :::{.column width="23%"}
-<br>
+<br> <br> <br> <br> <br> <br> <br>
+![](img/global-mem-arrow.svg){width="40%"}
 :::
 
 ::::::
 
 4 read operations for 32 elements
 
-# Local data share
+---
+
+## Local data share
 
 - Variable defined as `__shared__` is shared within block 
-- Divided into banks, each serve one address per cycle
+- Divided into 32 banks of 512 Dwords (MI250x), each serve one address per cycle
 - Use cases:
-  - Nearby threads load/store to/from the same memory location $\Rightarrow$
-  reduce ovelapping global memory operations
+  - reduce ovelapping global memory operations <br>$\Rightarrow$ Remember to `__syncthreads()`!
   - User controlled cache
   - Transform uncoalesced memory OPs to coalesced
 - Usage:
   ```cpp
   __shared__ float buf[256];
   ```
-- Remember to `__syncthreads()`!
 
-# Local data share
+---
 
-- **Advanced optimization**: avoid bank conflicts
+## Local data share
+
+### **Advanced optimization**: avoid bank conflicts
 
 <br>
 
@@ -247,15 +254,90 @@ Each big arrow is memory read from global device memory.
 ![](img/BankConflicts.jpeg){width=100%}
 </div>
 
+
+# 5. Avoid branching within warp
+
+
+::::::{.columns}
+:::{.column width=60%}
+- Both branches are executed sequentially but if statement value is used as a mask
+- *However*
+  - Compiler is pretty good at optimizing
+  - Even if both branches are executed, code on right is memory-bound
+:::
+:::{.column width=39%}
+```cpp
+if ( (tid%2) == 0) {
+  c[tid] = b[tid]-a[tid];
+} else {
+  c[tid] = a[tid]-b[tid];
+}
+```
+```cpp
+bool mask = (tid%2) == 0;
+c[tid] = mask*(b[tid]-a[tid]);
+c[tid] = mask*(a[tid]-b[tid]);
+```
+"Solution"
+```cpp
+if ( ((tid/16)%2) == 0) {
+  c[tid] = b[tid]-a[tid];
+} else {
+  c[tid] = a[tid]-b[tid];
+}
+```
+:::
+::::::
+
+---
+
+## Branching across SIMD units
+
+::::::{.columns}
+:::{.column width=59%}
+- $N=2^{29}$ doubles $\sim$ 512 MiB
+ 
+Table: *Cost of branching at different optimization levels*
+
+  | branching | `-O0` (ms) | `-O1` (ms)  |
+  |-----------|-----:|-----:|
+  | *Good* | 181 | 9 |
+  | *Bad* | 320 | 9 | 
+  | *single branch* | 108 | 6 |
+
+
+:::
+:::{.column width=39%}
+*Good*
+```cpp
+if (((tid)/16)%2 == 0) {
+  x[tid] = sin(M_PI*double(tid)/N);
+} else {
+  x[tid] = cos(M_PI*double(tid)/N);
+}
+```
+*Bad*
+```cpp
+if(tid%2 == 0) {
+  x[tid] = sin(M_PI*double(tid)/N);
+} else {
+  x[tid] = cos(M_PI*double(tid)/N);
+}
+```
+*Single branch*
+```cpp
+x[tid] = sin(M_PI*double(tid)/N);
+```
+:::
+::::::
+
 # non-renewed material follows {.section}
 
 # Low level optimizations 
 - Avoid branching
   - All threads in  wavefront should execute the same instruction
     - `if(tid%2==0)` would result in 2 branches
-    -  better use `if(tid<N/2)`
-- Sometimes recomputing can be faster than reading from the memory
-- Depending on the problem, consider using lower precision instead of `double` (math functions are available for `single` and `half` precision )
+    -  better use `if(tid<N/2)` - Sometimes recomputing can be faster than reading from the memory - Depending on the problem, consider using lower precision instead of `double` (math functions are available for `single` and `half` precision )
 
 # Optimizing matrix operations. `B(i,j)=A(j,i)`  
 ![](img/transpose_img.png){.center width=60%}
