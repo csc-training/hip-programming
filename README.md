@@ -44,7 +44,7 @@ part of the EuroCC training activities at CSC.
 | 15:45-16:00 | Close-up | 
 
 
-Link to [slides](https://kannu.csc.fi/s/gZSBE8DbeEKZjRw)
+Link to [slides](https://csc-training.github.io/hip-programming/)
 ## Exercises
 
 [General instructions](exercise-instructions.md)
