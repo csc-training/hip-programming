@@ -55,7 +55,7 @@ lang:     en
 
 ::: notes
 
-- Dont be afraid of host-device memory copies
+- Don't be afraid of host-device memory copies
 - But be aware of the 2-order of magnitude BW difference
 
 :::
@@ -170,68 +170,64 @@ lang:     en
 
 # 4. Optimise for coalesced memory access
 
-Memory is fetched in cache lines of 64/128 bytes from device memory
-
-- warp requests non-consecutive elements, cannot coalesce memory operations
-
-  ```cpp
-   int tid = gridDim.x*blockIdx.y + (threadIdx.y + blockIdx.x)*blockDim.x + 8*threadIdx.x;
-   if(tid < L) out[tid] = in[tid];
-   
-  ```
-
-- consecutive elements, memory operations are coalesced
-
-  ```cpp
-   int tid = gridDim.x*blockIdx.y + (threadIdx.y + blockIdx.x)*blockDim.x + threadIdx.x;
-   if(tid < K) out[tid] = in[tid];
-  ```
-- call: 
-  ```cpp
-     kernel<<<dim3(M,N,1), dim3(M_b, N_b, 1)>>>(float* in, float* out, size_t L);
-  ```
+- Memory is fetched in cache lines of 64/128 bytes from device memory
+- If warp requests consecutive elements, then fewer global memory accesses are needed
+- Typically (in bytes)
+  - stride-1 access "`double val = global_mem[tid]`" fast
+  - stride-64 access "`double val = global_mem[tid*8]`" slow
+- But access needn't be linear as long as the warp accesses consecutive elements in global memory!
+  - "`double val = global_mem[permutation_of_1_to_8[tid]]`"
 
 ---
 
 ## Uncoalesced memory access
 
 ::::::{.columns}
-:::{.column width="76%"}
+:::{.column width="50%"}
 ![](img/uncoalesced.svg){width="100%"}
+<div align=right>
+![](img/global-mem-arrow.svg){width="3cm"}
+</div>
 :::
-:::{.column width="23%"}
-<br> <br> <br> <br> <br> <br> <br>
-![](img/global-mem-arrow.svg){width="40%"}
+:::{.column}
+
+* 6 read operations for 6 elements
+```cpp
+double val = global_array[8*tid];
+```
+
 :::
 ::::::
 
-9 read OPs for 9 elements
 
 ---
 
 ## Coalesced memory access
 
 ::::::{.columns}
-:::{.column width="76%"}
-![](./img/coalesced.svg){width="100%"}
+:::{.column width="50%"}
+![](./img/coalesced.svg){width="100%"} 
+<div align=right>
+![](img/global-mem-arrow.svg){width="3cm"}
+</div>
 :::
-:::{.column width="23%"}
-<br> <br> <br> <br> <br> <br> <br>
-![](img/global-mem-arrow.svg){width="40%"}
+:::{.column}
+* 2 read operations for 16 elements
+```cpp
+double val = global_array[tid];
+```
 :::
 
 ::::::
 
-4 read operations for 32 elements
 
 ---
 
 ## Local data share
 
 - Variable defined as `__shared__` is shared within block 
-- Divided into 32 banks of 512 Dwords (MI250x), each serve one address per cycle
 - Use cases:
-  - reduce ovelapping global memory operations <br>$\Rightarrow$ Remember to `__syncthreads()`!
+  - reduce overlapping global memory operations <br>$\Rightarrow$ Remember to `__syncthreads()`!
   - User controlled cache
   - Transform uncoalesced memory OPs to coalesced
 - Usage:
@@ -243,9 +239,10 @@ Memory is fetched in cache lines of 64/128 bytes from device memory
 
 ## Local data share
 
-### **Advanced optimization**: avoid bank conflicts
+**Advanced optimization**: avoid bank conflicts
 
-<br>
+- LDS is divided into 32 banks of 512 Dwords (MI250x), each serve one address per cycle
+
 
 <div class="column">
 ![](img/NoBankConflicts.jpeg){width=100%}
@@ -337,17 +334,14 @@ if(tid%2 == 0) {
 - Might happen if the kernel is very complicated
   - Solution: reduce *occupancy*.
 
-# non-renewed material follows {.section}
+# Example: Utilizing local shared memory {.section}
+## Matrix transpose
 
-# Low level optimizations 
-- Avoid branching
-  - All threads in  wavefront should execute the same instruction
-    - `if(tid%2==0)` would result in 2 branches
-    -  better use `if(tid<N/2)` - Sometimes recomputing can be faster than reading from the memory - Depending on the problem, consider using lower precision instead of `double` (math functions are available for `single` and `half` precision )
+# Matrix transpose
 
-# Optimizing matrix operations. `B(i,j)=A(j,i)`  
+- Naive: Either reads or writes are uncoalesced
+
 ![](img/transpose_img.png){.center width=60%}
-
 
 # Copy operation as base
 
@@ -447,17 +441,20 @@ __global__ void transpose_lds_kernel(float *in, float *out, int width,
 
 The duration is `0.179 ms`  and the effective bandwidth `697 GB/s`
 
-
-
 # Other examples where shared memory is critical 
+
 - Matrix-matrix/vector multiplication
 - N-body problem
 - reductions
 
 # Summary
 
-- Uses existing provided libraries: `hipBLAS`, `hipFFT`, ...
-- Coalesced memory access in kernels results in better
-  performance
-- Use shared memory to reduce duplicate global memory accesses or make the acceses coalesced, but watch out for bank conflicts
-- Try to avoid branching of the threads inside a wavefront
+- Existing specialized libraries are extremely optimised. Especially dense linear algebra (hipBLAS/cuBlAS) and FFTs
+- Host-Device vs Device-Compute Unit BW difference is order of 2
+- Keep data in registers and don't move it unnecessarily to device memory
+  - But there are a finite amount of registers!
+- Coalesced memory access is better!
+- Local data share: a shared variable inside a block
+- Branching
+  - Condition varies in warp: Execute both branches and mask other to be *NoOp*
+  - Condition varies between warps: Execute only one branch
