@@ -2,9 +2,26 @@
 title:  Multi-GPU programming and HIP+MPI
 subtitle: GPU programming with HIP
 author:   CSC Training
-date:     2022-11
+date:     2025-03
 lang:     en
 ---
+
+
+
+
+# HPC Systems
+
+* Workstations or supercomputer nodes can be equipped with several GPUs
+    * For the current supercomputers, the number of GPUs per node usually
+      ranges between 2 to 8
+    * Allows sharing (and saving) resources (disks, power units, e.g.)
+    * More GPU resources per node, better per-node-performance
+
+
+
+# Lumi - Pre-exascale system in Finland
+
+ ![](img/lumi.png){.center width=50%}
 
 # Outline
 
