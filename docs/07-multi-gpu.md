@@ -13,13 +13,12 @@ lang:     en
 
  <div class="column">
 
-<small>
-* Workstations or supercomputer nodes can be equipped with several GPUs
-    * For the current supercomputers, the number of GPUs per node usually
-      ranges between 2 to 8
-    * Allows sharing (and saving) resources (disks, power units, e.g.)
-    * More GPU resources per node, better per-node-performance
-</small>  
+* <small>Workstations or supercomputer nodes can be equipped with several GPUs</small> 
+    * <small>For the current supercomputers, the number of GPUs per node usually
+      ranges between 2 to 8</small> 
+    * <small>Allows sharing (and saving) resources (disks, power units, e.g.)</small> 
+    * <small>More GPU resources per node, better per-node-performance</small> 
+ 
 </div>
 
  <div class="column">
