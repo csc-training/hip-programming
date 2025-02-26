@@ -22,18 +22,19 @@ lang:     en
 # HPC SystemsLumi - Pre-exascale system in Finland
 
  <div class="column">
-    
+
+<small>
 * Workstations or supercomputer nodes can be equipped with several GPUs
     * For the current supercomputers, the number of GPUs per node usually
       ranges between 2 to 8
     * Allows sharing (and saving) resources (disks, power units, e.g.)
     * More GPU resources per node, better per-node-performance
-  
-  </div>
+</small>  
+</div>
 
  <div class="column">
-    ![](img/lumi.png){.center width=40%}
-    Lumi - Pre-exascale system in Finland
+    ![](img/lumi.png){.center width=400%}
+    <small>Lumi - Pre-exascale system in Finland</small>
   </div>
 
 # Three levels of parallelism
