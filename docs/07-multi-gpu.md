@@ -23,6 +23,23 @@ lang:     en
 
  ![](img/lumi.png){.center width=50%}
 
+
+# Three levels of parallelism
+
+<div class="column">
+1. GPU: GPU threads
+    * Parallelization strategy: HIP, OpenMP, SYCL, Kokkos, OpenCL
+2. Node: Multiple GPUs and CPUs
+    * Parallelization strategy: MPI, Threads, OpenMP
+3. Supercomputer: Many nodes connected with interconnect
+    * Parallelization strategy: MPI between nodes
+</div>
+
+<div class="column">
+![](img/parallel_regions.png){width=99%}
+</div>
+
+
 # Outline
 
 * GPU context
@@ -297,25 +314,6 @@ int omp_target_memcpy(void *dst, const void *src, size_t size, size_t dstOffset,
 ```
 
 * If direct peer to peer access is not available or implemented, the functions should fall back to a normal copy through host memory
-
-
-# Summary {.section}
-
-# Three levels of parallelism
-
-<div class="column">
-1. GPU: GPU threads
-    * Parallelization strategy: HIP, OpenMP, SYCL, Kokkos, OpenCL
-2. Node: Multiple GPUs and CPUs
-    * Parallelization strategy: MPI, Threads, OpenMP
-3. Supercomputer: Many nodes connected with interconnect
-    * Parallelization strategy: MPI between nodes
-</div>
-
-<div class="column">
-![](img/parallel_regions.png){width=99%}
-</div>
-
 
 # Summary
 
