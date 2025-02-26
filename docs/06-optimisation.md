@@ -414,7 +414,7 @@ __global__ void transpose_lds_kernel(float *in, float *out, int width,
 The duration is `0.185 ms`  and the effective bandwidth `674 GB/s`
 
 
-# Matrix transpose with shared memory without bank conflicts
+# Extra: Matrix transpose with shared memory without bank conflicts
 
 <small>
 ```cpp
@@ -444,11 +444,15 @@ The duration is `0.179 ms`  and the effective bandwidth `697 GB/s`
 # Other examples where shared memory is critical 
 
 - Matrix-matrix/vector multiplication
+  - Same elements are loaded in different threads
 - N-body problem
+  - One thread evolves one body: each thread loads all data of each other body as well
 - reductions
+  - Cooperation between threads
 
 # Summary
 
+::: incremental
 - Existing specialized libraries are extremely optimised. Especially dense linear algebra (hipBLAS/cuBlAS) and FFTs
 - Host-Device vs Device-Compute Unit BW difference is order of 2
 - Keep data in registers and don't move it unnecessarily to device memory
@@ -458,3 +462,4 @@ The duration is `0.179 ms`  and the effective bandwidth `697 GB/s`
 - Branching
   - Condition varies in warp: Execute both branches and mask other to be *NoOp*
   - Condition varies between warps: Execute only one branch
+:::
