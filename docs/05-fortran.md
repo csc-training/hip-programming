@@ -112,6 +112,22 @@ void launch(float *dout, float *da,
 ```
 </div>
 
+# Compilation
+
+**NVIDIA**
+```
+hipcc "--gpu-architecture=sm_70" --x cu -c hip_implementation.cpp -o hip_implementation.o
+gfortran -cpp -I<hipfort_install_folder>/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\""  -c main.f03 -o main.o 
+hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_70" -I<hipfort_install_folder>/include/hipfort/nvptx -L<hipfort_install_folder>/lib/ -lhipfort-nvptx
+```
+**LUMI**
+```
+export HIPFORT_HOME=/projappl/project_465001194/apps/HIPFORT
+ftn -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$HIPFORT_HOME/lib -lhipfort-amdgcn $LIB_FLAGS -c <fortran_code>.f90
+CC -xhip -c <hip_kernels>.cpp
+ftn  -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$HIPFORT_HOME/lib -lhipfort-amdgcn $LIB_FLAGS -o main <fortran_code>.o hip_kernels.o
+```
+
 # Summary
 
 * No native GPU support in Fortran
