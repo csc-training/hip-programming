@@ -8,7 +8,7 @@ program testSaxpy
      subroutine launch(y,x,b,N) bind(c)
        use iso_c_binding
        implicit none
-       type(c_ptr) :: y,x
+       type(c_ptr),value :: y,x
        integer, value :: N
        real, value :: b
      end subroutine
