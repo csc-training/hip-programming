@@ -35,7 +35,7 @@ program saxpy
      subroutine launch(y,x,b,N) bind(c)
        use iso_c_binding
        implicit none
-       type(c_ptr) :: y,x
+       type(c_ptr),value :: y,x
        integer, value :: N
        real, value :: b
      end subroutine
@@ -101,7 +101,7 @@ __global__ void saxpy(float *y, float *x,
 <div class="column">
 ``` cpp
 extern "C"{
-void launch(float **dout, float **da, 
+void launch(float *dout, float *da, 
             float db, int N)
   {
      dim3 tBlock(256,1,1);
@@ -110,7 +110,7 @@ void launch(float **dout, float **da,
     hipLaunchKernelGGL(saxpy, 
                        grid, tBlock, 
                        0, 0, 
-                       *dout, *da, db, N);
+                       dout, da, db, N);
   }
 }
 ```
