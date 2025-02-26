@@ -15,7 +15,7 @@ lang:     en
 
 * Supercomputer nodes can be equipped with several GPUs
   
-    * For the current supercomputers there are  2 to 8 GPUs per node 
+    * In the current supercomputers there are  2 to 8 GPUs per node 
 
     * More GPU resources per node, better per-node-performance 
  
