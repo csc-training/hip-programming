@@ -43,7 +43,7 @@ program saxpy
   type(c_ptr) :: dx = c_null_ptr
   type(c_ptr) :: dy = c_null_ptr
   integer, parameter :: N = 400000000
-  integer, parameter :: bytes_per_element = 4
+  integer(c_size_t), parameter :: bytes_per_element = 4
   integer(c_size_t), parameter :: Nbytes = N*bytes_per_element
   real, allocatable,target,dimension(:) :: x, y
   real, parameter ::  a=2.0
