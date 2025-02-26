@@ -105,12 +105,8 @@ void launch(float *dout, float *da,
   {
      dim3 tBlock(256,1,1);
      dim3 grid(ceil((float)N/tBlock.x),1,1);
-    
-    hipLaunchKernelGGL(saxpy, 
-                       grid, tBlock, 
-                       0, 0, 
-                       dout, da, db, N);
-//  saxpy<<<grid, tBlock>>>(dout, da, db, N);
+     
+     saxpy<<<grid, tBlock>>>(dout, da, db, N);
   }
 }
 ```
