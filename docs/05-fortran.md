@@ -114,7 +114,7 @@ void launch(float *dout, float *da,
 
 # Compilation
 
-**NVIDIA**
+**NVIDIA: Mahti**
 ```
 gfortran -cpp -I$HIPFORT_HOME/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\"" \
          -c <fortran_code>.f90
@@ -125,7 +125,7 @@ hipcc -lgfortran  $LIB_FLAGS  "--gpu-architecture=sm_80" -I$HIPFORT_HOME/include
       -L$HIPFORT_HOME/lib/ -lhipfort-nvptx \
       <fortran_code>.o <hip_kernels>.o  -o main
 ```
-**LUMI**
+**AMD: LUMI**
 ```
 ftn -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" \
     -L$HIPFORT_HOME/lib -lhipfort-amdgcn $LIB_FLAGS \
