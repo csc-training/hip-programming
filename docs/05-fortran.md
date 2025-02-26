@@ -116,7 +116,8 @@ void launch(float *dout, float *da,
 
 **NVIDIA**
 ```
-gfortran -cpp -I$HIPFORT_HOME/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\""  -c <fortran_code>.f90
+gfortran -cpp -I$HIPFORT_HOME/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\"" \
+                                -c <fortran_code>.f90
  
 hipcc "--gpu-architecture=sm_80" --x cu -c <hip_kernels>.cpp
 
