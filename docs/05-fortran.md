@@ -122,8 +122,7 @@ gfortran -cpp -I$HIPFORT_HOME/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\"" \
 hipcc "--gpu-architecture=sm_80" --x cu -c <hip_kernels>.cpp
 
 hipcc -lgfortran  $LIB_FLAGS  "--gpu-architecture=sm_80" -I$HIPFORT_HOME/include/hipfort/nvptx \
-      -L$HIPFORT_HOME/lib/ -lhipfort-nvptx \
-      <fortran_code>.o <hip_kernels>.o  -o main
+      -L$HIPFORT_HOME/lib/ -lhipfort-nvptx <fortran_code>.o <hip_kernels>.o  -o main
 ```
 **AMD: LUMI**
 ```
@@ -133,9 +132,8 @@ ftn -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" \
 
 hipcc -c <hip_kernels>.cpp
 
-ftn  -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" \
-     -L$HIPFORT_HOME/lib -lhipfort-amdgcn $LIB_FLAGS \
-     <fortran_code>.o <hip_kernels>.o -o main 
+ftn  $LIB_FLAGS -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" \
+     -L$HIPFORT_HOME/lib -lhipfort-amdgcn <fortran_code>.o <hip_kernels>.o -o main 
 ```
 
 # Summary
