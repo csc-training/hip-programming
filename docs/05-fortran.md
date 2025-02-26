@@ -110,6 +110,7 @@ void launch(float *dout, float *da,
                        grid, tBlock, 
                        0, 0, 
                        dout, da, db, N);
+//  saxpy<<<grid, tBlock>>>(dout, da, db, N);
   }
 }
 ```
