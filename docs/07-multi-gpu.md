@@ -11,19 +11,17 @@ lang:     en
 
 # Running on HPC Systems
 
- <div class="column">
+ <div class="column" width=60%>
 
-* Supercomputer nodes can be equipped with several GPUs
-  
-    * In the current supercomputers there are  2 to 8 GPUs per node 
-
-    * More GPU resources per node, better per-node-performance 
+* Supercomputer are a collection of thousands of nodes
+* Currently there are  2 to 8 GPUs per node
+* More GPU resources per node, better per-node-performance 
  
 </div>
 
- <div class="column">
-    ![](img/lumi.png){.center width=400%}
-    <small>Lumi - Pre-exascale system in Finland}</small>
+ <div class="column" width=40%>
+    ![](img/lumi.png){.center width=200%}
+    <small>Lumi - Pre-exascale system in Finland</small>
   </div>
 
 # Three levels of parallelism
