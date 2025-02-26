@@ -134,7 +134,7 @@ hipcc -c <hip_kernels>.cpp
 ftn  -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" \
      -L$HIPFORT_HOME/lib -lhipfort-amdgcn <fortran_code>.o <hip_kernels>.o -o main 
 ```
-<small> *For the complete syntax check the Makefile in the exercise folder.*</small>
+
 
 # Summary
 
