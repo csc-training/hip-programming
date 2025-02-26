@@ -2,9 +2,10 @@
 title:  Code design, conditional compilation, lambdas, hipify 
 subtitle: GPU programming with HIP
 author:   CSC Training
-date:     2022-11
+date:     2025-03
 lang:     en
 ---
+
 
 # Outline
 
