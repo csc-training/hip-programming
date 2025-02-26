@@ -54,8 +54,7 @@ program saxpy
 ```cpp
   allocate(x(N));allocate(y(N))
 
-  x = 1.0
-  y = 2.0
+  x = 1.0;y = 2.0
 
   call hipCheck(hipMalloc(dx,Nbytes))
   call hipCheck(hipMalloc(dy,Nbytes))
