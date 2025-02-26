@@ -1,5 +1,5 @@
 ---
-title:  Code design, conditional compilation, lambdas, hipify 
+title:  Application Portability 
 subtitle: GPU programming with HIP
 author:   CSC Training
 date:     2025-03
