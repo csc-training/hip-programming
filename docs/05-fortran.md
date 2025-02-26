@@ -127,8 +127,7 @@ hipcc -lgfortran  $LIB_FLAGS  "--gpu-architecture=sm_80" -I$HIPFORT_HOME/include
 **AMD: LUMI**
 ```
 ftn -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" \
-    -L$HIPFORT_HOME/lib -lhipfort-amdgcn $LIB_FLAGS \
-    -c <fortran_code>.f90
+    -L$HIPFORT_HOME/lib -lhipfort-amdgcn $LIB_FLAGS -c <fortran_code>.f90
 
 hipcc -c <hip_kernels>.cpp
 
