@@ -19,7 +19,7 @@ lang:     en
 
 
 
-# Lumi - Pre-exascale system in Finland
+# HPC SystemsLumi - Pre-exascale system in Finland
 
  <div class="column">
     
@@ -32,7 +32,8 @@ lang:     en
   </div>
 
  <div class="column">
-    ![](img/lumi.png){.center width=400%}
+    ![](img/lumi.png){.center width=40%}
+    Lumi - Pre-exascale system in Finland
   </div>
 
 # Three levels of parallelism
