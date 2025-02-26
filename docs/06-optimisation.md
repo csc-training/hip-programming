@@ -13,7 +13,7 @@ lang:     en
 3. Minimise device memory-compute unit data transfers
 4. Optimise for coalesced memory access
 5. Avoid branching within warp
-6. Minimise number of active local variables
+6. Minimise number of active local variables 
 
 # 1. Libraries (I)
 
@@ -49,11 +49,9 @@ lang:     en
 
 | Link | Host-device | Device memory | 
 |------|------------:|--------------:|
-| LUMI-G MI250x | 36 GB/s$^{\star}$ | 1600 GB/s|
+| LUMI-G MI250x | 36 GB/s | 1600 GB/s|
 | PCIE4.0 x16 | $\sim$ 32 GB/s |  |
 | A100 (Mahti) |  | 2000 GB/s |
-
-$^\star$ per GCD, MI250x has 2 GCDs
 
 ::: notes
 
@@ -95,18 +93,20 @@ $^\star$ per GCD, MI250x has 2 GCDs
 
 # 3. Device global memory access
 
-## Device memory hierarchy
+**Device memory hierarchy**<br>
+**Fastest first**
 
-<div class="column">
+::::::{.columns}
+:::{.column width=60%}
 - Registers (per-thread-access)
-- Local memory (per-thread-access)
 - Shared memory (per-block-access)
+- Local scratch memory (per-thread-access)
 - Global memory (global access)
-</div>
-
-<div class="column">
-![](img/memlayout.png){width=80%}
-</div>
+:::
+:::{.column}
+![](img/memory-hierarchy.png){width=100%}
+:::
+::::::
 
 
 # 3. Device global memory access
@@ -261,9 +261,9 @@ Memory is fetched in cache lines of 64/128 bytes from device memory
 ::::::{.columns}
 :::{.column width=60%}
 - Both branches are executed sequentially but if statement value is used as a mask
+- If the branch changes only between warps, then there is no penalty
 - *However*
-  - Compiler is pretty good at optimizing
-  - Even if both branches are executed, code on right is memory-bound
+  - Code on right is memory bound
 :::
 :::{.column width=39%}
 ```cpp
@@ -280,7 +280,7 @@ c[tid] = mask*(a[tid]-b[tid]);
 ```
 "Solution"
 ```cpp
-if ( ((tid/16)%2) == 0) {
+if ( ((tid/64)%2) == 0) {
   c[tid] = b[tid]-a[tid];
 } else {
   c[tid] = a[tid]-b[tid];
@@ -291,45 +291,51 @@ if ( ((tid/16)%2) == 0) {
 
 ---
 
-## Branching across SIMD units
+## Branching across warps
+
 
 ::::::{.columns}
-:::{.column width=59%}
-- $N=2^{29}$ doubles $\sim$ 512 MiB
- 
-Table: *Cost of branching at different optimization levels*
-
-  | branching | `-O0` (ms) | `-O1` (ms)  |
-  |-----------|-----:|-----:|
-  | *Good* | 181 | 9 |
-  | *Bad* | 320 | 9 | 
-  | *single branch* | 108 | 6 |
-
-
-:::
-:::{.column width=39%}
-*Good*
+:::{.column width=49%}
+*No divergence*
 ```cpp
-if (((tid)/16)%2 == 0) {
-  x[tid] = sin(M_PI*double(tid)/N);
+if ((tid/64)%2 == 0) {
+  x[tid] = f_1(double(tid), ...);
 } else {
-  x[tid] = cos(M_PI*double(tid)/N);
+  x[tid] = f_2(double(tid), ...);
 }
 ```
-*Bad*
+*Branch divergence*
 ```cpp
 if(tid%2 == 0) {
-  x[tid] = sin(M_PI*double(tid)/N);
+  x[tid] = f_1(double(tid), ...);
 } else {
-  x[tid] = cos(M_PI*double(tid)/N);
+  x[tid] = f_2(double(tid), ...);
 }
 ```
-*Single branch*
-```cpp
-x[tid] = sin(M_PI*double(tid)/N);
-```
+:::
+:::{.column width=49%}
+ 
+ Table: Effect of branching
+
+  | Branching | time (µs) |
+  |-----------|-----:|
+  | *No divergence* | 970 |
+  | *Branch divergence* | 1900|
+  | *single branch* | 1000 |
+
+- `f_1` and `f_2` are sufficiently complicated $\Rightarrow$ *not* memory-bound
+
 :::
 ::::::
+
+# 6. Minimise number of active local variables 
+
+- Local variables are stored in registers
+  - MI250x 128 kiB per SIMD-unit
+- What happens if there is not enough registers? 
+  - Variables are "spilled" to local memory on slow global device memory
+- Might happen if the kernel is very complicated
+  - Solution: reduce *occupancy*.
 
 # non-renewed material follows {.section}
 
