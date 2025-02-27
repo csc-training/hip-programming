@@ -119,3 +119,4 @@ gfortran -cpp -I<hipfort_install_folder>/include/hipfort/nvptx "-DHIPFORT_ARCH=\
 hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_80" -I<hipfort_install_folder>/include/hipfort/nvptx -L<hipfort_install_folder>/lib/ -lhipfort-nvptx
 ```
 Now the executable `a.out` can be executed as a normal gpu program. 
+**Note** HIPFORT provides as well the `hipfc` script which can be used to compilations, though by using this script the linking is always done using fortran and it is more difficult to instegrate with `make` when working with big projects.
