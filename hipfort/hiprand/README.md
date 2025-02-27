@@ -1,6 +1,6 @@
 # Computing `pi`
 
-Hipfort provides interfaces for various highly optimized library. In this exercise `hip_rand` library is used to accelerate the computation of `pi` using Monte Carlo method. 
+HIPFORT provides interfaces for various highly optimized library. In this exercise `hip_rand` library is used to accelerate the computation of `pi` using Monte Carlo method. 
 
 In this method **random** `(x, y)` points are generated in a 2-D plane with domain as a square of side *2r* units centered on `(0,0)`.  
 A circle of radius **r** centered at `(0,0)` will fit perfectly inside. The ratio between the area of circle and the square is `pi/4`. If a sufficiently large number of uniformly distributed random points are generated, the the proportion of points inside the circle to the total points in the square is a good estimate for `pi/4`. For efficiency, it is sufficient to consider only one-quarter of the domain  (i.e, where  `x>0` & `y>0`).
