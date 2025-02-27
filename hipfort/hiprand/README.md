@@ -32,7 +32,7 @@ The folder  [hiprand_example](hiprand_example/) shows how to call the `hiprand` 
 
 <figure>
   <img src="img/pi_MC.png" width="50%" alt="Pi Monte Carlo">
-  <figcaption>Scatter plot of 1000 random uniform distributed points. (From [stackoverflow](https://stackoverflow.com/questions/43703757/plotting-pi-using-monte-carlo-method)) </figcaption>
+  <figcaption>Scatter plot of 1000 random uniform distributed points.<br>(From [stackoverflow](https://stackoverflow.com/questions/43703757/plotting-pi-using-monte-carlo-method)) </figcaption>
 </figure>
 
 
