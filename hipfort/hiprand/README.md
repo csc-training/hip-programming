@@ -17,7 +17,7 @@ In order to compute `pi` two arrays are filled with uniform distributed random n
 
 In this exercise, one needs to complete the missing code sections labeled with **TODO** to obtain the correct result. This include adding the right Fortran modules to use, memory allocations, calling the `hiprand` library for generating random numbers, and transfering the data to CPU for the final counting. 
 
-The memory allocations are done similarly to the [saxpy](../saxpy/hip) example. While random numbers are generate with `hiprand`. 
+The memory allocations are done similarly to the [saxpy](../saxpy/hip) example. The random numbers are generate with `hiprand`. 
 
 First one needs to first initialize the library:
 ```
