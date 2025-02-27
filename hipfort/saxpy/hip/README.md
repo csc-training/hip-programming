@@ -27,22 +27,3 @@ Now the executable `a.out` can be executed as a normal gpu program.
 # Exercise
 Apply the above procedure to the `saxpy`  code in the present folder  and inspect the codes in the `rocm` repository folder `hipfort` containing the example (test) codes `.../hipfort/test/f2003`. See how the memory management (allocations and transfers) are done and how  various `hipxxx` libraries are called in `Fortran` programs.
 
-
-# Notes from testing on Mahti
-
-Compile and run:
-
-```bash
-module load cuda/11.5.0
-export SINGULARITY_BIND="/scratch,/projappl,/appl"
-singularity exec -B /local_scratch .../cuda_hip_0.1.0.sif hipfc -v --offload-arch=sm_80 hipsaxpy.cpp main.f03
-
-srun -p gputest --nodes=1 --ntasks-per-node=1 --gres=gpu:a100:1 -t 0:15:00 ./a.out
-# Alternative without system cuda module:
-srun -p gputest --nodes=1 --ntasks-per-node=1 --gres=gpu:a100:1 -t 0:15:00 singularity exec --nv .../cuda_hip_0.1.0.sif ./a.out
-```
-
-Output:
-```
- Max error:    0.00000000
-```
