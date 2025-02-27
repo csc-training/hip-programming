@@ -69,7 +69,8 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 
 ### Fortran and HIP
 
-- [Hipfort exercise](hipfort)
+- [SAXPY](hipfort/saxpy/hip/)
+- [HIPRAND](hipfort/hiprand/hip/)
 
 ### Optimization
 
