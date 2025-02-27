@@ -23,15 +23,15 @@ First one needs to first initialize the library:
 ```
 istat= hiprandCreateGenerator(gen, HIPRAND_RNG_PSEUDO_DEFAULT)
 ```
-In the above `istat` is an `integer(c_size_t)` variable and it is used to store the a value indicating if the callwas succedful or failed. The arguments of the functions are `gen` a pointer to the random number generator, which in Fotran is declared as a `type(c_ptr)` variable and the type of generator which in this case is the default one. 
+In the above `istat` is an `integer(c_size_t)` variable and it is used to store the a value indicating if the callwas succesful or failed. The arguments of the functions are `gen` a pointer to the random number generator, which in Foftran is declared as a `type(c_ptr)` variable and the type of generator which in this case is the default one. 
 
 A GPU array is filled with uniform distribtued random numbers using:
 ```
 istat= hiprandGenerateUniform(gen, A_d, n)
 ```
-In this call the argument `A_d` is a `type(c_ptr)` variable and it is assumed that some memory was previously allocated to this variable. The last argument is an integer which indicates how many numbers are generated (shouldd be the same as the size of the array). 
+In this call the argument `A_d` is a `type(c_ptr)` variable and it is assumed that some memory has been previously allocated to this it. The last argument is an integer which indicates how many numbers are generated (should be the same as the size of the array). 
 
-In the end there is one more step, counting the points inside the circle `(x^2+y^2<1)`. For this first one needs to trasnfer the arrays `x_d` and `y_d`from GPU to CPU. This is done as well similarly as in  the [saxpy](../saxpy/hip) example.
+In the end there is one more step, counting the points inside the circle `(x^2+y^2<1)`. For this, first the arrays `x_d` and `y_d` are transfered from GPU to CPU. This is done as well similarly as in  the [saxpy](../saxpy/hip) example.
 
 **Optional task** When the size of the problem is very large a simple step like counting the points can take a large amount of time. 
 In the last (optional) tasks one should offload to GPU the final loop:
@@ -44,6 +44,6 @@ In the last (optional) tasks one should offload to GPU the final loop:
 ```
 In this case there is no need for transfering the arrays with the random numbers to the CPU. Only the result of the counting needs to be transferd to CPU. 
 Note that an additional variable is needed to store the GPU result (could be `inside_d.cpp`).
-The actual kernel and wrapper are found in the [hip_kernels.cpp](hip_kernels.cpp), but an interface is needed in the main fortran code.
+The actual kernel and wrapper are found in the [hip_kernels.cpp](hip_kernels.cpp), but an interface is needed in the main fortran code to be able to call it.
 
 For more examples of usage of HIPFORT and libraries please check also the [HIPFORT repository](https://github.com/ROCmSoftwarePlatform/hipfort/tree/develop/test).
