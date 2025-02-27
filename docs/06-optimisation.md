@@ -172,11 +172,15 @@ lang:     en
 
 - Memory is fetched in cache lines of 64/128 bytes from device memory
 - If warp requests consecutive elements, then fewer global memory accesses are needed
-- Typically (in bytes)
-  - stride-1 access "`double val = global_mem[tid]`" fast
-  - stride-64 access "`double val = global_mem[tid*8]`" slow
+- Typically
+
+  |  |  |  |
+  |--|--|--|
+  | stride-1 | "`double val = global_mem[tid]`" | ***fast*** 🐇 |
+  | stride-64 |"`double val = global_mem[tid*8]`" | ***slow*** 🐢 |
+
 - But access needn't be linear as long as the warp accesses consecutive elements in global memory!
-  - "`double val = global_mem[permutation_of_1_to_8[tid]]`"
+  - "`double val = global_mem[permutation_of_1_to_8[tid]]`" 🐇
 
 ---
 
