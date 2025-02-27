@@ -32,9 +32,9 @@ The folder  [hiprand_example](hiprand_example/) shows how to call the `hiprand` 
 
 <figure>
   <img src="img/pi_MC.png" width="50%" alt="Pi Monte Carlo">
-  <figcaption>Scatter plot of 1000 random uniform distributed points. </figcaption>
+  <figcaption>Scatter plot of 1000 random uniform distributed points. (From [stackoverflow](https://stackoverflow.com/questions/43703757/plotting-pi-using-monte-carlo-method)) </figcaption>
 </figure>
 
-(From [stackoverflow](https://stackoverflow.com/questions/43703757/plotting-pi-using-monte-carlo-method)
+
 
 The exercise is to analyse and run the programs. For more examples of hipfort check also the [HIPFORT repository](https://github.com/ROCmSoftwarePlatform/hipfort/tree/develop/test).
