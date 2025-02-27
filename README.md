@@ -70,7 +70,7 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 ### Fortran and HIP
 
 - [SAXPY](hipfort/saxpy/hip/)
-- [HIPRAND](hipfort/hiprand/hip/)
+- [HIPRAND](hipfort/hiprand/)
 
 ### Optimization
 
