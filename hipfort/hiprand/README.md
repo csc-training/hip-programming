@@ -26,8 +26,11 @@ This option gives enough flexibility for calling HIP libraries from Fortran or f
 ## Computing `pi` 
 
 
-Hipfort provides interfaces for various highly optimized library. 
+Hipfort provides interfaces for various highly optimized library. In this exercise `hip_rand` library is used to accelerate the computation of `pi` using Monte Carlo method. In this method **random** `(x, y)` points are generated in a 2-D plane with domain as a square of side *2r* units centered on `(0,0)`. 
 
-The folder  [hiprand_example](hiprand_example/) shows how to call the `hiprand` for generating single precision uniform random distributed nubmbers for calculation the value of `pi`.
+The folder  [hiprand_example](hiprand_example/) shows how to call the `hiprand` for generating single precision uniform random distributed nubmbers for calculation the value of `pi`. A circle of radius **r** centered at `(0,0)` will fit perfectly inside. The ratio between the area of circle and the square is `pi/4`. If enough numbers are uniformely distrbuted numbers are generate one can assume that number of poits generated in the square or the inside circle are direct proportionally to the areas. In order to get the value of `pi/4` one just needs to take the ratio between the number of points which ar inside the circle and the total number of points generated insidde the square.
 
-The exercise is to analyse and run the programs. For more examples of hipfort check also the [official repository](https://github.com/ROCmSoftwarePlatform/hipfort/tree/develop/test).
+
+![Scatter plot of 1000 random uniform distributed points. (From [stackoverflow](https://stackoverflow.com/questions/43703757/plotting-pi-using-monte-carlo-method)](img/pi_MC.png)img/pi_MC.png
+
+The exercise is to analyse and run the programs. For more examples of hipfort check also the [HIPFORT repository](https://github.com/ROCmSoftwarePlatform/hipfort/tree/develop/test).
