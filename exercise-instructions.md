@@ -93,7 +93,7 @@ The following modules are required:
 ```bash
 module load LUMI/24.0.3
 module load partition/G
-module load rocm/6.0.1
+module load rocm
 ```
 Because the default `HIPFORT` installation only supports gfortran,  we use a custom installation  prepared in the training project. This package provide Fortran modules compatible with the Cray Fortran compiler as well as direct use of HIPFFORT with the Fortran Cray Compiler wrapper (ftn).
 
