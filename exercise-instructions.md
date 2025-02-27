@@ -86,3 +86,36 @@ gfortran -cpp -I<hipfort_install_folder>/include/hipfort/nvptx "-DHIPFORT_ARCH=\
 hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_70" -I<hipfort_install_folder>/include/hipfort/nvptx -L<hipfort_install_folder>/lib/ -lhipfort-nvptx
 ```
 Now the executable `a.out` can be executed as a normal gpu program. 
+
+### HIPFORT on LUMI
+
+The following modules are required:
+```bash
+module load LUMI/24.0.3
+module load partition/G
+module load rocm/6.0.1
+```
+Because the default `HIPFORT` installation only supports gfortran,  we use a custom installation  prepared in the training project. This package provide Fortran modules compatible with the Cray Fortran compiler as well as direct use of HIPFFORT with the Fortran Cray Compiler wrapper (ftn).
+
+The package was installed via:
+```bash
+# In some temporary folder
+wget https://github.com/ROCm/hipfort/archive/refs/tags/rocm-6.1.0.tar.gz # one can try various realeases
+tar -xvzf rocm-6.1.0.tar.gz;
+cd hipfort-rocm-6.1.0;
+mkdir build;
+cd build;
+cmake -DHIPFORT_INSTALL_DIR=<path-to>/HIPFORT -DHIPFORT_COMPILER_FLAGS="-ffree -eZ" -DHIPFORT_COMPILER=<path-to>/ftn -DHIPFORT_AR=${CRAY_BINUTILS_BIN_X86_64}/ar -DHIPFORT_RANLIB=${CRAY_BINUTILS_BIN_X86_64}/ranlib  ..
+make -j 64
+make install
+```
+Where `<path-to>/ftn` can be obtain by running `which ftn`.
+
+We will use the Cray 'ftn' compiler wrapper as you would do to compile any fortran code plus some additional flags:
+```bash
+export HIPFORT_HOME=/projappl/<project_number>/apps/HIPFORT
+ftn -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$HIPFORT_HOME/lib -lhipfort-amdgcn $LIB_FLAGS -c <fortran_code>.f90
+CC -xhip -c <hip_kernels>.cpp
+ftn  -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$HIPFORT_HOME/lib -lhipfort-amdgcn $LIB_FLAGS -o main <fortran_code>.o hip_kernels.o
+```
+This option gives enough flexibility for calling HIP libraries from Fortran or for a mix of OpenMP/OpenACC offloading to GPUs and HIP kernels/libraries.
