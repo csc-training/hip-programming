@@ -13,7 +13,7 @@ A circle of radius **r** centered at `(0,0)` will fit perfectly inside. The rati
 
 ## The task
 
-In order to compute `pi` two arrays are filled with uniform distributed random numbers. Because it is (arguably) very expensive to compute random numbers, this step is offloaded to GPU. 
+In order to compute `pi` two arrays are filled with uniform distributed random numbers. Because it is (arguably) very expensive to compute random numbers on the CPU, this step is offloaded to GPU. 
 
 In this exercise, one needs to complete the missing code sections labeled with **TODO** to obtain the correct result. This include adding the right Fortran modules to use, memory allocations, calling the `hiprand` library for generating random numbers, and transfering the data to CPU for the final counting. 
 
