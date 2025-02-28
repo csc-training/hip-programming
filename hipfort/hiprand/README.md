@@ -33,7 +33,7 @@ In this call the argument `A_d` is a `type(c_ptr)` variable and it is assumed th
 
 In the end there is one more step, counting the points inside the circle `(x^2+y^2<1)`. For this, first the arrays `x_d` and `y_d` are transfered from GPU to CPU. This is done as well similarly as in  the [saxpy](../saxpy/hip) example.
 
-**Optional task** When the size of the problem is very large a simple step like counting the points can take a large amount of time. 
+**Optional Bonus task** When the size of the problem is very large a simple step like counting the points can take a large amount of time. 
 In the last (optional) tasks one should offload to GPU the final loop:
 ```
     do i = 1, n
