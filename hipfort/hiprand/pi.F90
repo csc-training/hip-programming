@@ -70,15 +70,14 @@ contains
     allocate(x(1:n))
     allocate(y(1:n))
     Nbytes=sizeof(x)
-    
-    call hipCheck(hipMalloc(x_d,Nbytes))
-    call hipCheck(hipMalloc(y_d,Nbytes))
 
     inside = 0
     ! Initialization for (optional) task. Instead of this one can as well initialize inside_d using a hip kernel 
     ! Sbytes = sizeof(inside)
     ! call hipCheck(hipMalloc(inside_d,Sbytes)) 
     ! call hipCheck(hipMemcpy( inside_d,c_loc(inside), Sbytes, hipMemcpyHostToDevice))
+
+    !Allocate memory for the gpu arrays
 
     ! TODO  Initialize the gpu random number generator 
 
