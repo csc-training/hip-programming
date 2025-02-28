@@ -42,7 +42,7 @@ In the last (optional, bonus) tasks one should offload to GPU the final loop:
       end if
     end do
 ```
-the most naive (a.k.a simple) implementation looks like this:
+The most naive (a.k.a simple) implementation looks like this:
 ```
 __global__ void countInsideCircle(float* x_d, float* y_d, int* inside_d,  int64_t n) {
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
