@@ -95,7 +95,7 @@ __global__ void fill_kernel_noif(size_t n, double *x, double a, int Nz)
 int main(void)
 {
     // set problem size
-    const size_t n = pow(2,24);
+    const size_t n = 1<<30;
     
     int Nz = 1;
     // allocate device memory
@@ -106,13 +106,13 @@ int main(void)
     HIP_CHECK(hipMalloc(&d_y, sizeof(double) * n));
 
     // launch kernel
-    const int blocksize = 256;
-    const int gridsize = (n - 1 + blocksize) / blocksize;
+    const size_t blocksize = 256;
+    const size_t gridsize = (n - 1 + blocksize) / blocksize;
 
 
-    std::cout << "% noif, nodiv, div, Nz \n"; // TODO: count flops
-    repeat(10) {
-      Nz = Nz << 1;
+    std::cout << "% N_fma, noif, nodiv, div\n"; // TODO: count flops
+    repeat(50) {
+      if (my_repeat_counter > 1) std::cout << Nz << ", ";
       starttime
         fill_kernel_noif<<<gridsize, blocksize>>>(n, d_x, a, Nz);
       synchronize;
@@ -129,12 +129,12 @@ int main(void)
         fill_kernel_div<<<gridsize, blocksize>>>(n, d_x, a, Nz);
       synchronize;
       endtime
-        if (my_repeat_counter > 1) std::cout << ", " << Nz << "\n";
+        if (my_repeat_counter > 1) std::cout << "\n";
+      Nz += 1;
     }
 
     // copy data to the host and print
-    double x[n];
-    HIP_CHECK(hipMemcpy(x, d_x, sizeof(double) * n, hipMemcpyDeviceToHost));
+    /* HIP_CHECK(hipMemcpy(x, d_x, sizeof(double) * n, hipMemcpyDeviceToHost)); */
     /* printf("%f %f %f %f ... %f %f\n", */
             /* x[0], x[1], x[2], x[3], x[n-2], x[n-1]); */
 
