@@ -43,7 +43,7 @@ In the last (optional) tasks one should offload to GPU the final loop:
     end do
 ```
 In this case there is no need for transfering the arrays with the random numbers to the CPU. Only the result of the counting needs to be transferd to CPU. 
-Note that an additional variable is needed to store the GPU result (could be `inside_d.cpp`).
+Note that an additional variable is needed to store the GPU result (could be `inside_d`).
 The actual kernel and wrapper are found in the [hip_kernels.cpp](hip_kernels.cpp), but an interface is needed in the main fortran code to be able to call it.
 
 For more examples of usage of HIPFORT and libraries please check also the [HIPFORT repository](https://github.com/ROCmSoftwarePlatform/hipfort/tree/develop/test).
