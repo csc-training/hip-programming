@@ -9,7 +9,7 @@ CXX = CC -xhip
 FC = ftn -I$(HIPFORT_HOME)/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$(HIPFORT_HOME)/lib -lhipfort-amdgcn $(LIB_FLAGS)
 endif 
 
-OBJS=pi.o 
+OBJS=pi.o hip_kernels.o
 
 all: pi
 
@@ -18,6 +18,9 @@ pi: $(OBJS)
 
 %.o: %.F90
 	$(FC) $(FCFLAGS) -c $< -o $@
+
+%.o: %.cpp
+	$(CXX) -c -o $@ $<
 
 %.mod: %.F90
 	$(FC) $(FCFLAGS) -c $<
