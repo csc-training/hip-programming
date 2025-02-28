@@ -1,7 +1,7 @@
 #include <hip/hip_runtime.h>
 #include <cstdio>
 
-__global__ void countInsideKernel(float *x, float *y, int *inside, long long int n)
+__global__ void countInsideKernel(float *x, float *y, int *inside,  int64_t n)
 {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     
@@ -15,7 +15,7 @@ __global__ void countInsideKernel(float *x, float *y, int *inside, long long int
 
 extern "C"
 {
-  void launch(float *x, float *y, int *inside_d, long long int N)
+  void launch(float *x, float *y, int *inside_d,  int64_t N)
   {
 
      dim3 tBlock(256,1,1);
