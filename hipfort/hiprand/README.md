@@ -31,7 +31,7 @@ istat= hiprandGenerateUniform(gen, A_d, n)
 ```
 In this call the argument `A_d` is a `type(c_ptr)` variable in which the numbers are store. It is assumed that the memory for it has been previously allocated. The last argument, `n` is the amount of random numbers to generate (should be the same as the size of the array). 
 
-In the end there is one more step, counting the points inside the circle `$(x^2+y^2<1)$`. For this, first the arrays `x_d` and `y_d` are transfered from GPU to CPU. This is done as well similarly as in  the [saxpy](../saxpy/hip) example.
+In the end there is one more step, counting the points inside the circle `(x^2+y^2<1)`. For this, first the arrays `x_d` and `y_d` are transfered from GPU to CPU. This is done as well similarly as in  the [saxpy](../saxpy/hip) example.
 
 **Optional Bonus task** When the number of points `n` is large, counting points inside the circle on the CPU can become a bottleneck. You can offload this counting step to the GPU using a kernel that counts the points in parallel. 
 In the last (optional, bonus) tasks one should offload to GPU the final loop:
