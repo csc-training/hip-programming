@@ -23,7 +23,7 @@ First one needs to first initialize the library:
 ```
 istat= hiprandCreateGenerator(gen, HIPRAND_RNG_PSEUDO_DEFAULT)
 ```
-Here, `istat` is an `integer(c_size_t)` variable and it is used to store the a value indicating if the call was succesful or failedand `gen` is a pointer to the random number generator, which in Fortran is declared as a `type(c_ptr)` variable. The generator type is set to `HIPRAND_RNG_PSEUDO_DEFAULT`, which is the default pseudorandom number generator.
+Here, `istat` is an `integer(c_size_t)` variable and it is used to store the a value indicating if the call was succesful or failed, while `gen` is a pointer to the random number generator, which in Fortran is declared as a `type(c_ptr)` variable. The generator type is set to `HIPRAND_RNG_PSEUDO_DEFAULT`, which is the default pseudorandom number generator.
 
 A GPU array is filled withuniform random using:
 ```
