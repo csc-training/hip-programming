@@ -44,7 +44,7 @@ In the last (optional, bonus) tasks one should offload to GPU the final loop:
 ```
 the most naive (a.k.a simple) implementation looks like this:
 ```
-__global__ void countInsideCircle(float* x_d, float* y_d, int* inside_d, int n) {
+__global__ void countInsideCircle(float* x_d, float* y_d, int* inside_d,  int64_t n) {
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
     if (idx < n) {
         if (x_d[idx] * x_d[idx] + y_d[idx] * y_d[idx] < 1.0f) {
