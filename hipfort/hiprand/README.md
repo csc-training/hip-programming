@@ -60,7 +60,7 @@ The actual kernel and wrapper are found in the [hip_kernels.cpp](hip_kernels.cpp
 ```
 OBJS=pi.o hip_kernels.o
 ```
-Furthermode and one has to add a rule  to create the `.o` file from the `.cpp` source:
+Furthermore one has to add a rule  to create the `.o` file from the `.cpp` source:
 ```
 %.o: %.cpp
 	$(CXX) -c -o $@ $<
