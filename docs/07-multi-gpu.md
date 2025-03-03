@@ -117,7 +117,7 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 3. Supercomputer - Many nodes connected with interconnect
     * Parallelization strategy: MPI between nodes
 
-![](img/parallel_regions.png){width=40%}
+![](img/parallel_regions.png){width=40% .center}
 
 # Multi-GPU programming models
 
