@@ -119,7 +119,7 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
     * Parallelization strategy: MPI between nodes
 </div>
 <div class="column" style="margin-top: 150px;">
-    <img src="img/parallel_regions.png" style="width:99%;">
+    <img src="img/parallel_regions.png" style="width:40%;">
 </div>
 
 # Multi-GPU programming models
