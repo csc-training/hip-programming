@@ -136,10 +136,19 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 3. Supercomputer: Many nodes connected with interconnect
     * Parallelization strategy: MPI between nodes
 
-
 ![](img/parallel_regions.png){width=99%}
 
 
+# Three levels of parallelism
+
+![](img/parallel_regions.png){width=99%}
+
+1. GPU: GPU threads
+    * Parallelization strategy: HIP, OpenMP, SYCL, Kokkos, OpenCL
+2. Node: Multiple GPUs and CPUs
+    * Parallelization strategy: MPI, Threads, OpenMP
+3. Supercomputer: Many nodes connected with interconnect
+    * Parallelization strategy: MPI between nodes
 
 # Multi-GPU programming models
 
