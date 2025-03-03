@@ -92,13 +92,13 @@ int main(void)
 
 # GPU programming considerations
 
-- GPU model requires many small tasks executing a kernel
-    - e.g. can replace iterations of loop with a GPU kernel call
+- Parallel nature of GPUs requires many similar tasks that can be executed simultaneously
+    - one usage is to replace iterations of loop with a GPU kernel call
 - Need to adapt CPU code to run on the GPU
-    - rethink algorithm to fit better into the execution model
-    - keep reusing data on the GPU to reach high occupancy of the hardware
-    - if necessary, manage data transfers between CPU and GPU memories
-      carefully (can easily become a bottleneck!)
+    - algorithmic changes to fit the parallel execution model better
+    - share data among hundreds of cooperating threads
+    - manage data transfers between CPU and GPU memories
+      carefully (a common bottleneck)
 
 
 # Grid: thread hierarchy
