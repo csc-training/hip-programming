@@ -24,3 +24,24 @@ MPICH_GPU_SUPPORT_ENABLED=1
 ```
 For running, one should use two GPUs and two MPI processes.
 
+On **Lumi**, one can compile the MPI example simply using the Cray compiler with
+```
+CC -xhip ping-pong.cpp
+```
+and run with
+```
+srun --account=XXXXXX --partition=dev-g -N1 -n2 --cpus-per-task=1 --gpus-per-task=2 --time=00:15:00 ./a.out
+```
+
+On **Mahti**, compile the MPI example with
+```
+OMPI_CXXFLAGS='' OMPI_CXX='hipcc --x cu' mpicxx -c -o ping-pong.o ping-pong.cpp
+```
+then link with
+```
+hipcc ping-pong.o -lmpi
+```
+and finally run:
+```
+srun --account=XXXXXX --partition=gputest -N1 -n2 --cpus-per-task=1 --gres=gpu:v100:2 --time=00:15:00 ./a.out
+```
