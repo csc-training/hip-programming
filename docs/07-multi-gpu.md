@@ -242,6 +242,7 @@ OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
   `mpicxx` and `hipcc`
     * Link object files in a separate step using `mpicxx` or `hipcc`
 * on LUMI, `cc` and `CC` wrappers know about both MPI and HIP
+
 # Selecting the correct GPU
 
 * Typically all processes on the node can access all GPUs of that node
