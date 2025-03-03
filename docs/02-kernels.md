@@ -302,9 +302,10 @@ int main(void)
 
 ::: incremental
 - HIP supports both AMD and NVIDIA GPUs
-- HIP contains API functions for writing GPU code
-  - Some functions are callable from host, some from device
-- Kernels launch grid of blocks, each block consists of many threads
+- HIP consists of an API and a "kernel language"
+    - API controls the larger context
+    - kernel language for single thread point of view GPU code
+- Kernels execute over a grid of (blocks of) threads
     - Each block is executed in wavefronts of 64 (AMD) or 32 (NVIDIA) threads
-- Kernels need to be declared `__global__` and `void` and are launched with special syntaxes
+- Kernels need to be declared `__global__` and `void` and are launched with special syntax
 :::
