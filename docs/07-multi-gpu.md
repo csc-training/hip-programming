@@ -120,6 +120,9 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 </div>
 
 <div class="column">
+
+
+
 ![](img/parallel_regions.png){width=99%}
 </div>
 
