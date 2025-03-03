@@ -77,6 +77,7 @@ int main(void)
 # AMD GPU terminology
 
 <small>
+
 ::: incremental
 - Compute Unit
     - one of the parallel vector processors in a GPU
