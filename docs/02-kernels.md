@@ -24,11 +24,11 @@ lang:     en
 Control the larger context and the flow of execution on the CPU
 
 ::: incremental
-    - Device init and management
-    - Memory management
-    - Execution control
-    - Synchronisation: device, stream, events
-    - Error handling, context handling, ...
+- Device init and management
+- Memory management
+- Execution control
+- Synchronisation: device, stream, events
+- Error handling, context handling, ...
 :::
 
 # HIP kernel language
@@ -76,17 +76,13 @@ int main(void)
 
 # AMD GPU terminology
 
+<small>
 ::: incremental
 - Compute Unit
     - one of the parallel vector processors in a GPU
 - Kernel
     - function launched to the GPU that is executed by multiple parallel
       workers
-:::
-
-# AMD GPU terminology (continued)
-
-::: incremental
 - Thread
     - individual "worker" of a wavefront
 - Wavefront (cf. CUDA warp)
@@ -98,6 +94,7 @@ int main(void)
     - group of threads that are on the GPU at the same time and
       are part of the same compute unit (CU)
     - can synchronise together and communicate through memory in the CU
+</small>
 :::
 
 # GPU programming considerations
