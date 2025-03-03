@@ -144,7 +144,6 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
       looks much like a single-GPU program
 
 
-
 # Many GPUs per Process
 
 * Process switches the active GPU using `hipSetDevice()` (HIP) function 
@@ -196,8 +195,6 @@ for(unsigned n = 0; n < num_devices; n++) {
 }
 ```
 
-# Direct peer to peer access {.section}
-
 # Direct peer to peer access (HIP)
 
 * Access peer GPU memory directly from another GPU
@@ -217,24 +214,18 @@ hipError_t hipDeviceDisablePeerAccess(int peerDevice)
 ```
 * Between AMD GPUs, the peer access is always enabled (if supported)
 
-
 # Peer to peer communication
 
 * Devices have separate memories
-* Memcopies between different devices can be done as follows:
-
+* With devices supporting unified virtual addressing, `hipMemCpy()` with
+  `kind=hipMemcpyDefault`, works:
 ```cpp
-// HIP: First option that requires unified virtual addressing (use "hipMemcpyDefault" for "kind")
-hipError_t hipMemcpy(void* dst, void* src, size_t size, hipMemcpyKind kind=hipMemcpyDefault)
-
-// HIP: Second option does not require unified virtual addressing
-hipError_t hipMemcpyPeer(void* dst, int  dstDev, void* src, int srcDev, size_t size)
-
-// OpenMP
-int omp_target_memcpy(void *dst, const void *src, size_t size, size_t dstOffset,
-                      size_t srcOffset, int dstDev, int dstDev)
+hipError_t hipMemcpy(void* dst, void* src, size_t count, hipMemcpyKind kind)
 ```
-
+* Other option which does not require unified virtual addressing
+```cpp
+hipError_t hipMemcpyPeer(void* dst, int  dstDev, void* src, int srcDev, size_t count)
+```
 * If direct peer to peer access is not available or implemented, the functions should fall back to a normal copy through host memory
 
 
@@ -251,7 +242,6 @@ OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
   `mpicxx` and `hipcc`
     * Link object files in a separate step using `mpicxx` or `hipcc`
 
-
 # MPI+HIP strategies
 
 1. One MPI process per node
@@ -267,16 +257,21 @@ OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
     * It is further possible to utilize remaining CPU cores with OpenMP (but
       this is not always worth the effort/increased complexity)
 
-
 # Selecting the correct GPU
 
-* Typically, all processes on the node can access all GPUs of that node
+* Typically all processes on the node can access all GPUs of that node
 * The following implementation allows utilizing all GPUs using one or more
   processes per GPU
-    * On Nvidia systems, use CUDA MPS when launching more processes than GPUs
-<p>
-* Demo: `device_management_mpi_hip.cpp`
+    * Use CUDA MPS when launching more processes than GPUs
 
+```cpp
+int deviceCount, nodeRank;
+MPI_Comm commNode;
+MPI_Comm_split_type(MPI_COMM_WORLD, MPI_COMM_TYPE_SHARED, 0, MPI_INFO_NULL, &commNode);
+MPI_Comm_rank(commNode, &nodeRank);
+hipGetDeviceCount(&deviceCount);
+hipSetDevice(nodeRank % deviceCount);
+```
 
 # GPU-GPU communication through MPI
 
@@ -287,18 +282,16 @@ OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
     * Data packing/unpacking must be implemented application-side on GPU
 * On LUMI, enable on runtime by `export MPICH_GPU_SUPPORT_ENABLED=1`
 
+# GPU-GPU communication through MPI
 
-# MPI communication with GPU-aware MPI
+* CUDA/ROCm aware MPI libraries support direct GPU-GPU transfers
+    * Can take a pointer to device buffer (avoids host/device data copies)
+* Unfortunately, currently no GPU support for custom MPI datatypes (must use a
+  datatype representing a contiguous block of memory)
+    * Data packing/unpacking must be implemented application-side on GPU
+* On LUMI, enable on runtime by `export MPICH_GPU_SUPPORT_ENABLED=1`
+* Having a fallback for pinned host staging buffers is a good idea.
 
-* With MPI+HIP, one can simply pass a device pointer to GPU-aware MPI
-   * In OpenMP this can be achieved using `use_device_ptr` clause
-<p>
-* Demos: `mpi_send_and_recv_hip.cpp`, `mpi_send_and_recv_omp.cpp`
-
-
-# Many GPUs per process{.section}
-
-# One GPU per thread{.section}
 # Summary
 
 - There are many ways to write a multi-GPU program
