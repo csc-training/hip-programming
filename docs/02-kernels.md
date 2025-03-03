@@ -159,9 +159,9 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 
 # Grid: thread hierarchy
 
+:::::: {.column width=44%}
 <small>
 
-:::::: {.column width=44%}
 ::: incremental
 - kernels are executed on a 3D *grid* of threads
 - threads are partitioned into equal-sized *blocks*
@@ -170,9 +170,8 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 - dimension of the grid are set at kernel launch
 - built-in variables to be used within a kernel: `threadIdx`, `blockIDx`, `blockDim`, `gridDim`
 :::
-::::::
 </small>
-
+::::::
 :::::: {.column width=54%}
 ![](img/ThreadExecution_new.jpg){.center width=56%}
 ::::::
