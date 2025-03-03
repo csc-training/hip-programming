@@ -146,23 +146,23 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 
 # Many GPUs per Process
 
-* Process switches the active GPU using `hipSetDevice()` (HIP) function 
+* Process switches the active GPU using `hipSetDevice()` function 
 * After selecting the default device, operations such as the following are effective only
   on the selected GPU:
     * Memory operations
     * Kernel execution
-    * Streams and events (HIP)
+    * Streams and events
 * Asynchronous function calls are required to overlap work
 
 # Many GPUs per Process. Code Example
 
 ```cpp
-// Launch kernels (HIP)
+// Launch kernels
 for(unsigned n = 0; n < num_devices; n++) {
   hipSetDevice(n);
   kernel<<<blocks[n],threads[n], 0, stream[n]>>>(arg1[n], arg2[n], size[n]);
 }
-//Synchronize all kernels with host (HIP)
+//Synchronize all kernels with host
 for(unsigned n = 0; n < num_devices; n++) {
   hipSetDevice(n);
   hipStreamSynchronize(stream[n]);
@@ -176,7 +176,7 @@ for(unsigned n = 0; n < num_devices; n++) {
 * HIP is threadsafe
     * Multiple threads can call the functions at the same time
 * Each thread can create its own context on a different GPU
-    * `hipSetDevice()` (HIP) sets the device and create a context per thread
+    * `hipSetDevice()` sets the device and create a context per thread
     * Easy device management with no changing of device
 * From the point of view of a single thread, the implementation closer to a single-GPU case
 * Communication between threads still not trivial
@@ -195,7 +195,7 @@ for(unsigned n = 0; n < num_devices; n++) {
 }
 ```
 
-# Direct peer to peer access (HIP)
+# Direct peer to peer access
 
 * Access peer GPU memory directly from another GPU
     * Pass a pointer to data on GPU 1 to a kernel running on GPU 0
@@ -235,7 +235,7 @@ hipError_t hipMemcpyPeer(void* dst, int  dstDev, void* src, int srcDev, size_t c
 * Trying to compile code with any HIP calls with other than the `hipcc`
   compiler can result in errors
 * Either set MPI compiler to use `hipcc`, eg for OpenMPI:
-```cpp
+```bash
 OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
 ```
 * or separate HIP and MPI code in different compilation units compiled with
