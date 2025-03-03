@@ -31,18 +31,7 @@ lang:     en
 <!-- Copyright CSC -->
  ![](img/compp.svg){.center width=40%}
 
-
-# Parallel programming models I
-
-- Parallel execution is based on threads or processes (or both) which run at the same time on different CPU cores
-- Processes
-    - Interaction is based on exchanging messages between processes
-    - MPI (Message passing interface)
-- Threads
-    - Interaction is based on shared memory, i.e. each thread can access directly other threads data
-    - OpenMP, pthreads
-
-# Parallel programming models II
+# Parallel programming models
 
 <!-- Copyright CSC -->
  ![](img/processes-threads.svg){.center width=80%}
@@ -52,6 +41,7 @@ lang:     en
 - Independent execution units
 - MPI launches N processes at application startup
 - Works over multiple nodes
+- Processes  exchange dat via messages
 </div>
 <div class=column>
 
@@ -60,6 +50,7 @@ lang:     en
 - Threads share memory space
 - Threads are created and destroyed  (parallel regions)
 - Limited to a single node
+- Directive based
 
 </div>
 
