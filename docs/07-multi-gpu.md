@@ -110,6 +110,14 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 
 # Three levels of parallelism
 
+1. GPU - GPU threads on the multiprocessors: HIP
+2. Node - Multiple GPUs and CPUs: MPI, OpenMP
+3. Supercomputer - Many nodes connected with interconnect: MPI 
+
+![](img/parallel_regions.png){.center width=60% }
+
+# Three levels of parallelism
+
 1. GPU - GPU threads on the multiprocessors
     * Parallelization strategy: HIP, SYCL, Kokkos, OpenMP
 2. Node - Multiple GPUs and CPUs
@@ -118,7 +126,6 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
     * Parallelization strategy: MPI between nodes
 
 ![](img/parallel_regions.png){.center width=40% }
-
 # Multi-GPU programming models
 
 <div class="column">
