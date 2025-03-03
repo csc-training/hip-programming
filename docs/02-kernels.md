@@ -114,7 +114,7 @@ Write the GPU code from the point of view of a single thread
 
 ::: incremental
 - kernel is a function executed by the GPU
-- kernel must be declared with the `__global__` attribute and the return type must be`void`
+- kernel must be declared with the `__global__` attribute and the return type must be `void`
 - any function called from a kernel must be declared with `__device__` attribute
 - all pointers passed to a kernel should point to memory accessible from
   the device
