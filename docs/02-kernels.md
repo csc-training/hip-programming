@@ -102,6 +102,7 @@ int main(void)
 Code on the GPU from the point of view of a single thread
 
 <small>
+
 :::::: {.column width=50%}
 ::: incremental
 - kernel is a function executed by the GPU
@@ -120,6 +121,7 @@ Code on the GPU from the point of view of a single thread
 - atomic functions: `atomicAdd`, `atomicMin`, ...
 - intrinsic functions: `__syncthreads`, `__threadfence`, ...
 ::::::
+
 </small>
 
 # Kernel example: axpy
