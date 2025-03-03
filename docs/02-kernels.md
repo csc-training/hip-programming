@@ -19,6 +19,53 @@ lang:     en
 - AMD offers also a wide set of optimised libraries and tools
 :::
 
+# AMD GPU terminology
+
+<small>
+
+::: incremental
+- Compute Unit
+    - a parallel vector processor in a GPU
+- Kernel
+    - parallel code executed on the GPU
+- Thread
+    - individual worker of a wavefront
+- Wavefront (cf. CUDA warp)
+    - collection of threads that execute in lockstep and execute the same
+      instructions
+    - each wavefront has fixed number of threads (AMD: 64, NVIDIA 32)
+    - the number of threads, and thus implicitly the number of wavefronts, per workgroup is chosen at kernel launch
+- Workgroup (cf. CUDA thread block)
+    - group of threads that are on the GPU at the same time and
+      are part of the same compute unit (CU)
+    - can synchronise together and communicate through memory in the CU
+</small>
+:::
+
+# HIP programming model
+
+::: incremental
+- GPU accelerator is often called a *device* and CPU a *host*
+- Parallel code is
+    - launched by the host using the HIP API
+    - written using the kernel language
+    - executed on a device by many threads
+- Code is written from the point of view of a single thread
+    - each thread has a unique ID
+:::
+
+# GPU programming considerations
+
+::: incremental
+- Parallel nature of GPUs requires many similar tasks that can be executed simultaneously
+    - one usage is to replace iterations of loop with a GPU kernel call
+- Need to adapt CPU code to run on the GPU
+    - algorithmic changes to fit the parallel execution model
+    - share data among hundreds of cooperating threads
+    - manage data transfers between CPU and GPU memories
+      carefully (a common bottleneck)
+:::
+
 # HIP API
 
 Control the larger context and the flow of execution on the CPU
@@ -29,29 +76,6 @@ Control the larger context and the flow of execution on the CPU
 - Execution control
 - Synchronisation: device, stream, events
 - Error handling, context handling, ...
-:::
-
-# HIP kernel language
-
-Write the GPU code from the point of view of a single thread
-
-::: incremental
-- Qualifiers: `__device__`, `__global__`, `__shared__`, ...
-- Built-in variables: `threadIdx.x`, `blockIdx.y`, ...
-- Vector types: `int3`, `float2`, `dim3`, ...
-- Math functions: `sqrt`, `powf`, `sinh`, ...
-- Arithmetic functions: `atomicAdd`, `atomicMin`, ...
-- Intrinsic functions: `__syncthreads`, `__threadfence`, ...
-:::
-
-# HIP programming model
-
-::: incremental
-- GPU accelerator is often called a *device* and CPU a *host*
-- Parallel code (kernel) is launched by the host and executed on
-  a device by several threads
-- Code is written from the point of view of a single thread
-    - each thread has a unique ID
 :::
 
 # API example: Hello world
@@ -73,62 +97,18 @@ int main(void)
 }
 ```
 
+# HIP kernel language
 
-# AMD GPU terminology
-
-<small>
-
-::: incremental
-- Compute Unit
-    - one of the parallel vector processors in a GPU
-- Kernel
-    - function launched to the GPU that is executed by multiple parallel
-      workers
-- Thread
-    - individual "worker" of a wavefront
-- Wavefront (cf. CUDA warp)
-    - collection of threads that execute in lockstep and execute the same
-      instructions
-    - each wavefront has fixed number of threads (AMD: 64, NVIDIA 32)
-    - the number of threads, and thus implicitly the number of wavefronts, per workgroup is chosen at kernel launch
-- Workgroup (cf. CUDA thread block)
-    - group of threads that are on the GPU at the same time and
-      are part of the same compute unit (CU)
-    - can synchronise together and communicate through memory in the CU
-</small>
-:::
-
-# GPU programming considerations
+Write the GPU code from the point of view of a single thread
 
 ::: incremental
-- Parallel nature of GPUs requires many similar tasks that can be executed simultaneously
-    - one usage is to replace iterations of loop with a GPU kernel call
-- Need to adapt CPU code to run on the GPU
-    - algorithmic changes to fit the parallel execution model
-    - share data among hundreds of cooperating threads
-    - manage data transfers between CPU and GPU memories
-      carefully (a common bottleneck)
+- Qualifiers: `__device__`, `__global__`, `__shared__`, ...
+- Built-in variables: `threadIdx.x`, `blockIdx.y`, ...
+- Vector types: `int3`, `float2`, `dim3`, ...
+- Math functions: `sqrt`, `powf`, `sinh`, ...
+- Arithmetic functions: `atomicAdd`, `atomicMin`, ...
+- Intrinsic functions: `__syncthreads`, `__threadfence`, ...
 :::
-
-# Grid: thread hierarchy
-
-:::::: {.column width=44%}
-::: incremental
-- Kernels are executed on a 3D *grid* of threads
-    - threads are partitioned into equal-sized *blocks*
-- Code is executed by the threads, the grid is a way to organise the
-  work
-- Dimension of the grid are set at kernel launch
-:::
-::::::
-
-:::::: {.column width=54%}
-![](img/ThreadExecution_new.jpg){.center width=56%}
-
-- Built-in variables to be used within a kernel:
-    - `threadIdx`, `blockIDx`, `blockDim`, `gridDim`
-::::::
-
 
 # Kernels
 
@@ -175,8 +155,26 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 }
 ```
 
-- Handles any vector size, but grid dimensions should be still "optimised"
+- Handles any vector size, but grid size should still be chosen with some care
 
+# Grid: thread hierarchy
+
+:::::: {.column width=44%}
+::: incremental
+- Kernels are executed on a 3D *grid* of threads
+    - threads are partitioned into equal-sized *blocks*
+- Code is executed by the threads, the grid is a way to organise the
+  work
+- Dimension of the grid are set at kernel launch
+:::
+::::::
+
+:::::: {.column width=54%}
+![](img/ThreadExecution_new.jpg){.center width=56%}
+
+- Built-in variables to be used within a kernel:
+    - `threadIdx`, `blockIDx`, `blockDim`, `gridDim`
+::::::
 
 # Launching kernels
 
@@ -197,8 +195,6 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 - Kernel execution is asynchronous with the host
 :::
 
-
-
 # Simple memory management
 
 - In order to calculate something on the GPUs, we usually need to
@@ -218,8 +214,8 @@ hipMemcpy(x_, x, sizeof(double) * n, hipMemcpyHostToDevice);
 hipMemcpy(x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
 ```
 
-
 # Error checking
+
 <small>
 
 - Always use HIP error checking with larger codebases!
