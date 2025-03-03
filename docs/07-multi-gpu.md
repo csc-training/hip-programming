@@ -79,23 +79,21 @@ A GPU context is an execution environment that manages resources such as memory 
 
 ::: incremental
 - Return the number of hip capable devices by `count`
- - ```cpp
-hipError_t hipGetDeviceCount(int *count)
-```
+   - `hipError_t hipGetDeviceCount(int *count)`
 - Set device as the current device for the calling host thread
-- ```cpp
+     - ```cpp
 hipError_t hipSetDevice(int device)
 ```
-:::
-Return the current device for the calling host thread by `device`
-```cpp
+
+- Return the current device for the calling host thread by `device`
+   - ```cpp
 hipError_t hipGetDevice(int *device)
 ```
-Reset and explicitly destroy all resources associated with the current device
-```cpp
+- Reset and explicitly destroy all resources associated with the current device
+   - ```cpp
 hipError_t hipDeviceReset(void)
 ```
-
+:::
 
 # Querying or verifying device properties
 
