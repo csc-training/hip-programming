@@ -99,9 +99,9 @@ int main(void)
 
 # HIP kernels
 
-Code on the GPU from the point of view of a single thread
-
 <small>
+
+Code on the GPU from the point of view of a single thread
 
 :::::: {.column width=50%}
 ::: incremental
