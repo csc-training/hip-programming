@@ -41,7 +41,7 @@ lang:     en
 - Independent execution units
 - MPI launches N processes at application startup
 - Works over multiple nodes
-- Processes  exchange data via messages
+- Data exchange via messages
 </div>
 <div class=column>
 
