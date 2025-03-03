@@ -242,27 +242,10 @@ OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
   `mpicxx/CC` and `hipcc`
     * Link object files in a separate step using `mpicxx/CC` or `hipcc`
 
-# MPI+HIP strategies
-
-1. One MPI process per node
-2. **One MPI process per GPU**
-3. Many MPI processes per GPU, only one uses it
-4. **Many MPI processes sharing a GPU**
-
-* 2 is recommended (also allows using 4)
-    * Typically results in most productive and least invasive implementation
-      for an MPI program
-    * No need to implement GPU-GPU transfers explicitly (MPI handles all
-      this)
-    * It is further possible to utilize remaining CPU cores with OpenMP (but
-      this is not always worth the effort/increased complexity)
-
 # Selecting the correct GPU
 
 * Typically all processes on the node can access all GPUs of that node
-* The following implementation allows utilizing all GPUs using one or more
-  processes per GPU
-    * Use CUDA MPS when launching more processes than GPUs
+* The following implementation allows utilizing all GPUs using one process per GPU
 
 ```cpp
 int deviceCount, nodeRank;
@@ -272,15 +255,9 @@ MPI_Comm_rank(commNode, &nodeRank);
 hipGetDeviceCount(&deviceCount);
 hipSetDevice(nodeRank % deviceCount);
 ```
-
-# GPU-GPU communication through MPI
-
-* GPU-aware (CUDA/ROCm aware) MPI libraries support direct GPU-GPU transfers
-    * Can take a pointer to device buffer (avoids host/device data copies)
-* Unfortunately, currently no GPU support for custom MPI data types (must use a
-  datatype representing a contiguous block of memory)
-    * Data packing/unpacking must be implemented application-side on GPU
-* On LUMI, enable on runtime by `export MPICH_GPU_SUPPORT_ENABLED=1`
+::: notes
+* Can be done from slurm using `ROCR_VISIBLE_DEVICES` or `CUDA_VISIBLE_DEVICES`
+:::
 
 # GPU-GPU communication through MPI
 
@@ -294,11 +271,11 @@ hipSetDevice(nodeRank % deviceCount);
 
 # Summary
 
-- There are many ways to write a multi-GPU program
-- Use `hipSetDevice()` (HIP) or `omp_set_default_device()` (OpenMP) to choose the default device
-   * In OpenMP, `device()`-directive can also be used to select the target device
+- There are many options to write a multi-GPU program
+- Use `hipSetDevice()` to select the device, and the subsequent HIP calls
+  operate on that device
 * If you have an MPI program, it is often best to use one GPU per process, and
-  let MPI handle data transfers between GPUs
+  let MPI handle data transfers between GPUs 
 * GPU-aware MPI is required when passing device pointers to MPI
   * Using host pointers does not require any GPU awareness
 
