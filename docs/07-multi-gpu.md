@@ -32,7 +32,7 @@ lang:     en
  ![](img/compp.svg){.center width=40%}
 
 
-# (CPU) Parallel programming models I
+# Parallel programming models I
 
 - Parallel execution is based on threads or processes (or both) which run at the same time on different CPU cores
 - Processes
@@ -42,7 +42,7 @@ lang:     en
     - Interaction is based on shared memory, i.e. each thread can access directly other threads data
     - OpenMP, pthreads
 
-# (CPU) Parallel programming models II
+# Parallel programming models II
 
 <!-- Copyright CSC -->
  ![](img/processes-threads.svg){.center width=80%}
