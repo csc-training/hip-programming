@@ -73,8 +73,6 @@ A GPU context is an execution environment that manages resources such as memory 
 
 # Device management
 
-# Device management
-
 Return the number of hip capable devices by `count`
 ```cpp
 hipError_t hipGetDeviceCount(int *count)
@@ -138,17 +136,17 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
     * Apart from each process selecting a different device, the implementation
       looks much like a single-GPU program
 
-# Compiling MPI+HIP/OpenMP code
+# Compiling MPI+HIP Code
 
-* Compiling HIP/OpenMP and MPI calls in the same compilation unit may not always be trivial
-  * On LUMI, `CC` compiler wrapper takes care of this
-* One can set MPI compiler to use `hipcc` or the desirable OpenMP compiler like `nvc`, e.g. for OpenMPI:
-  ```bash
-  OMPI_CXXFLAGS='' OMPI_CXX='hipcc'  # hip
-  OMPI_CXXFLAGS='' OMPI_CXX='nvc -mp=gpu -gpu=cc80'  # nvc
-  ```
-* Alternatively, one could separate HIP/OpenMP and MPI code in different compilation units compiled with `mpicxx` and `hipcc`/`nvc`
-    * Link object files in a separate step using `mpicxx` or `hipcc`/`nvc`
+* Trying to compile code with any HIP calls with other than the `hipcc`
+  compiler can result in errors
+* Either set MPI compiler to use `hipcc`, eg for OpenMPI:
+```cpp
+OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
+```
+* or separate HIP and MPI code in different compilation units compiled with
+  `mpicxx` and `hipcc`
+    * Link object files in a separate step using `mpicxx` or `hipcc`
 
 
 # MPI+HIP strategies
