@@ -71,11 +71,11 @@ lang:     en
 Control the larger context and the flow of execution on the CPU
 
 ::: incremental
-- device init and management
-- memory management
-- execution control
-- synchronisation: device, stream, events
-- error handling, context handling, ...
+- device init and management: `hipSetDevice`
+- memory management: `hipMalloc`
+- execution control: `kernel<<<blocks, threads>>>`
+- synchronisation: device, stream, events: `hipDeviceSynchronize`
+- error handling, context handling, ... : `hipGetErrorString`
 :::
 
 # API example: Hello world
