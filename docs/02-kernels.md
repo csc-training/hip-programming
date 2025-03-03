@@ -26,16 +26,16 @@ lang:     en
 ::: incremental
 - Compute Unit
     - a parallel vector processor in a GPU
-- Kernel
+- kernel
     - parallel code executed on the GPU
-- Thread
+- thread
     - individual worker of a wavefront
-- Wavefront (cf. CUDA warp)
+- wavefront (cf. CUDA warp)
     - collection of threads that execute in lockstep and execute the same
       instructions
     - each wavefront has fixed number of threads (AMD: 64, NVIDIA 32)
     - the number of threads, and thus implicitly the number of wavefronts, per workgroup is chosen at kernel launch
-- Workgroup (cf. CUDA thread block)
+- workgroup (cf. CUDA thread block)
     - group of threads that are on the GPU at the same time and
       are part of the same compute unit (CU)
     - can synchronise together and communicate through memory in the CU
@@ -46,7 +46,7 @@ lang:     en
 
 ::: incremental
 - GPU accelerator is often called a *device* and CPU a *host*
-- Parallel code is
+- parallel code is
     - launched by the host using the HIP API
     - written using the kernel language
         - from the point of view of a single thread
@@ -57,9 +57,9 @@ lang:     en
 # GPU programming considerations
 
 ::: incremental
-- Parallel nature of GPUs requires many similar tasks that can be executed simultaneously
+- parallel nature of GPUs requires many similar tasks that can be executed simultaneously
     - one usage is to replace iterations of loop with a GPU kernel call
-- Need to adapt CPU code to run on the GPU
+- need to adapt CPU code to run on the GPU
     - algorithmic changes to fit the parallel execution model
     - share data among hundreds of cooperating threads
     - manage data transfers between CPU and GPU memories
@@ -71,11 +71,11 @@ lang:     en
 Control the larger context and the flow of execution on the CPU
 
 ::: incremental
-- Device init and management
-- Memory management
-- Execution control
-- Synchronisation: device, stream, events
-- Error handling, context handling, ...
+- device init and management
+- memory management
+- execution control
+- synchronisation: device, stream, events
+- error handling, context handling, ...
 :::
 
 # API example: Hello world
@@ -102,23 +102,23 @@ int main(void)
 Write the GPU code from the point of view of a single thread
 
 ::: incremental
-- Qualifiers: `__device__`, `__global__`, `__shared__`, ...
-- Built-in variables: `threadIdx.x`, `blockIdx.y`, ...
-- Vector types: `int3`, `float2`, `dim3`, ...
-- Math functions: `sqrt`, `powf`, `sinh`, ...
-- Arithmetic functions: `atomicAdd`, `atomicMin`, ...
-- Intrinsic functions: `__syncthreads`, `__threadfence`, ...
+- attributes: `__device__`, `__global__`, `__shared__`, ...
+- built-in variables: `threadIdx.x`, `blockIdx.y`, ...
+- vector types: `int3`, `float2`, `dim3`, ...
+- math functions: `sqrt`, `powf`, `sinh`, ...
+- atomic functions: `atomicAdd`, `atomicMin`, ...
+- intrinsic functions: `__syncthreads`, `__threadfence`, ...
 :::
 
 # Kernels
 
 ::: incremental
-- Kernel is a function executed by the GPU
-- A kernel definition must be of `void` type and must be declared with the `__global__` attribute
-- Any function called from a kernel must be declared with `__device__` attribute
-- All pointers passed to a kernel should point to memory accessible from
+- kernel is a function executed by the GPU
+- kernel must be declared with the `__global__` attribute and the return type must be`void`
+- any function called from a kernel must be declared with `__device__` attribute
+- all pointers passed to a kernel should point to memory accessible from
   the device
-- Unique thread and block IDs can be used to distribute work
+- unique thread and block IDs can be used to distribute work
 :::
 
 # Kernel example: axpy
@@ -135,7 +135,7 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 ```
 
 ::: incremental
-- Global ID `tid` calculated based on the thread and block IDs
+- global ID `tid` calculated based on the thread and block IDs
     - only threads with `tid` smaller than `n` calculate
     - works only if number of threads ≥ `n`
 :::
@@ -155,31 +155,29 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 }
 ```
 
-- Handles any vector size, but grid size should still be chosen with some care
+- handles any vector size, but grid size should still be chosen with some care
 
 # Grid: thread hierarchy
 
 :::::: {.column width=44%}
 ::: incremental
-- Kernels are executed on a 3D *grid* of threads
-    - threads are partitioned into equal-sized *blocks*
-- Code is executed by the threads, the grid is a way to organise the
+- kernels are executed on a 3D *grid* of threads
+- threads are partitioned into equal-sized *blocks*
+- code is executed by the threads, the grid is a way to organise the
   work
-- Dimension of the grid are set at kernel launch
+- dimension of the grid are set at kernel launch
+- built-in variables to be used within a kernel: `threadIdx`, `blockIDx`, `blockDim`, `gridDim`
 :::
 ::::::
 
 :::::: {.column width=54%}
 ![](img/ThreadExecution_new.jpg){.center width=56%}
-
-- Built-in variables to be used within a kernel:
-    - `threadIdx`, `blockIDx`, `blockDim`, `gridDim`
 ::::::
 
 # Launching kernels
 
 ::: incremental
-- Kernels are launched with one of the two following options:
+- kernels are launched with one of the two following options:
   - CUDA syntax (recommended, because it works on CUDA and HIP both):
   ```cpp
   somekernel<<<blocks, threads, shmem, stream>>>(args)
@@ -190,26 +188,24 @@ __global__ void axpy_(int n, double a, double *x, double *y)
   hipLaunchKernelGGL(somekernel, blocks, threads, shmem, stream, args)
   ```
 
-- Grid dimensions are obligatory, `shmem`, and `stream` are optional arguments for CUDA syntax, and can be `0` for the HIP syntax
-  - Must have an integer type or vector type of `dim3`
-- Kernel execution is asynchronous with the host
+- grid dimensions are obligatory
+    - must have an integer type or vector type of `dim3`
+- `shmem`, and `stream` are optional arguments for CUDA syntax, and can be `0` for the HIP syntax
+- kernel execution is asynchronous with the host
 :::
 
 # Simple memory management
 
-- In order to calculate something on the GPUs, we usually need to
-  allocate device memory and pass a pointer to it when launching a kernel
-- Similarly to `cudaMalloc` (or simple `malloc`), HIP provides a function to
-  allocate device memory: `hipMalloc()`
+::: incremental
+- GPU has it's own memory area
+    - allocate device usable memory with `hipMalloc` (cf. `cudaMalloc` and `std::malloc`)
+    - pass the pointer to the kernel
+- copy data to/from device: `hipMemcpy` (cf. `cudaMemcpy`, `std::memcpy`)
+:::
 
 ```cpp
 double *x_
 hipMalloc((void **) &x_, sizeof(double) * n);
-```
-
-- To copy data to/from device, one can use `hipMemcpy()`:
-
-```cpp
 hipMemcpy(x_, x, sizeof(double) * n, hipMemcpyHostToDevice);
 hipMemcpy(x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
 ```
@@ -218,8 +214,11 @@ hipMemcpy(x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
 
 <small>
 
-- Always use HIP error checking with larger codebases!
-  - It has low overhead, and can save a lot of debugging time!
+::: incremental
+- always use HIP error checking with larger codebases!
+  - it has low overhead, and can save a lot of debugging time!
+- for teaching purposes many exercises of this course do not have error checking
+:::
 
 ```cpp
 #define HIP_ERR(err) (hip_error(err, __FILE__, __LINE__))
@@ -229,9 +228,7 @@ inline static void hip_error(hipError_t err, const char *file, int line) {
     exit(1);
   }
 }
-```
-- Here we wrap a HIP call into the above defined HIP_ERR macro:
-```cpp
+ // Wrap allocation with the macro
 inline static void* alloc(size_t bytes) {
   void* ptr;
   HIP_ERR(hipMallocManaged(&ptr, bytes));
@@ -239,9 +236,6 @@ inline static void* alloc(size_t bytes) {
 }
 
 ```
-
-- For simplicity, most exercises of this course do not have error checking, but error checking is strongly recommended when building bigger projects.
-
 </small>
 
 
@@ -298,10 +292,10 @@ int main(void)
 
 ::: incremental
 - HIP supports both AMD and NVIDIA GPUs
-- HIP consists of an API and a "kernel language"
+- HIP consists of an API and a kernel language
     - API controls the larger context
     - kernel language for single thread point of view GPU code
-- Kernels execute over a grid of (blocks of) threads
-    - Each block is executed in wavefronts of 64 (AMD) or 32 (NVIDIA) threads
-- Kernels need to be declared `__global__` and `void` and are launched with special syntax
+- kernels execute over a grid of (blocks of) threads
+    - each block is executed in wavefronts of 64 (AMD) or 32 (NVIDIA) threads
+- kernels need to be declared `__global__` and `void` and are launched with special syntax
 :::
