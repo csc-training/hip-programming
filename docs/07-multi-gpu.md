@@ -239,8 +239,8 @@ hipError_t hipMemcpyPeer(void* dst, int  dstDev, void* src, int srcDev, size_t c
 OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
 ```
 * or separate HIP and MPI code in different compilation units compiled with
-  `mpicxx` and `hipcc`
-    * Link object files in a separate step using `mpicxx` or `hipcc`
+  `mpicxx/CC` and `hipcc`
+    * Link object files in a separate step using `mpicxx/CC` or `hipcc`
 
 # MPI+HIP strategies
 
