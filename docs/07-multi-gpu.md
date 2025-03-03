@@ -52,36 +52,51 @@ lang:     en
 
 # GPU Context
 
-* A context is established implicitly on the current device when the first task requiring an active context is evaluated (HIP and OpenMP)
+* A context is established implicitly on the current device when the first HIP function requiring an active context is evaluated 
 * Several processes can create contexts for a single device
     * The device resources are allocated per context
 * By default, one context per device per process in HIP
-    * Threads of the same process share the primary context (for each device)
-* HIP supports explicit context management whereas OpenMP does not
+    * (CPU) Threads of the same process share the primary context (for each device)
+* HIP supports explicit context management 
+
+::: notes
+A GPU context is an execution environment that manages resources such as memory allocations, streams, and kernel execution for a specific GPU. It acts as an interface between the application and the GPU, ensuring that operations like memory management and kernel launches are handled correctly.
+:::
 
 # Selecting device
 
 * Driver associates a number for each available GPU device starting from 0
-* The functions `hipSetDevice()` and `omp_set_default_device()` are used for selecting the desired device for HIP and OpenMP, respectively
-  * Furthermore, in OpenMP, the `device()`-directive can be used to offload targets to specific devices without changing the default device
+
+
+* The functions `hipSetDevice()` is used for selecting the desired device 
 
 
 # Device management
 
+# Device management
+
+:::::: {.columns}
+::: Return the number of hip capable devices by `count`
 ```cpp
-// HIP
 hipError_t hipGetDeviceCount(int *count)
-hipError_t hipSetDevice(int device)
-hipError_t hipGetDevice(int *device)
-
-// OpenMP
-int omp_get_num_devices(void)
-void omp_set_default_device(int device)
-int omp_get_default_device(void)
 ```
-
-* Demos: `device_management_hip.cpp`, `device_management_omp.cpp`
-
+:::
+::: Set device as the current device for the calling host thread
+```cpp
+hipError_t hipSetDevice(int device)
+```
+:::
+::: Return the current device for the calling host thread by `device`
+```cpp
+hipError_t hipGetDevice(int *device)
+```
+:::
+::: Reset and explicitly destroy all resources associated with the current device
+```cpp
+hipError_t hipDeviceReset(void)
+```
+:::
+::::::
 
 # Querying or verifying device properties
 
