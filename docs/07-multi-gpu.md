@@ -7,6 +7,36 @@ lang:     en
 ---
 
 
+# Parallel programming models
+
+- Parallel execution is based on threads or processes (or both) which run at the same time on different CPU cores
+- Processes
+    - Interaction is based on exchanging messages between processes
+    - MPI (Message passing interface)
+- Threads
+    - Interaction is based on shared memory, i.e. each thread can access directly other threads data
+    - OpenMP, pthreads
+
+# Parallel programming models
+
+<!-- Copyright CSC -->
+ ![](img/processes-threads.svg){.center width=80%}
+<div class=column>
+**MPI: Processes**
+
+- Independent execution units
+- MPI launches N processes at application startup
+- Works over multiple nodes
+</div>
+<div class=column>
+
+**OpenMP: Threads**
+
+- Threads share memory space
+- Threads are created and destroyed  (parallel regions)
+- Limited to a single node
+
+</div>
 
 # GPU Context
 
@@ -62,29 +92,6 @@ Return the properties of a HIP capable device by `prop`
 ```
 hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 ```
-
-# Parallel programming models
-
-- Parallel execution is based on threads or processes (or both) which run at the same time on different CPU cores
-- Processes
-    - Interaction is based on exchanging messages between processes
-    - MPI (Message passing interface)
-- Threads
-    - Interaction is based on shared memory, i.e. each thread can access directly other threads data
-    - OpenMP, pthreads
-
-# Parallel programming models
-
-<!-- Copyright CSC -->
- ![](img/processes-threads.svg){.center width=80%}
-<div class=column>
-**MPI: Processes**
-
-- Independent execution units
-- MPI launches N processes at application startup
-- Works over multiple nodes
-</div>
-<div class=column>
 
 # Running on HPC Systems
 
