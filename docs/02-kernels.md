@@ -99,11 +99,11 @@ int main(void)
 
 # HIP kernels
 
-<small>
-
 Code on the GPU from the point of view of a single thread
 
-:::::: {.column width=50%}
+<small>
+
+:::::: {.column width=45%}
 ::: incremental
 - kernel is a function executed by the GPU
 - kernel must be declared with the `__global__` attribute and the return type must be `void`
@@ -113,7 +113,7 @@ Code on the GPU from the point of view of a single thread
 - unique thread and block IDs can be used to distribute work
 :::
 ::::::
-:::::: {.column width=50%}
+:::::: {.column width=45%}
 - attributes: `__device__`, `__global__`, `__shared__`, ...
 - built-in variables: `threadIdx.x`, `blockIdx.y`, ...
 - vector types: `int3`, `float2`, `dim3`, ...
