@@ -6,6 +6,20 @@ date:     2025-03
 lang:     en
 ---
 
+# Running on HPC Systems
+
+ <div class="column" width=60%>
+
+* Supercomputer are a collection of thousands of nodes
+* Currently there are  2 to 8 GPUs per node
+* More GPU resources per node, better per-node-performance 
+ 
+</div>
+
+ <div class="column" width=40%>
+    ![](img/lumi.png){.center width=200%}
+    <small>Lumi - Pre-exascale system in Finland</small>
+  </div>
 
 
 # Computing in parallel
@@ -104,21 +118,6 @@ Return the properties of a HIP capable device by `prop`
 hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 ```
 
-# Running on HPC Systems
-
- <div class="column" width=60%>
-
-* Supercomputer are a collection of thousands of nodes
-* Currently there are  2 to 8 GPUs per node
-* More GPU resources per node, better per-node-performance 
- 
-</div>
-
- <div class="column" width=40%>
-    ![](img/lumi.png){.center width=200%}
-    <small>Lumi - Pre-exascale system in Finland</small>
-  </div>
-
 # Three levels of parallelism
 
 <div class="column">
@@ -133,16 +132,6 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 <div class="column">
 ![](img/parallel_regions.png){width=99%}
 </div>
-
-
-# Outline
-
-* GPU context
-* Device management
-* Programming models
-* Peer access (GPU-GPU)
-* MPI+HIP
-
 
 
 # Multi-GPU programming models
