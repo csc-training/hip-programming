@@ -68,7 +68,7 @@ lang:     en
 
 # HIP API
 
-Control the larger context and the flow of execution on the CPU
+Code on the CPU to control the larger context and the flow of execution
 
 ::: incremental
 - device init and management: `hipSetDevice`
@@ -97,21 +97,11 @@ int main(void)
 }
 ```
 
-# HIP kernel language
+# HIP kernels
 
-Write the GPU code from the point of view of a single thread
+Code on the GPU from the point of view of a single thread
 
-::: incremental
-- attributes: `__device__`, `__global__`, `__shared__`, ...
-- built-in variables: `threadIdx.x`, `blockIdx.y`, ...
-- vector types: `int3`, `float2`, `dim3`, ...
-- math functions: `sqrt`, `powf`, `sinh`, ...
-- atomic functions: `atomicAdd`, `atomicMin`, ...
-- intrinsic functions: `__syncthreads`, `__threadfence`, ...
-:::
-
-# Kernels
-
+:::::: {.column width=50%}
 ::: incremental
 - kernel is a function executed by the GPU
 - kernel must be declared with the `__global__` attribute and the return type must be `void`
@@ -120,6 +110,15 @@ Write the GPU code from the point of view of a single thread
   the device
 - unique thread and block IDs can be used to distribute work
 :::
+::::::
+:::::: {.column width=50%}
+- attributes: `__device__`, `__global__`, `__shared__`, ...
+- built-in variables: `threadIdx.x`, `blockIdx.y`, ...
+- vector types: `int3`, `float2`, `dim3`, ...
+- math functions: `sqrt`, `powf`, `sinh`, ...
+- atomic functions: `atomicAdd`, `atomicMin`, ...
+- intrinsic functions: `__syncthreads`, `__threadfence`, ...
+::::::
 
 # Kernel example: axpy
 
