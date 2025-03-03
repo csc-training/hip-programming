@@ -231,7 +231,8 @@ inline static void hip_error(hipError_t err, const char *file, int line) {
     exit(1);
   }
 }
- // Wrap allocation with the macro
+
+ // Wrap API call with the macro
 inline static void* alloc(size_t bytes) {
   void* ptr;
   HIP_ERR(hipMallocManaged(&ptr, bytes));
