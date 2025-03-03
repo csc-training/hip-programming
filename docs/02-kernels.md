@@ -2,7 +2,7 @@
 title:    HIP and GPU kernels
 subtitle: GPU programming with HIP
 author:   CSC Training
-date:     2022-11
+date:     2024-03
 lang:     en
 ---
 
@@ -78,14 +78,14 @@ int main(void)
 # AMD GPU terminology (continued)
 
 - Thread
-    - individual lane in a wavefront
+    - individual "worker" of a wavefront
 - Wavefront (cf. CUDA warp)
     - collection of threads that execute in lockstep and execute the same
       instructions
     - each wavefront has fixed number of threads (AMD: 64, NVIDIA 32)
-    - number of wavefronts per workgroup is chosen at kernel launch
+    - the number of threads, and thus implicitly the number of wavefronts, per workgroup is chosen at kernel launch
 - Workgroup (cf. CUDA thread block)
-    - group of wavefronts (threads) that are on the GPU at the same time and
+    - group of threads that are on the GPU at the same time and
       are part of the same compute unit (CU)
     - can synchronise together and communicate through memory in the CU
 
