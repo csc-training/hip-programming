@@ -239,9 +239,9 @@ hipError_t hipMemcpyPeer(void* dst, int  dstDev, void* src, int srcDev, size_t c
 OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
 ```
 * or separate HIP and MPI code in different compilation units compiled with
-  `mpicxx/CC` and `hipcc`
-    * Link object files in a separate step using `mpicxx/CC` or `hipcc`
-
+  `mpicxx` and `hipcc`
+    * Link object files in a separate step using `mpicxx` or `hipcc`
+* on LUMI, `cc` and `CC` wrappers know about both MPI and HIP
 # Selecting the correct GPU
 
 * Typically all processes on the node can access all GPUs of that node
