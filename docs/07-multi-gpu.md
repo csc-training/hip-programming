@@ -75,7 +75,6 @@ A GPU context is an execution environment that manages resources such as memory 
 
 # Device management
 
-::: incremental
 Return the number of hip capable devices by `count`
 ```cpp
 hipError_t hipGetDeviceCount(int *count)
@@ -92,24 +91,22 @@ Reset and explicitly destroy all resources associated with the current device
 ```cpp
 hipError_t hipDeviceReset(void)
 ```
-:::
+
 
 # Querying or verifying device properties
 
-* One can query or verify the properties of different devices in the system
-    * Properties include name, amount of memory, warp size, support for unified virtual addressing, etc.
+* One can query the properties of different devices in the system using
+  `hipGetDeviceProperties()` function
+    * No context needed
+    * Provides e.g. name, amount of memory, warp size, support for unified
+      virtual addressing, etc.
     * Useful for code portability
 
-In HIP, the function returns the device properties in struct `prop`
-```cpp
-// HIP - get device properties as struct
+Return the properties of a HIP capable device by `prop`
+```
 hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
-
-// OpenMP - use `requires` clause to verify the device properties, e.g.
-#pragma omp requires unified_shared_memory
 ```
 
-* Demo: `device_properties_hip.cpp`
 
 
 # Multi-GPU programming models
