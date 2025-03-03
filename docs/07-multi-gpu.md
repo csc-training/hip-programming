@@ -118,7 +118,7 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 3. Supercomputer: Many nodes connected with interconnect
     * Parallelization strategy: MPI between nodes
 </div>
-<div class="column" style="margin-top: 160px;">
+<div class="column" style="margin-top: 150px;">
     <img src="img/parallel_regions.png" style="width:99%;">
 </div>
 
