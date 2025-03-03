@@ -117,14 +117,14 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 ![](img/parallel_regions.png){.center width=60% }
 
 
-# Multi-GPU programming models
+# Multi-GPU Programming Models
 
 <div class="column">
-* One GPU per process (I)
+* One GPU per process
     * Syncing is handled through message passing (e.g. MPI)
-* Many GPUs per process (II)
+* Many GPUs per process
     * Process manages all context switching and syncing explicitly
-* One GPU per thread (III)
+* One GPU per thread
     * Syncing is handled through thread synchronization requirements
 </div>
 
@@ -134,9 +134,6 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 ![](img/single_proc_thread_gpu.png){width=50%}
 </div>
 
-
-# One GPU per process with MPI{.section}
-
 # One GPU per process
 
 * Recommended for multi-process applications using MPI
@@ -145,6 +142,102 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
   easier and less invasive (if MPI is used anyway)
     * Apart from each process selecting a different device, the implementation
       looks much like a single-GPU program
+
+
+
+# Many GPUs per Process
+
+* Process switches the active GPU using `hipSetDevice()` (HIP) function 
+* After selecting the default device, operations such as the following are effective only
+  on the selected GPU:
+    * Memory operations
+    * Kernel execution
+    * Streams and events (HIP)
+* Asynchronous function calls are required to overlap work
+
+# Many GPUs per Process. Code Example
+
+```cpp
+// Launch kernels (HIP)
+for(unsigned n = 0; n < num_devices; n++) {
+  hipSetDevice(n);
+  kernel<<<blocks[n],threads[n], 0, stream[n]>>>(arg1[n], arg2[n], size[n]);
+}
+//Synchronize all kernels with host (HIP)
+for(unsigned n = 0; n < num_devices; n++) {
+  hipSetDevice(n);
+  hipStreamSynchronize(stream[n]);
+}
+```
+
+# Multi-GPU, One GPU per Thread
+
+* One GPU per CPU thread
+    * E.g. one OpenMP CPU thread per GPU being used
+* HIP is threadsafe
+    * Multiple threads can call the functions at the same time
+* Each thread can create its own context on a different GPU
+    * `hipSetDevice()` (HIP) sets the device and create a context per thread
+    * Easy device management with no changing of device
+* From the point of view of a single thread, the implementation closer to a single-GPU case
+* Communication between threads still not trivial
+
+
+# Multi-GPU, One GPU per Thread. Code Example
+
+```cpp
+// Launch and synchronize kernels from parallel CPU threads using HIP
+#pragma omp parallel num_threads(deviceCount)
+{
+  unsigned n = omp_get_thread_num();
+  hipSetDevice(n);
+  kernel<<<blocks[n],threads[n], 0, stream[n]>>>(arg1[n], arg2[n], size[n]);
+  hipStreamSynchronize(stream[n]);
+}
+```
+
+# Direct peer to peer access {.section}
+
+# Direct peer to peer access (HIP)
+
+* Access peer GPU memory directly from another GPU
+    * Pass a pointer to data on GPU 1 to a kernel running on GPU 0
+    * Transfer data between GPUs without going through host memory
+    * Lower latency, higher bandwidth
+
+```cpp
+// Check peer accessibility
+hipError_t hipDeviceCanAccessPeer(int* canAccessPeer, int device, int peerDevice)
+
+// Enable peer access
+hipError_t hipDeviceEnablePeerAccess(int peerDevice, unsigned int flags)
+
+// Disable peer access
+hipError_t hipDeviceDisablePeerAccess(int peerDevice)
+```
+* Between AMD GPUs, the peer access is always enabled (if supported)
+
+
+# Peer to peer communication
+
+* Devices have separate memories
+* Memcopies between different devices can be done as follows:
+
+```cpp
+// HIP: First option that requires unified virtual addressing (use "hipMemcpyDefault" for "kind")
+hipError_t hipMemcpy(void* dst, void* src, size_t size, hipMemcpyKind kind=hipMemcpyDefault)
+
+// HIP: Second option does not require unified virtual addressing
+hipError_t hipMemcpyPeer(void* dst, int  dstDev, void* src, int srcDev, size_t size)
+
+// OpenMP
+int omp_target_memcpy(void *dst, const void *src, size_t size, size_t dstOffset,
+                      size_t srcOffset, int dstDev, int dstDev)
+```
+
+* If direct peer to peer access is not available or implemented, the functions should fall back to a normal copy through host memory
+
+
 
 # Compiling MPI+HIP Code
 
@@ -205,132 +298,7 @@ OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
 
 # Many GPUs per process{.section}
 
-# Many GPUs per process
-
-* Process switches the active GPU using `hipSetDevice()` (HIP) or `omp_set_default_device()` (OpenMP) functions 
-   * OpenMP has also `device()`-directive to offload work to a specific device
-* After selecting the default device, operations such as the following are effective only
-  on the selected GPU:
-    * Memory operations
-    * Kernel execution
-    * Streams and events (HIP)
-* Asynchronous function calls (HIP) or `nowait` clause (OpenMP) are required to overlap work
-
-
-# Many GPUs per process, code example
-
-<small>
-
-* HIP example
-```cpp
-// Launch kernels (HIP)
-for(unsigned n = 0; n < num_devices; n++) {
-  hipSetDevice(n);
-  kernel<<<blocks[n],threads[n], 0, stream[n]>>>(arg1[n], arg2[n], size[n]);
-}
-//Synchronize all kernels with host (HIP)
-for(unsigned n = 0; n < num_devices; n++) {
-  hipSetDevice(n);
-  hipStreamSynchronize(stream[n]);
-}
-```
-* OpenMP example
-```cpp
-// Launch kernels (OpenMP)
-for(int n = 0; n < num_devices; n++) {
-  omp_set_default_device(n);
-  #pragma omp target teams distribute parallel for nowait
-  for (unsigned i = 0; i < size[n]; i++)
-    // Do something
-}
-#pragma omp taskwait //Synchronize all kernels with host (OpenMP)
-```
-</small>
-
 # One GPU per thread{.section}
-
-# One GPU per thread
-
-* One GPU per CPU thread
-    * E.g. one OpenMP CPU thread per GPU being used
-* HIP and OpenMP APIs are threadsafe
-    * Multiple threads can call the functions at the same time
-* Each thread can create its own context on a different GPU
-    * `hipSetDevice()` (HIP) or `device()`-directive (OpenMP) determine the device and create a context per thread
-* From the point of view of a single thread, the implementation closer to a single-GPU case
-* Communication between threads still not trivial
-
-
-# One GPU per thread, code example
-
-<small>
-
-* HIP example
-```cpp
-// Launch and synchronize kernels from parallel CPU threads using HIP
-#pragma omp parallel num_threads(num_devices)
-{
-  unsigned n = omp_get_thread_num();
-  hipSetDevice(n);
-  kernel<<<blocks[n],threads[n], 0, stream[n]>>>(arg1[n], arg2[n], size[n]);
-  hipStreamSynchronize(stream[n]);
-}
-```
-* OpenMP example
-```cpp
-// Launch and synchronize kernels from parallel CPU threads using OpenMP
-#pragma omp parallel num_threads(num_devices)
-{
-  unsigned n = omp_get_thread_num();
-  #pragma omp target teams distribute parallel for device(n)
-  for (unsigned i = 0; i < size[n]; i++)
-    // Do something
-}
-```
-</small>
-
-
-# Direct peer to peer access {.section}
-
-# Direct peer to peer access (HIP)
-
-* Access peer GPU memory directly from another GPU
-    * Pass a pointer to data on GPU 1 to a kernel running on GPU 0
-    * Transfer data between GPUs without going through host memory
-    * Lower latency, higher bandwidth
-
-```cpp
-// Check peer accessibility
-hipError_t hipDeviceCanAccessPeer(int* canAccessPeer, int device, int peerDevice)
-
-// Enable peer access
-hipError_t hipDeviceEnablePeerAccess(int peerDevice, unsigned int flags)
-
-// Disable peer access
-hipError_t hipDeviceDisablePeerAccess(int peerDevice)
-```
-* Between AMD GPUs, the peer access is always enabled (if supported)
-
-
-# Peer to peer communication
-
-* Devices have separate memories
-* Memcopies between different devices can be done as follows:
-
-```cpp
-// HIP: First option that requires unified virtual addressing (use "hipMemcpyDefault" for "kind")
-hipError_t hipMemcpy(void* dst, void* src, size_t size, hipMemcpyKind kind=hipMemcpyDefault)
-
-// HIP: Second option does not require unified virtual addressing
-hipError_t hipMemcpyPeer(void* dst, int  dstDev, void* src, int srcDev, size_t size)
-
-// OpenMP
-int omp_target_memcpy(void *dst, const void *src, size_t size, size_t dstOffset,
-                      size_t srcOffset, int dstDev, int dstDev)
-```
-
-* If direct peer to peer access is not available or implemented, the functions should fall back to a normal copy through host memory
-
 # Summary
 
 - There are many ways to write a multi-GPU program
