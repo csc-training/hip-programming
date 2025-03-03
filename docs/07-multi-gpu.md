@@ -8,48 +8,6 @@ lang:     en
 
 
 
-
-# Running on HPC Systems
-
- <div class="column" width=60%>
-
-* Supercomputer are a collection of thousands of nodes
-* Currently there are  2 to 8 GPUs per node
-* More GPU resources per node, better per-node-performance 
- 
-</div>
-
- <div class="column" width=40%>
-    ![](img/lumi.png){.center width=200%}
-    <small>Lumi - Pre-exascale system in Finland</small>
-  </div>
-
-# Three levels of parallelism
-
-<div class="column">
-1. GPU: GPU threads
-    * Parallelization strategy: HIP, OpenMP, SYCL, Kokkos, OpenCL
-2. Node: Multiple GPUs and CPUs
-    * Parallelization strategy: MPI, Threads, OpenMP
-3. Supercomputer: Many nodes connected with interconnect
-    * Parallelization strategy: MPI between nodes
-</div>
-
-<div class="column">
-![](img/parallel_regions.png){width=99%}
-</div>
-
-
-# Outline
-
-* GPU context
-* Device management
-* Programming models
-* Peer access (GPU-GPU)
-* MPI+HIP
-
-
-
 # GPU Context
 
 * A context is established implicitly on the current device when the first HIP function requiring an active context is evaluated 
@@ -104,6 +62,68 @@ Return the properties of a HIP capable device by `prop`
 ```
 hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 ```
+
+# Parallel programming models
+
+- Parallel execution is based on threads or processes (or both) which run at the same time on different CPU cores
+- Processes
+    - Interaction is based on exchanging messages between processes
+    - MPI (Message passing interface)
+- Threads
+    - Interaction is based on shared memory, i.e. each thread can access directly other threads data
+    - OpenMP, pthreads
+
+# Parallel programming models
+
+<!-- Copyright CSC -->
+ ![](img/processes-threads.svg){.center width=80%}
+<div class=column>
+**MPI: Processes**
+
+- Independent execution units
+- MPI launches N processes at application startup
+- Works over multiple nodes
+</div>
+<div class=column>
+
+# Running on HPC Systems
+
+ <div class="column" width=60%>
+
+* Supercomputer are a collection of thousands of nodes
+* Currently there are  2 to 8 GPUs per node
+* More GPU resources per node, better per-node-performance 
+ 
+</div>
+
+ <div class="column" width=40%>
+    ![](img/lumi.png){.center width=200%}
+    <small>Lumi - Pre-exascale system in Finland</small>
+  </div>
+
+# Three levels of parallelism
+
+<div class="column">
+1. GPU: GPU threads
+    * Parallelization strategy: HIP, OpenMP, SYCL, Kokkos, OpenCL
+2. Node: Multiple GPUs and CPUs
+    * Parallelization strategy: MPI, Threads, OpenMP
+3. Supercomputer: Many nodes connected with interconnect
+    * Parallelization strategy: MPI between nodes
+</div>
+
+<div class="column">
+![](img/parallel_regions.png){width=99%}
+</div>
+
+
+# Outline
+
+* GPU context
+* Device management
+* Programming models
+* Peer access (GPU-GPU)
+* MPI+HIP
 
 
 
