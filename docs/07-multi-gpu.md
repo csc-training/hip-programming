@@ -12,7 +12,7 @@ lang:     en
 
 - Parallel computing
     - A problem is split into smaller subtasks
-    - Multiple subtasks are processed simultaneously using multiple cores
+    - Multiple subtasks are processed simultaneously using multiple CPUs/GPUS
 
 <!-- Copyright CSC -->
  ![](img/compp.svg){.center width=40%}
