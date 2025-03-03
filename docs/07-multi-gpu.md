@@ -89,7 +89,7 @@ hipError_t hipSetDevice(int device)
 ```cpp
 hipError_t hipGetDevice(int *device)
 ```
-- Reset and explicitly destroy all resources associated with the current device
+- Reset and destroy all current device resources
 ```cpp
 hipError_t hipDeviceReset(void)
 ```
