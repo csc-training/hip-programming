@@ -49,9 +49,9 @@ lang:     en
 - Parallel code is
     - launched by the host using the HIP API
     - written using the kernel language
+        - from the point of view of a single thread
+        - each thread has a unique ID
     - executed on a device by many threads
-- Code is written from the point of view of a single thread
-    - each thread has a unique ID
 :::
 
 # GPU programming considerations
