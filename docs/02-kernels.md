@@ -278,7 +278,7 @@ int main(void)
     // launch kernel
     dim3 blocks(32);
     dim3 threads(256);
-    hipLaunchKernelGGL(fill_, blocks, threads, 0, 0, n, x_, a);
+    fill_<<<blocks, threads>>>(n, x_, a);
 
     // copy data to the host and print
     hipMemcpy(x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
