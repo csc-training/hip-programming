@@ -110,7 +110,7 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 
 # Three levels of parallelism
 
-1. GPU - GPU threads on the multiprocessors: HIP
+1. GPU - GPU threads on the CUs: HIP
 2. Node - Multiple GPUs and CPUs: MPI, OpenMP
 3. Supercomputer - Many nodes connected with interconnect: MPI 
 
