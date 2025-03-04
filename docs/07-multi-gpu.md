@@ -186,7 +186,7 @@ for(unsigned n = 0; n < num_devices; n++) {
 
 ```cpp
 // Launch and synchronize kernels from parallel CPU threads using HIP
-#pragma omp parallel num_threads(deviceCount)
+#pragma omp parallel num_threads(num_devices)
 {
   unsigned n = omp_get_thread_num();
   hipSetDevice(n);
