@@ -19,11 +19,11 @@ lang:     en
 **CUDA**
 </div>
 
-<div class="column"  width=45%>
+<div class="column width=45%">
 **HIP**
 </div>
 
-<div class="column"  width=45%>
+<div class="column width=45%"  >
 ```cpp
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
@@ -32,7 +32,7 @@ kernel_name<<<gridsize, blocksize,
 ``` 
 </div>
 
-<div class="column" width=45%>
+<div class="column width=45%">
 ```cpp
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
