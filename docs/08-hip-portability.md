@@ -84,6 +84,11 @@ hipLaunchKernelGGL(kernel_name,
 
 # Porting a CUDA Project
 
+- start on a CUDA platform
+- Various options:
+    * manual editing (search/replace)
+    * HIPIFY Tools
+    * Header porting
 
 
 # Outline
