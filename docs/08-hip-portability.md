@@ -6,7 +6,13 @@ date:     2025-03
 lang:     en
 ---
 
+# Heterogeneous-Compute Interface for Portability API
 
+- code to run on both **AMD ROCm** and **NVIDIA CUDA** platforms with minimal changes
+- (very) similar to **CUDA**, but designed for cross-platform compatibility
+- enables fast translation of CUDA API calls
+   - most calls can be converted in place by simply replacing `cuda` with `hip`
+   - 
 # Outline
 
 * Introduction
