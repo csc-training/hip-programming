@@ -75,25 +75,13 @@ hipLaunchKernelGGL(kernel_name,
 <small>
  <div class="column" width=45%>>
 ```cpp
-kernel_name<<<gridsize, blocksize, 
-              shared_mem_size, 
-              stream>>>
-              (arg0,arg1, ...);
-``` 
+cudaMalloc(&d_x,N*sizeof(double));
+```
 </div>
 
-<div class="column" width=45%>
+<div class="column" width=45%>>
 ```cpp
-kernel_name<<<gridsize, blocksize, 
-              shared_mem_size, 
-              stream>>>
-              (arg0,arg1, ...);
-
-hipLaunchKernelGGL(kernel_name,
-                    gridsize, 
-                    blocksize, 
-                    shared_mem_size, 
-                    stream,arg0,arg1, ...);
+hipMalloc(&d_x,N*sizeof(double));
 ```
 </div>
 
