@@ -82,35 +82,9 @@ hipLaunchKernelGGL(kernel_name,
 </small>
 
 
-# CUDA vs. HIP: API
+# Porting a CUDA Project
 
 
-<div class="column" width=45%>>
-```cpp
-// CUDA
-```
-</div>
-
-<div class="column" width=45%>>
-```cpp
-// HIP
- ```
-</div>
-
-<small>
- <div class="column" width=45%>>
-```cpp
-cudaMalloc(&d_x,N*sizeof(double));
-```
-</div>
-
-<div class="column" width=45%>>
-```cpp
-hipMalloc(&d_x,N*sizeof(double));
-```
-</div>
-
-</small>
 
 # Outline
 
