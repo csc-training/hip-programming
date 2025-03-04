@@ -41,7 +41,7 @@ kernel_name<<<gridsize, blocksize,
 ```
   
 ```cpp
-hiplaunchKernelGGL(kernel_name,
+hipLaunchKernelGGL(kernel_name,
                     gridsize, 
                     blocksize, 
                     shared_mem_size, 
