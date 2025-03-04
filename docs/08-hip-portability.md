@@ -14,7 +14,7 @@ lang:     en
 - supports a strong subset of the **CUDA** runtime functionality
 - enables fast translation of **CUDA API** calls: most calls can be converted in place by simply replacing `cuda` with `hip`
 
-# CUDA vs. HIP: Launch Kernel
+# CUDA vs. HIP: Launch Kernels
 
  <div class="column" width=45%>>
 **CUDA**
@@ -51,32 +51,29 @@ hipLaunchKernelGGL(kernel_name,
 
 </small>
 
-# HIPFort for SAXPY (`Y=Y+a*X`). Fortran Code
+
+
+# CUDA vs. HIP: API
+
+ <div class="column" width=42%>>
+**CUDA**
+</div>
+
+ <div class="column" width=48%>>
+**HIP**
+</div>
+
 <small>
-<div class="column" width=45%>>
+ <div class="column" width=42%>>
 ```cpp
-kernel_name<<<gridsize, blocksize, 
-              shared_mem_size, 
-              stream>>>
-              (arg0,arg1, ...);
+``` 
+</div>
+
+<div class="column" width=48%>
+```cpp
 ```
 </div>
 
-<div class="column" width=53%>>
-```cpp
-  
-kernel_name<<<gridsize, blocksize, 
-              shared_mem_size, 
-              stream>>>
-              (arg0,arg1, ...);
-
-hipLaunchKernelGGL(kernel_name,
-                    gridsize, 
-                    blocksize, 
-                    shared_mem_size, 
-                    stream,arg0,arg1, ...);
-```
-</div>
 </small>
 
 # Outline
