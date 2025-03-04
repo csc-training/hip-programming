@@ -16,6 +16,31 @@ lang:     en
 - enables fast translation of **CUDA API** calls
 - most calls can be converted in place by simply replacing `cuda` with `hip`
 
+# CUDA v.s HIP. LAunch Kernel
+<div class="column">
+**CUDA**
+</div>
+
+<div class="column">
+**HIP**
+</div>
+
+<div class="column">
+**CUDA**
+```cpp
+kernel_<<<gridsize, blocksize, shared_mem_size, stream>>>(arg0,arg1, ...);
+``` 
+</div>
+
+<div class="column">
+**HIP**
+```cpp
+kernel<<<gridsize, blocksize, shared_mem_size, stream>>>(arg0,arg1, ...);
+```
+```cpp
+hiplaunchKernelGGGL(kernel_name,gridsize, blocksize, shared_mem_size, stream,arg0,arg1, ...);
+```
+</div>
 
 # Outline
 
