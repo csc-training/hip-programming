@@ -12,6 +12,25 @@ lang:     en
 * Events
 * Synchronization
 
+# Outline
+
+:::{.fragment}
+- Streams
+  - Kernels in different streams are asynchronous
+  - Kernels in same stream are executed in first-in-first-out order
+:::
+:::{.fragment}
+- Events 
+  - Synchronize between streams and host
+  - Measure time
+:::
+:::{.fragment}
+- Synchronization
+  - host ⇔ stream, host ⇔ event,  host ⇔ device
+  - stream ⇔ event
+  - threads in block
+:::
+
 # What is a stream?
 
 * A sequence of operations that execute in order on the GPU
@@ -31,6 +50,12 @@ lang:     en
 
 </div>
 </small>
+
+::: {.notes}
+- Big kernels: 1 kernel in device at time
+- But moving data while kernel is computing ok
+- No data dependencies. HD2 does not depent on DH1.
+:::
 
 # Asynchronous funtions and the default stream
 
@@ -66,6 +91,12 @@ lang:     en
   ```
 
   </small>
+
+::: {.notes}
+- add `Async` prefix call name and
+- add `hipStream_t` argument list
+- Otherwise: default stream is assumed
+:::
 
 # Asynchronisity and kernels
 
@@ -151,52 +182,24 @@ for (int i = 0; i < 3; ++i){
 
 # Events
 
-<small>
+- Synchronize other streams/host with events
+- Measure time between events
 
-* Create `event` object
-```cpp
-​hipError_t hipEventCreate ( hipEvent_t* event ) 
-```
 
-* Capture in `event` the contents of `stream` at the time of this call
-```cpp
-hipError_t hipEventRecord ( hipEvent_t event, hipStream_t stream ) 
-``` 
-
-* Compute the elapsed time in milliseconds between `start` and `end` events
-```cpp
-hipError_t hipEventElapsedTime ( float* ms, hipEvent_t start, hipEvent_t end ) 
-``` 
-
-* Make all future work submitted to `stream` wait for all work captured in `event`
-```cpp
-​hipError_t hipStreamWaitEvent ( hipStream_t stream, hipEvent_t event, unsigned int  flags = 0 ) 
-```
-
-* Wait for `event` to complete
-```cpp
-hipError_t hipEventSynchronize ( hipEvent_t event ) 
-``` 
-
-* Destroy `event` object
-```cpp
-hipError_t hipEventDestroy ( hipEvent_t event ) 
-```
-
-</small>
 
 # Why events?
 
-<small>
-
-* Events provide a mechanism to signal when operations have occurred
-in a stream
+* Cut stream to fragments
   * Useful for inter-stream synchronization and timing asynchronous events
 * Events have a boolean state: occurred / not occurred
   * Important: the default state = occurred
 
-<div class="column">
+::::::{.columns}
+:::{.column}
+:::{.fragment}
 
+<small>
+Measure how fast host places tasks to stream:
 ```cpp
   // Start timed GPU kernel
   clock_t start_kernel_clock = clock();
@@ -210,12 +213,13 @@ in a stream
   clock_t stop_clock = clock();
   hipStreamSynchronize(stream);
 ```
-
-* This code snippet can measure how quick the CPU is throwing asynchronous tasks into a queue for the GPU
-
-</div>
-<div class="column">
-
+</small>
+:::
+:::
+:::{.column }
+:::{.fragment}
+<small>
+Measure duration of tasks on GPU:
 ```cpp
   // Start timed GPU kernel
   hipEventRecord(start_kernel_event, stream);
@@ -229,13 +233,34 @@ in a stream
   hipEventRecord(stop_event, stream);
   hipEventSynchronize(stop_event);
 ```
+</small>
+:::
+:::
+::::::
 
-* This code snippet can measure the duration of each asynchronous task on the GPU
+::: {.notes}
+- Note that with events the event is complete when the last hipMemcpy is complete
+- 
+:::
 
-</div>
+# Events: Central API calls
+
+<small>
+
+| *Description* | API call |
+|-|-|
+| Initialize `event` object  | `hipEventCreate(hipEvent_t* event)` |
+| Record an `event` in the `stream` | `hipEventRecord(hipEvent_t event, hipStream_t stream)`  |
+| Elapsed time (ms) between `start` and `end` | `hipEventElapsedTime(float* ms, hipEvent_t start, hipEvent_t end)`  |
+| Make `stream` wait for `event` | `hipStreamWaitEvent(hipStream_t stream, hipEvent_t event, unsigned int  flags = 0)` |
+| Wait for `event` to complete | `hipEventSynchronize(hipEvent_t event)` |
+| Destroy `event` object | `hipEventDestroy(hipEvent_t event)` |
+
+- All of the above return `hipError_t`
+
 </small>
 
-# Synchronization
+# Central synchronization API calls 
 
 <small>
 
@@ -290,6 +315,8 @@ __global__ void reverse(double *d_a) {
 
 # Summary
 
+
+::: incremental
 * Streams provide a mechanism to evaluate tasks on the GPU concurrently and asynchronously with the host
   * Asynchronous functions requiring a stream argument are required
   * Kernels are always asynchronous with the host
@@ -299,3 +326,4 @@ in a stream
   * Good for inter-stream sychronization and timing events
 * Many host/device synchronizations functions for different purposes
   * The device function `__syncthreads()` is only for in-kernel synchronization between threads in a same block (does not synch threads across blocks)
+:::
