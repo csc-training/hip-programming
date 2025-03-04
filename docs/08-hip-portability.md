@@ -16,11 +16,11 @@ lang:     en
 
 # CUDA vs. HIP: Launch Kernels
 
- <div class="column" width=45%>>
+<div class="column" width=45% style="border: 2px solid black; padding: 5px; text-align: center;">
 **CUDA**
 </div>
 
- <div class="column" width=45%>>
+<div class="column" width=45% style="border: 2px solid black; padding: 5px; text-align: center;">
 **HIP**
 </div>
 
