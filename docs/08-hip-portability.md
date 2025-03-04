@@ -17,7 +17,7 @@ lang:     en
 # CUDA vs. HIP: Launch Kernels
 
 <small>
-<div class="column" width=45% style="border: 2px solid black; padding: 5px; text-align: center;">
+<div class="column" width=45% style="border: 2px solid black; padding: 5px;">
 **CUDA**
 </div>
 
