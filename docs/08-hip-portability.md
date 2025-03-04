@@ -32,6 +32,7 @@ lang:     en
 <small>
  <div class="column" width=45%>>
 ```cpp
+cudaMalloc(&d_x,N*sizeof(double));
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
               stream>>>
@@ -41,6 +42,7 @@ kernel_name<<<gridsize, blocksize,
 
 <div class="column" width=45%>
 ```cpp
+hipMalloc(&d_x,N*sizeof(double));
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
               stream>>>
