@@ -60,26 +60,26 @@ hipLaunchKernelGGL(kernel_name,
 
 # CUDA vs. HIP: API
 
- <div class="column" width=46%>>
+ <div class="column" width=45%>>
 ```C
 // CUDA 
 ```
 </div>
 
- <div class="column" width=44%>>
+ <div class="column" width=45%>>
 ```
 // HIP
 ```
 </div>
 
 <small>
- <div class="column" width=46%>>
+ <div class="column" width=45%>>
 ```cpp
 cudaMalloc(&d_x,N*sizeof(double));
-``` 
+```
 </div>
 
-<div class="column" width=44%>
+<div class="column" width=45%>>
 ```cpp
 hipMalloc(&d_x,N*sizeof(double));
 ```
