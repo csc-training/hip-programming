@@ -15,15 +15,16 @@ lang:     en
 - enables fast translation of **CUDA API** calls: most calls can be converted in place by simply replacing `cuda` with `hip`
 
 # CUDA vs. HIP: Launch Kernel
-<div class="column" width=45%>
+
+ <div class="column" width=45%>
 **CUDA**
 </div>
 
-<div class="column width=45%">
+ <div class="column" width=45%>
 **HIP**
 </div>
 
-<div class="column width=45%"  >
+ <div class="column" width=45%>
 ```cpp
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
@@ -32,7 +33,7 @@ kernel_name<<<gridsize, blocksize,
 ``` 
 </div>
 
-<div class="column width=45%">
+<div class="column" width=45%>
 ```cpp
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
