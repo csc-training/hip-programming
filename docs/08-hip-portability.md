@@ -38,6 +38,9 @@ cudaMemcpy(d_x,x,N*sizeof(double),
               
 cudaDeviceSynchronize();
 
+cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, 
+                &alpha, d_A, N, d_B, N, &beta, d_C, N);
+
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
               stream>>>
@@ -53,6 +56,9 @@ hipMemcpy(d_x,x,N*sizeof(double),
               hipMemcpyHostToDevice);
 
 hipDeviceSynchronize();
+
+hipblasSgemm(handle, HIPBLAS_OP_N, HIPBLAS_OP_N, N, N, N, 
+                 &alpha, d_A, N, d_B, N, &beta, d_C, N);
 
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
