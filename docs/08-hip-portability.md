@@ -57,13 +57,13 @@ hipLaunchKernelGGL(kernel_name,
 # CUDA vs. HIP: API
 
  <div class="column" width=46%>>
-```
+```plaintext
 **CUDA**
 ```
 </div>
 
  <div class="column" width=44%>>
-```
+```plaintext
 **HIP**
 ```
 </div>
