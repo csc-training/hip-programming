@@ -9,12 +9,10 @@ lang:     en
 # Heterogeneous-Compute Interface for Portability API
 
 - code to run on both **AMD ROCm** and **NVIDIA CUDA** platforms with minimal changes
-- the `hipcc` compiler driver calls different compilers depending on the architecture
-- on **NVIDIA** platforms calls `nvcc` 
+- the `hipcc` compiler driver calls different compilers depending on the architecture: on **NVIDIA** platforms calls `nvcc` 
 - (very) similar to **CUDA**, but designed for cross-platform compatibility
 - supports a strong subset of the **CUDA** runtime functionality
-- enables fast translation of **CUDA API** calls
-- most calls can be converted in place by simply replacing `cuda` with `hip`
+- enables fast translation of **CUDA API** calls: most calls can be converted in place by simply replacing `cuda` with `hip`
 
 # CUDA v.s HIP. LAunch Kernel
 <div class="column">
