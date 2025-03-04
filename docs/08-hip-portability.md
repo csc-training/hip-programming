@@ -14,8 +14,7 @@ lang:     en
 - supports a strong subset of the **CUDA** runtime functionality
 - enables fast translation of **CUDA API** calls: most calls can be converted in place by simply replacing `cuda` with `hip`
 
-# CUDA vs. HIP: Launch Kernels
-
+# CUDA vs. HIP
 
 <div class="column" width=45%>>
 ```cpp
@@ -33,6 +32,12 @@ lang:     en
  <div class="column" width=45%>>
 ```cpp
 cudaMalloc(&d_x,N*sizeof(double));
+  
+cudaMemcpy(d_x,x,N*sizeof(double),
+              cudaMemcpyHostToDevice);
+              
+cudaDeviceSynchronize();
+
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
               stream>>>
@@ -43,6 +48,12 @@ kernel_name<<<gridsize, blocksize,
 <div class="column" width=45%>
 ```cpp
 hipMalloc(&d_x,N*sizeof(double));
+
+hipMemcpy(d_x,x,N*sizeof(double),
+              hipMemcpyHostToDevice);
+
+hipDeviceSynchronize();
+
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
               stream>>>
