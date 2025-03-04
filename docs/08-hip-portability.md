@@ -50,42 +50,6 @@ hipLaunchKernelGGL(kernel_name,
 ```
 </div>
 
-# CUDA vs. HIP: Launch Kernel
-
-<div class="columns">
-  <div class="column">
-    <strong>CUDA</strong>
-    <pre>
-    ```cpp
-    kernel_name<<<gridsize, blocksize, 
-                  shared_mem_size, 
-                  stream>>>
-                  (arg0,arg1, ...);
-    ```
-    </pre>
-  </div>
-
-  <div class="column">
-    <strong>HIP</strong>
-    <pre>
-    ```cpp
-    kernel_name<<<gridsize, blocksize, 
-                  shared_mem_size, 
-                  stream>>>
-                  (arg0,arg1, ...);
-    ```
-
-    ```cpp
-    hipLaunchKernelGGL(kernel_name,
-                        gridsize, 
-                        blocksize, 
-                        shared_mem_size, 
-                        stream, arg0, arg1, ...);
-    ```
-    </pre>
-  </div>
-</div>
-
 # Outline
 
 * Introduction
