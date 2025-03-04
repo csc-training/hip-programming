@@ -10,7 +10,7 @@ lang:     en
 
 - code to run on both **AMD ROCm** and **NVIDIA CUDA** platforms with minimal changes
 - the `hipcc` compiler driver calls different compilers depending on the architecture
-         - on **NVIDIA** platforms calls `nvcc` 
+- on **NVIDIA** platforms calls `nvcc` 
 - (very) similar to **CUDA**, but designed for cross-platform compatibility
 - supports a strong subset of the **CUDA** runtime functionality
 - enables fast translation of **CUDA API** calls
