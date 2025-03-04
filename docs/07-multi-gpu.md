@@ -19,7 +19,7 @@ lang:     en
  <div class="column" width=40%>
     ![](img/lumi.png){.center width=200%}
     <small>Lumi - Pre-exascale system in Finland</small>
-  </div>
+ </div>
 
 # Three levels of parallelism
 

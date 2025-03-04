@@ -9,13 +9,83 @@ lang:     en
 # Heterogeneous-Compute Interface for Portability API
 
 - code to run on both **AMD ROCm** and **NVIDIA CUDA** platforms with minimal changes
-- the `hipcc` compiler driver calls different compilers depending on the architecture
-         - on **NVIDIA** platforms calls `nvcc` 
+- the `hipcc` compiler driver calls different compilers depending on the architecture: on **NVIDIA** platforms calls `nvcc` 
 - (very) similar to **CUDA**, but designed for cross-platform compatibility
 - supports a strong subset of the **CUDA** runtime functionality
-- enables fast translation of **CUDA API** calls
-- most calls can be converted in place by simply replacing `cuda` with `hip`
+- enables fast translation of **CUDA API** calls: most calls can be converted in place by simply replacing `cuda` with `hip`
 
+# CUDA vs. HIP: Launch Kernels
+
+
+<div class="column" width=45%>>
+ ```cpp
+// CUDA
+ ```
+</div>
+
+<div class="column" width=45%>>
+```cpp
+// HIP
+ ```
+</div>
+
+<small>
+ <div class="column" width=45%>>
+```cpp
+kernel_name<<<gridsize, blocksize, 
+              shared_mem_size, 
+              stream>>>
+              (arg0,arg1, ...);
+``` 
+</div>
+
+<div class="column" width=45%>
+```cpp
+kernel_name<<<gridsize, blocksize, 
+              shared_mem_size, 
+              stream>>>
+              (arg0,arg1, ...);
+
+hipLaunchKernelGGL(kernel_name,
+                    gridsize, 
+                    blocksize, 
+                    shared_mem_size, 
+                    stream,arg0,arg1, ...);
+```
+</div>
+
+</small>
+
+
+
+# CUDA vs. HIP: API
+
+ <div class="column" width=45%>>
+```C
+// CUDA 
+```
+</div>
+
+ <div class="column" width=45%>>
+```
+// HIP
+```
+</div>
+
+<small>
+ <div class="column" width=45%>>
+```cpp
+cudaMalloc(&d_x,N*sizeof(double));
+```
+</div>
+
+<div class="column" width=45%>>
+```cpp
+hipMalloc(&d_x,N*sizeof(double));
+```
+</div>
+
+</small>
 
 # Outline
 
