@@ -14,7 +14,7 @@ lang:     en
 - (very) similar to **CUDA**, but designed for cross-platform compatibility
 - supports a strong subset of the **CUDA** runtime functionality
 - enables fast translation of **CUDA API** calls
-         - most calls can be converted in place by simply replacing `cuda` with `hip`
+- most calls can be converted in place by simply replacing `cuda` with `hip`
 
 
 # Outline
