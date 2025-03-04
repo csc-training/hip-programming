@@ -6,7 +6,7 @@ date:     2025-03
 lang:     en
 ---
 
-# Heterogeneous-Compute Interface for Portability API
+# Heterogeneous-Compute Interface for Portability
 
 - code to run on both **AMD ROCm** and **NVIDIA CUDA** platforms with minimal changes
 - the `hipcc` compiler driver calls different compilers depending on the architecture: on **NVIDIA** platforms calls `nvcc` 
@@ -14,6 +14,9 @@ lang:     en
 - supports a strong subset of the **CUDA** runtime functionality
 - enables fast translation of **CUDA API** calls: most calls can be converted in place by simply replacing `cuda` with `hip`
 
+::: notes
+HIP (Heterogeneous-Compute Interface for Portability) is a C++ runtime API and programming model designed by AMD to enable seamless portability between CUDA and ROCm-based GPU architectures. It provides an interface similar to CUDA, allowing developers to write GPU-accelerated code that can run on both NVIDIA and AMD GPUs with minimal changes. The HIP API includes equivalents for CUDA runtime functions, memory management, and kernel launches, as well as a HIPified version of libraries like cuBLAS (hipBLAS) and cuDNN (hipDNN). Developers can use hipify tools to automatically translate CUDA code to HIP, making it easier to migrate applications across different hardware platforms while maintaining high performance.
+:::
 # CUDA vs. HIP
 
 <div class="column" width=45%>>
