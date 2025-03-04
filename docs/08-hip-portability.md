@@ -39,9 +39,7 @@ kernel_name<<<gridsize, blocksize,
               shared_mem_size, 
               stream>>>
               (arg0,arg1, ...);
-```
-  
-```cpp
+
 hipLaunchKernelGGL(kernel_name,
                     gridsize, 
                     blocksize, 
