@@ -14,7 +14,7 @@ lang:     en
 - supports a strong subset of the **CUDA** runtime functionality
 - enables fast translation of **CUDA API** calls: most calls can be converted in place by simply replacing `cuda` with `hip`
 
-# CUDA v.s HIP. LAunch Kernel
+# CUDA vs. HIP. Launch Kernel
 <div class="column">
 **CUDA**
 </div>
@@ -47,6 +47,42 @@ hipLaunchKernelGGL(kernel_name,
                     shared_mem_size, 
                     stream,arg0,arg1, ...);
 ```
+</div>
+
+# CUDA vs. HIP: Launch Kernel
+
+<div class="columns">
+  <div class="column">
+    <strong>CUDA</strong>
+    <pre>
+    ```cpp
+    kernel_name<<<gridsize, blocksize, 
+                  shared_mem_size, 
+                  stream>>>
+                  (arg0,arg1, ...);
+    ```
+    </pre>
+  </div>
+
+  <div class="column">
+    <strong>HIP</strong>
+    <pre>
+    ```cpp
+    kernel_name<<<gridsize, blocksize, 
+                  shared_mem_size, 
+                  stream>>>
+                  (arg0,arg1, ...);
+    ```
+
+    ```cpp
+    hipLaunchKernelGGL(kernel_name,
+                        gridsize, 
+                        blocksize, 
+                        shared_mem_size, 
+                        stream, arg0, arg1, ...);
+    ```
+    </pre>
+  </div>
 </div>
 
 # Outline
