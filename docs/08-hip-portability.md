@@ -16,15 +16,15 @@ lang:     en
 
 # CUDA vs. HIP: Launch Kernel
 
- <div class="column" width=45%>
+ <div class="column" width=45%>>
 **CUDA**
 </div>
 
- <div class="column" width=45%>
+ <div class="column" width=45%>>
 **HIP**
 </div>
 
- <div class="column" width=45%>
+ <div class="column" width=45%>>
 ```cpp
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
