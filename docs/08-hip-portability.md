@@ -24,6 +24,7 @@ lang:     en
 **HIP**
 </div>
 
+<small>
  <div class="column" width=45%>>
 ```cpp
 kernel_name<<<gridsize, blocksize, 
@@ -47,6 +48,8 @@ hipLaunchKernelGGL(kernel_name,
                     stream,arg0,arg1, ...);
 ```
 </div>
+
+</small>
 
 # HIPFort for SAXPY (`Y=Y+a*X`). Fortran Code
 <small>
