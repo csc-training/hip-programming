@@ -16,15 +16,18 @@ lang:     en
 
 # CUDA vs. HIP: Launch Kernels
 
-<small>
-<div class="column" width=40% style="border: 2px solid black;">
-**CUDA**
+
+<div class="column" width=45%>>
+ ```cpp
+// CUDA
+ ```
 </div>
 
-<div class="column" width=40% style="border: 2px solid black;">
-**HIP**
+<div class="column" width=45%>>
+```cpp
+// HIP
+ ```
 </div>
-</small>
 
 <small>
  <div class="column" width=45%>>
@@ -58,14 +61,14 @@ hipLaunchKernelGGL(kernel_name,
 # CUDA vs. HIP: API
 
  <div class="column" width=46%>>
-```plaintext
-**CUDA**
+```C
+// CUDA 
 ```
 </div>
 
  <div class="column" width=44%>>
-```plaintext
-**HIP**
+```
+// HIP
 ```
 </div>
 
