@@ -18,9 +18,52 @@ lang:     en
 
 
 <div class="column" width=45%>>
- ```cpp
+```cpp
 // CUDA
- ```
+```
+</div>
+
+<div class="column" width=45%>>
+```cpp
+// HIP
+```
+</div>
+
+<small>
+ <div class="column" width=45%>>
+```cpp
+kernel_name<<<gridsize, blocksize, 
+              shared_mem_size, 
+              stream>>>
+              (arg0,arg1, ...);
+``` 
+</div>
+
+<div class="column" width=45%>
+```cpp
+kernel_name<<<gridsize, blocksize, 
+              shared_mem_size, 
+              stream>>>
+              (arg0,arg1, ...);
+
+hipLaunchKernelGGL(kernel_name,
+                    gridsize, 
+                    blocksize, 
+                    shared_mem_size, 
+                    stream,arg0,arg1, ...);
+```
+</div>
+
+</small>
+
+
+# CUDA vs. HIP: API
+
+
+<div class="column" width=45%>>
+```cpp
+// CUDA
+```
 </div>
 
 <div class="column" width=45%>>
@@ -56,18 +99,16 @@ hipLaunchKernelGGL(kernel_name,
 
 </small>
 
-
-
 # CUDA vs. HIP: API
 
  <div class="column" width=45%>>
-```C
+```cpp
 // CUDA 
 ```
 </div>
 
  <div class="column" width=45%>>
-```
+```cpp
 // HIP
 ```
 </div>
