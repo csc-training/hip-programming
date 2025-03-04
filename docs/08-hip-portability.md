@@ -14,7 +14,7 @@ lang:     en
 - supports a strong subset of the **CUDA** runtime functionality
 - enables fast translation of **CUDA API** calls: most calls can be converted in place by simply replacing `cuda` with `hip`
 
-# CUDA vs. HIP. Launch Kernel
+# CUDA vs. HIP: Launch Kernel
 <div class="column" width=45%>
 **CUDA**
 </div>
