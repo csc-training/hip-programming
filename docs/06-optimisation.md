@@ -163,6 +163,8 @@ lang:     en
 - Simplification
 - Ballpark sizes for registers, LDS and cache
 - MI250x GCD has 110 compute units
+  - Note: Cache is per CU
+  - CPU: 32 kiB L1 cache per core
 - Lot of register storage
 - MI250x has also matrix units but they are tricker. Need intrinsics.
 :::
@@ -170,7 +172,7 @@ lang:     en
 
 # 4. Optimise for coalesced memory access
 
-- Memory is fetched in cache lines of 64/128 bytes from device memory
+- Device main memory accessed in batches of 64 or 128 bytes
 - If warp requests consecutive elements, then fewer global memory accesses are needed
 - Typically
 
@@ -199,7 +201,6 @@ lang:     en
 ```cpp
 double val = global_array[8*tid];
 ```
-
 :::
 ::::::
 
@@ -261,9 +262,10 @@ double val = global_array[tid];
 
 ::::::{.columns}
 :::{.column width=60%}
-- Both branches are executed sequentially but if statement value is used as a mask
+- Both branches are executed sequentially
+  - In threads where the condition is false: 
 - If the branch changes only between warps, then there is no penalty
-- *However*
+- *Note*
   - Code on right is memory bound
 :::
 :::{.column width=39%}
@@ -289,6 +291,10 @@ if ( ((tid/64)%2) == 0) {
 ```
 :::
 ::::::
+
+::: notes
+  - GPUs have so much computing power that executing all branches is usually fine
+:::
 
 ---
 
@@ -328,6 +334,10 @@ if(tid%2 == 0) {
 
 :::
 ::::::
+
+::: notes
+- Exercise: Find out how complicated `f_1` and `f_2` need to be that branch divergence is an issue
+:::
 
 # 6. Minimise number of active local variables 
 
@@ -451,12 +461,11 @@ The duration is `0.179 ms`  and the effective bandwidth `697 GB/s`
   - Same elements are loaded in different threads
 - N-body problem
   - One thread evolves one body: each thread loads all data of each other body as well
-- reductions
+- Reductions
   - Cooperation between threads
 
 # Summary
 
-::: incremental
 - Existing specialized libraries are extremely optimised. Especially dense linear algebra (hipBLAS/cuBlAS) and FFTs
 - Host-Device vs Device-Compute Unit BW difference is order of 2
 - Keep data in registers and don't move it unnecessarily to device memory
@@ -465,5 +474,3 @@ The duration is `0.179 ms`  and the effective bandwidth `697 GB/s`
 - Local data share: a shared variable inside a block
 - Branching
   - Condition varies in warp: Execute both branches and mask other to be *NoOp*
-  - Condition varies between warps: Execute only one branch
-:::
