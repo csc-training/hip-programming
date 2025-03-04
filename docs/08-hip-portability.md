@@ -52,58 +52,26 @@ hipLaunchKernelGGL(kernel_name,
 <small>
 <div class="column" width=45%>>
 ```cpp
-program saxpy
-  use iso_c_binding
-  use hipfort
-  use hipfort_check
-
-  implicit none
-  interface
-     subroutine launch(y,x,b,N) bind(c)
-       use iso_c_binding
-       implicit none
-       type(c_ptr),value :: y,x
-       integer, value :: N
-       real, value :: b
-     end subroutine
-  end interface
-
-  type(c_ptr) :: dx = c_null_ptr
-  type(c_ptr) :: dy = c_null_ptr
-  integer, parameter :: N = 400000000
-  integer(c_size_t), parameter :: bytes_per_element = 4
-  integer(c_size_t), parameter :: Nbytes = N*bytes_per_element
-  real, allocatable,target,dimension(:) :: x, y
-  real, parameter ::  a=2.0
+kernel_name<<<gridsize, blocksize, 
+              shared_mem_size, 
+              stream>>>
+              (arg0,arg1, ...);
 ```
 </div>
 
 <div class="column" width=53%>>
 ```cpp
-  allocate(x(N), y(N))
+  
+kernel_name<<<gridsize, blocksize, 
+              shared_mem_size, 
+              stream>>>
+              (arg0,arg1, ...);
 
-  x = 1.0
-  y = 2.0
-
-  call hipCheck(hipMalloc(dx,Nbytes))
-  call hipCheck(hipMalloc(dy,Nbytes))
-
-  call hipCheck(hipMemcpy(dx, c_loc(x), Nbytes, hipMemcpyHostToDevice))
-  call hipCheck(hipMemcpy(dy, c_loc(y), Nbytes, hipMemcpyHostToDevice))
-
-  call launch(dy, dx, a, N)
-
-  call hipCheck(hipDeviceSynchronize())
-
-  call hipCheck(hipMemcpy(c_loc(y), dy, Nbytes, hipMemcpyDeviceToHost))
-
-  write(*,*) "Max error: ", maxval(abs(y-4.0))
-
-  call hipCheck(hipFree(dx));call hipCheck(hipFree(dy))
-
-  deallocate(x);deallocate(y)
-
-end program testSaxpy
+hipLaunchKernelGGL(kernel_name,
+                    gridsize, 
+                    blocksize, 
+                    shared_mem_size, 
+                    stream,arg0,arg1, ...);
 ```
 </div>
 </small>
