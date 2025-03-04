@@ -24,7 +24,6 @@ lang:     en
 </div>
 
 <div class="column">
-**CUDA**
 ```cpp
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
@@ -34,15 +33,15 @@ kernel_name<<<gridsize, blocksize,
 </div>
 
 <div class="column">
-**HIP**
 ```cpp
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
               stream>>>
               (arg0,arg1, ...);
 ```
+  
 ```cpp
-hiplaunchKernelGGGL(kernel_name,
+hiplaunchKernelGGL(kernel_name,
                     gridsize, 
                     blocksize, 
                     shared_mem_size, 
