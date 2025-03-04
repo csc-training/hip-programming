@@ -28,17 +28,27 @@ lang:     en
 <div class="column">
 **CUDA**
 ```cpp
-kernel_<<<gridsize, blocksize, shared_mem_size, stream>>>(arg0,arg1, ...);
+kernel_name<<<gridsize, blocksize, 
+              shared_mem_size, 
+              stream>>>
+              (arg0,arg1, ...);
 ``` 
 </div>
 
 <div class="column">
 **HIP**
 ```cpp
-kernel<<<gridsize, blocksize, shared_mem_size, stream>>>(arg0,arg1, ...);
+kernel_name<<<gridsize, blocksize, 
+              shared_mem_size, 
+              stream>>>
+              (arg0,arg1, ...);
 ```
 ```cpp
-hiplaunchKernelGGGL(kernel_name,gridsize, blocksize, shared_mem_size, stream,arg0,arg1, ...);
+hiplaunchKernelGGGL(kernel_name,
+                    gridsize, 
+                    blocksize, 
+                    shared_mem_size, 
+                    stream,arg0,arg1, ...);
 ```
 </div>
 
