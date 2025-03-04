@@ -2,7 +2,7 @@
 title:    HIP and GPU kernels
 subtitle: GPU programming with HIP
 author:   CSC Training
-date:     2024-03
+date:     2025-03
 lang:     en
 ---
 
@@ -164,7 +164,7 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 
 <small>
 
-:::::: {.column width=44%}
+:::::: {.column width=40%}
 ::: incremental
 - kernels are executed on a 3D *grid* of threads
 - threads are partitioned into equal-sized *blocks*
@@ -174,8 +174,8 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 - built-in variables to be used within a kernel: `threadIdx`, `blockIDx`, `blockDim`, `gridDim`
 :::
 ::::::
-:::::: {.column width=54%}
-![](img/ThreadExecution_new.jpg){.center width=56%}
+:::::: {.column width=55%}
+![](img/software_hardware_mapping.png){.center width=70%}
 ::::::
 
 </small>
