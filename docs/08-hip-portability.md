@@ -88,13 +88,13 @@ hipLaunchKernelGGL(kernel_name,
 # Porting a CUDA Project
 
 - start on a CUDA platform
-- get a working HIP version
-- go ROCM platform to solve the unsupported CUDA functions
-- Various options:
-    * **manual editing** (search/replace)
+- get a fully working HIP version
+- compile the HIP code on an AMD machine
+- handle platform-specific features through conditional compilation
+- Conversion Methods:
+    * **Manual Code Conversion** (search/replace)
     * **HIPIFY Tools**
     * **Header Porting**
-
 
 # Outline
 
