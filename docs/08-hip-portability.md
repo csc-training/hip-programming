@@ -94,8 +94,21 @@ hipLaunchKernelGGL(kernel_name,
     * handle platform-specific features through conditional compilation (or by adding them to the open-source HIP infrastructure)
 - **Conversion Methods**:
     * **Manual Code Conversion** (search/replace)
-    * **HIPIFY Tools**
-    * **Header Porting**
+    * **HIPIFY Tools** (automated translation tools)
+    * **Header Porting** (on the fly translation)
+
+# HIPIFY Tools. Automated Translation Tools
+- collection of tools that automatically translate CUDA to HIP code
+- **hipify-perl**
+   * translates to HIP using pattern matching
+   * does not require a working CUDA installation
+   * can also convert CUDA code, that is not syntactically correct
+- **hipify-clang**
+   * uses the Clang compiler to parse the CUDA code and perform semantic translation
+   * needs to be able to actually compile the code
+   * requires a working CUDA installation
+   * CUDA code needs to be correct
+
 
 # Outline
 
