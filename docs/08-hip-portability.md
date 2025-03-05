@@ -91,7 +91,7 @@ hipLaunchKernelGGL(kernel_name,
 - get a working HIP version
 - go ROCM platform to solve the unsupported CUDA functions
 - Various options:
-    * manual editing (**search/replace**)
+    * **manual editing** (search/replace)
     * **HIPIFY Tools**
     * **Header Porting**
 
