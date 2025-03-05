@@ -114,25 +114,33 @@ lang:     en
 ## Device memory hierarchy
 
 <div class="column">
+::: {.fragment}
 - Registers (per-thread-access)
     - Used automatically
-    - Size on the order of kilobytes
+    - $\sim$ kilobytes
     - Very fast access
+:::
+::: {.fragment}
+- Shared memory (per-block-access)
+    - User controlled with `__shared__` keyword
+    - $\sim$ kilobytes
+    - Fast access
+:::
+</div>
+
+<div class="column">
+::: {.fragment}
 - Local memory (per-thread-access)
     - Used automatically if all registers are reserved
     - Local memory resides in global memory
     - Very slow access
-</div>
-
-<div class="column">
-- Shared memory (per-block-access)
-    - Usage must be explicitly programmed
-    - Size on the order of kilobytes
-    - Fast access
+:::
+::: {.fragment}
 - Global memory (per-device-access)
-    - Managed by the host through HIP API
-    - Size on the order of gigabytes
+    - Managed by the host with HIP API
+    - $\sim$ gigabytes
     - Very slow access
+:::
 </div>
 
 ---
