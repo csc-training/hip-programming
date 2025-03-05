@@ -6,7 +6,7 @@ date:     2025-03
 lang:     en
 ---
 
-# Heterogeneous-Compute Interface for Portability API
+# Heterogeneous-Compute Interface for Portability
 
 - code to run on both **AMD ROCm** and **NVIDIA CUDA** platforms with minimal changes
 - the `hipcc` compiler driver calls different compilers depending on the architecture: on **NVIDIA** platforms calls `nvcc` 
@@ -14,33 +14,61 @@ lang:     en
 - supports a strong subset of the **CUDA** runtime functionality
 - enables fast translation of **CUDA API** calls: most calls can be converted in place by simply replacing `cuda` with `hip`
 
-# CUDA vs. HIP: Launch Kernels
-
+::: notes
+HIP (Heterogeneous-Compute Interface for Portability) is a C++ runtime API and programming model designed by AMD to enable seamless portability between CUDA and ROCm-based GPU architectures. It provides an interface similar to CUDA, allowing developers to write GPU-accelerated code that can run on both NVIDIA and AMD GPUs with minimal changes. The HIP API includes equivalents for CUDA runtime functions, memory management, and kernel launches, as well as a HIPified version of libraries like cuBLAS (hipBLAS) and cuDNN (hipDNN). Developers can use hipify tools to automatically translate CUDA code to HIP, making it easier to migrate applications across different hardware platforms while maintaining high performance.
+:::
+# CUDA vs. HIP
 
 <div class="column" width=45%>>
- ```cpp
+```cpp
 // CUDA
- ```
+```
 </div>
 
 <div class="column" width=45%>>
 ```cpp
 // HIP
- ```
+```
 </div>
 
 <small>
  <div class="column" width=45%>>
 ```cpp
+cudaMalloc(&d_x,N*sizeof(double));
+  
+cudaMemcpy(d_x,x,N*sizeof(double),
+              cudaMemcpyHostToDevice);
+              
+cudaDeviceSynchronize();
+
+cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, 
+                &alpha, d_A, N, d_B, N, &beta, d_C, N);
+
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
               stream>>>
               (arg0,arg1, ...);
+
+
+
+
+
+              
 ``` 
 </div>
 
 <div class="column" width=45%>
 ```cpp
+hipMalloc(&d_x,N*sizeof(double));
+
+hipMemcpy(d_x,x,N*sizeof(double),
+              hipMemcpyHostToDevice);
+
+hipDeviceSynchronize();
+
+hipblasSgemm(handle, HIPBLAS_OP_N, HIPBLAS_OP_N, N, N, N, 
+                 &alpha, d_A, N, d_B, N, &beta, d_C, N);
+
 kernel_name<<<gridsize, blocksize, 
               shared_mem_size, 
               stream>>>
@@ -57,35 +85,31 @@ hipLaunchKernelGGL(kernel_name,
 </small>
 
 
+# Porting a CUDA Project
 
-# CUDA vs. HIP: API
+- **Migrating Workflow**:
+    * start on a CUDA platform
+    * get a fully working HIP version
+    * compile the HIP code on an AMD machine
+    * handle platform-specific features through conditional compilation (or by adding them to the open-source HIP infrastructure)
+- **Conversion Methods**:
+    * **Manual Code Conversion** (search/replace)
+    * **HIPIFY Tools** (automated translation tools)
+    * **Header Porting** (on the fly translation)
 
- <div class="column" width=45%>>
-```C
-// CUDA 
-```
-</div>
+# HIPIFY Tools. Automated Translation Tools
+- collection of tools that automatically translate CUDA to HIP code
+- **hipify-perl**
+   * translates to HIP using pattern matching
+   * does not require a working CUDA installation
+   * can also convert CUDA code, that is not syntactically correct
+- **hipify-clang**
+   * uses the Clang compiler CUDA source into an Abstract Syntax Tree (AST)
+   * generates the HIP source from the AST
+   * needs to be able to actually compile the code
+   * requires a working CUDA installation
+   * CUDA code needs to be correct
 
- <div class="column" width=45%>>
-```
-// HIP
-```
-</div>
-
-<small>
- <div class="column" width=45%>>
-```cpp
-cudaMalloc(&d_x,N*sizeof(double));
-```
-</div>
-
-<div class="column" width=45%>>
-```cpp
-hipMalloc(&d_x,N*sizeof(double));
-```
-</div>
-
-</small>
 
 # Outline
 
