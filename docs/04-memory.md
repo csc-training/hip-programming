@@ -17,101 +17,99 @@ lang:     en
 # Memory model
 
 * Host and device have separate physical memories
-* It is generally not possible to call malloc() to allocate memory and access
-  the data from the GPU
+* It is generally not possible to allocate memory in device code
 * Memory management can be
     * Explicit (user manages the movement of the data and makes sure CPU and
       GPU pointers are not mixed)
     * Automatic, using Unified Memory (data movement is managed in the
       background by the Unified Memory driver)
-
-
-# Avoid moving data between CPU and GPU
-
-* Data copies between host and device are relatively slow
-* To achieve best performance, the host-device data traffic should be
-  minimized regardless of the chosen memory management strategy
-    * Initializing arrays on the GPU
-    * Rather than just solving a linear equation on a GPU, also setting it up
-      on the device
-* Not copying data back and forth between CPU and GPU every step or iteration
-  can have a large performance impact!
-
+* [HIP API documentation](https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.2/doxygen/html/group___memory_m.html)
 
 # Device memory hierarchy
 
-<div class="column">
-- Registers (per-thread-access)
-- Local memory (per-thread-access)
-- Shared memory (per-block-access)
-- Global memory (global access)
-</div>
+::::::{.columns}
+:::{.column width="60%"}
+::: {.fragment}
+- Registers (*VGPR, SGPR*)
+  - Compiler assigns automatically to warps / threads
+:::
+::: {.fragment}
+- Shared memory (*Local data share, LDS*)
+  - User controlled
+  - Shared by threads in a block
+:::
+::: {.fragment}
+- Local memory (*Scratch*)
+  - Automatically used when registers run out
+:::
+::: {.fragment}
+- Global memory
+:::
+:::
+::: {.column width="40%"}
+![](img/memory-hierarchy.png){width=100%}
+:::
+::::::
 
-<div class="column">
-![](img/memlayout.png){width=80%}
-</div>
-
-
-# Device memory hierarchy
-
-<div class="column">
-- Registers (per-thread-access)
-    - Used automatically
-    - Size on the order of kilobytes
-    - Very fast access
-- Local memory (per-thread-access)
-    - Used automatically if all registers are reserved
-    - Local memory resides in global memory
-    - Very slow access
-</div>
-
-<div class="column">
-- Shared memory (per-block-access)
-    - Usage must be explicitly programmed
-    - Size on the order of kilobytes
-    - Fast access
-- Global memory (per-device-access)
-    - Managed by the host through HIP API
-    - Size on the order of gigabytes
-    - Very slow access
-</div>
+::: {.notes}
+- Not covered: texture memory, constant memory
+- Could be considered only when lower hanging optimisation tricks are covered
+:::
 
 
-# Device memory hierarchy (advanced)
+# Explicit memory API calls
 
-- There are more details in the memory hierarchy, some of which are
-  architecture-dependent, eg,
-    - Texture memory
-    - Constant memory
-- Complicates implementation
-- Should be considered only when a very high level of optimization is
-  desirable
+- Allocate (pinned) device memory
+  ```cpp
+  hipError_t hipMalloc(void **devPtr, size_t size)
+  ```
 
+- Copy data
+  ```cpp
+  hipError_t hipMemcpy(void *dst, const void *src, size_t count, enum hipMemcpyKind kind)
+  ```
+  Where `kind`:
+    - `hipMemcpyDeviceToHost`, `hipMemcpyHostToDevice`, <br>`hipMemcpyHostToHost`, `hipMemcpyDeviceToDevice`
 
-# Important memory operations
+- Deallocate device memory
+  ```cpp
+  hipError_t hipFree(void *devPtr)
+  ```
 
-Allocate pinned device memory
-```cpp
-hipError_t hipMalloc(void **devPtr, size_t size)
-```
-Allocate Unified Memory; the data is moved automatically between host/device
-```cpp
-hipError_t hipMallocManaged(void **devPtr, size_t size)
-```
-Deallocate pinned device memory and Unified Memory
-```cpp
-hipError_t hipFree(void *devPtr)
-```
-Copy data (host-host, host-device, device-host, device-device)
-```cpp
-hipError_t hipMemcpy(void *dst, const void *src, size_t count, enum hipMemcpyKind kind)
-```
+# Explicit memory API calls
+
+Pinned *host* memory
+
+- Allocate/free pinned host memory
+  ```cpp 
+    hipHostMalloc(void **ptr, size_t size);
+    hipHostFree(void *ptr);
+  ```
+- Lower operating system overhead: faster device-host copies
+- Call kernels with host pointers: automatic copy to device and back
+- Memory paging is disabled: no swapping, must be contiguous
+
+# Unified memory API calls
+
+Also known as [*Managed memory*](https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.2/doxygen/html/group___memory_m.html)
+
+- Allocate Unified Memory
+  ```cpp
+  hipError_t hipMallocManaged(void **devPtr, size_t size)
+  ```
+- Deallocate unified memory (same as explicitly managed memory)
+  ```cpp
+  hipError_t hipFree(void *devPtr)
+  ```
 
 # Memory management strategies
-<small>
-<div class="column">
 
-* Example of explicit memory management
+::::::{.columns}
+:::{.column}
+
+:::{.fragment}
+<small>
+Explicit memory management
 ```cpp
 int main() {
  int *A, *d_A;
@@ -123,17 +121,18 @@ int main() {
  kernel<<<...>>>(d_A);
  hipMemcpy(A, d_A, N*sizeof(int), hipMemcpyDeviceToHost);
  hipFree(d_A);
- ...
- printf("A[0]: %d\n", A[0]);
+ // result is in A
  free(A);
- return 0;
 }
 ```
-</div>
+</small>
+:::
+:::
+:::{.column}
 
-<div class="column">
-
-* Example of Unified Memory
+:::{.fragment}
+<small>
+Unified Memory management
 ```cpp
 int main() {
  int *A;
@@ -142,33 +141,55 @@ int main() {
  /* Launch GPU kernel */
  kernel<<<...>>>(A);
  hipStreamSynchronize(0);
- ...
- printf("A[0]: %d\n", A[0]);
+ // result is in A
  hipFree(A);
- return 0;
 }
 ```
+:::
 
-</div>
+:::{.fragment}
+Host-pinned, automatic copy
+```cpp
+int main() {
+  int *A;
+  hipHostMalloc((void**) &A, N*sizeof(int));
+  kernel<<<...>>>(A)
+  hipStreamSynchronize(0);
+  // result is in A
+  hipHostFree(A);
+}
+```
+:::
+
 </small>
 
-# Unified Memory pros
+:::
+::::::
 
-- Allows incremental development
-- Can increase developer productivity significantly
-    - Especially large codebases with complex data structures
-- Supported by the latest NVIDIA + AMD architectures
+
+# Unified Memory pros & cons
+
+::::::{.columns}
+:::{.column}
+**Pros**
+
+- Incremental development
+- Increased developer productivity
+  - Especially large codebases with complex data structures
 - Allows oversubscribing GPU memory on some architectures
+- Data transfer can be optimized later
+  - With prefetches and hints
 
-# Unified Memory cons
+:::
+:::{.column}
+**Cons**
 
-- Data transfers between host and device are initially slower, but can be
-  optimized once the code works
-    - Through prefetches
-    - Through hints
-- Must still obey concurrency & coherency rules, not foolproof
-- Although the performance on AMD cards is quite good, there may be issues with prefetching and hints (with AMD)
+- Data transfers between host and device are initially slower <br>⇒ Must be optimized
+- Externalize memory management to unknown
+- Supported by the latest NVIDIA + AMD architectures
 
+:::
+::::::
 
 # Unified Memory workflow for GPU offloading
 
@@ -194,7 +215,7 @@ int main() {
 5.  Allocating GPU memory can have a much higher overhead than allocating
     standard host memory
     - If GPU memory is allocated and deallocated in a loop, consider using a
-      GPU memory pool allocator for better performance (eg Umpire)
+      GPU memory pool allocator for better performance (e.g. Umpire)
 
 
 # Virtual Memory addressing
