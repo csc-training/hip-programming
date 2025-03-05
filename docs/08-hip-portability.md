@@ -104,7 +104,8 @@ hipLaunchKernelGGL(kernel_name,
    * does not require a working CUDA installation
    * can also convert CUDA code, that is not syntactically correct
 - **hipify-clang**
-   * uses the Clang compiler to parse the CUDA code and perform semantic translation
+   * uses the Clang compiler CUDA source into an Abstract Syntax Tree (AST)
+   * generates the HIP source from the AST
    * needs to be able to actually compile the code
    * requires a working CUDA installation
    * CUDA code needs to be correct
