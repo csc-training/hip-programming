@@ -25,7 +25,7 @@
 
 #define endtime \
   auto stop = std::chrono::high_resolution_clock::now(); \
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop-start).count(); \
+  auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(stop-start).count(); \
     if (my_repeat_counter > 1) std::cout << duration; \
   }
 
@@ -37,7 +37,7 @@ __device__ double f_1(double x, double a, int Nz)
 
 #pragma unroll 8
   for(int i = 0; i<Nz; ++i) {
-    R += a*R+x;
+    R = a*R+x;
   }
   return R;
 }
@@ -48,7 +48,7 @@ __device__ double f_2(double x, double a, int Nz)
 
 #pragma unroll 8
   for(int i = 0; i<Nz; ++i) {
-    R += x*R+a;
+    R = x*R+a;
   }
   return R;
 }
@@ -60,9 +60,9 @@ __global__ void fill_kernel_div(size_t n, double *x, double a, int Nz)
   
   if(tid < n) {
     if(tid%2 == 0) {
-      x[tid] = f_1(double(tid)/n, a, Nz);
+      x[tid] = f_1(double(tid), a, Nz);
     } else {
-      x[tid] = f_2(double(tid)/n, a, Nz);
+      x[tid] = f_2(double(tid), a, Nz);
     }
   }
 }
@@ -75,9 +75,9 @@ __global__ void fill_kernel_nodiv(size_t n, double *x, double a, int Nz)
   
   if(tid <n) {
     if (((tid)/64)%2 == 0) {
-      x[tid] = f_1(double(tid)/n, a, Nz);
+      x[tid] = f_1(double(tid), a, Nz);
     } else {
-      x[tid] = f_2(double(tid)/n, a, Nz);
+      x[tid] = f_2(double(tid), a, Nz);
     }
   }
 }
@@ -113,6 +113,7 @@ int main(void)
     std::cout << "% N_fma, noif, nodiv, div\n"; // TODO: count flops
     repeat(50) {
       if (my_repeat_counter > 1) std::cout << Nz << ", ";
+
       starttime
         fill_kernel_noif<<<gridsize, blocksize>>>(n, d_x, a, Nz);
       synchronize;
@@ -130,6 +131,7 @@ int main(void)
       synchronize;
       endtime
         if (my_repeat_counter > 1) std::cout << "\n";
+
       Nz += 1;
     }
 
