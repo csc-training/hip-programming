@@ -90,7 +90,7 @@ hipLaunchKernelGGL(kernel_name,
 - start on a CUDA platform
 - get a fully working HIP version
 - compile the HIP code on an AMD machine
-- handle platform-specific features through conditional compilation
+- handle platform-specific features through conditional compilation (or by adding them to the open-source HIP infrastructure)
 - Conversion Methods:
     * **Manual Code Conversion** (search/replace)
     * **HIPIFY Tools**
