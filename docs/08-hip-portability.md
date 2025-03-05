@@ -106,7 +106,7 @@ hipLaunchKernelGGL(kernel_name,
 - **hipify-clang**
    * uses the Clang compiler CUDA source into an Abstract Syntax Tree (AST)
    * generates the HIP source from the AST
-   * needs to be able to actually compile the code
+   * needs to be able to compile the code
    * requires a working CUDA installation
    * CUDA code needs to be correct
 
