@@ -118,15 +118,14 @@ hipify-clang, on the other hand, provides a more robust and accurate translation
 
 # HIPIFY-perl 
 
-- `hipify-perl –examin <file>.cu`
+- `hipify-perl –examin <file>.cu` or `hipexamine-perl.sh <file>.cu`
      * basic statistics and number of replacements
      * no replacements
 - `hipify-perl <file>.cu`
      * translation a file to standard output
-- `hipify-perl -inplace <file>.cu`
+- `hipify-perl -inplace <file>.cu` or `hipconvertinplace-perl.sh <file>.cu`
      * modifies the input file inplace, saves the input file in .prehip file 
-     * recursively do folders
-     * `hipconvertinplace-perl.sh`
+     * works with folders:recursively do folders
 - `--print-stats` return a report for each file
 
 
