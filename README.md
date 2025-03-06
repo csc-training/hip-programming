@@ -86,7 +86,7 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 
 - 
 - 
-- [Monte Carlo simulation with hipRAND library](lambdas/03-hipify)
+- 
 
 ### Bonus
 - [Heat equation with HIP](bonus/heat-equation)
