@@ -84,7 +84,7 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 
 ### Applications Portability
 
-- 
+- [HIPIFY Tools](porting)
 - 
 - 
 
