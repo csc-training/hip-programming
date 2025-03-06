@@ -1,5 +1,5 @@
 ---
-title:  Applications Portability 
+title:  Porting Applications to HIP 
 subtitle: GPU programming with HIP
 author:   CSC Training
 date:     2025-03
