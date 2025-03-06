@@ -38,7 +38,7 @@ part of the EuroCC training activities at CSC.
 | 13:00-13:30 | Fortran and HIP (CA) |
 | 13:30-13:45 | Break |
 | 13:45-14:15 | Exercises  |
-| 13:30-14:15 | Applications portability (CA) |
+| 13:30-14:15 | Porting Applications to HIP (CA) |
 | 14:15-14:30 | Break |
 | 14:30-15:45 | Exercises |
 | 15:45-16:00 | Close-up | 
