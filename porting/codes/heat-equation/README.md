@@ -23,7 +23,7 @@ $$u^{m+1}(i,j) = u^m(i,j) + \Delta t \alpha \nabla^2 u^m(i,j) $$
 
  Note: Algorithm is stable only when
 
-$$ \Delta t < \frac{1}{2 \alpha} \frac{(\Delta x \Delta y)^2}{(\Delta x)^2
+$$ \Delta t < \frac{1}{2 \alpha} \frac{(\Delta x \Delta y)^2}{(\Delta x)^2+
  (\Delta y)^2} $$
 
 ## How to build
