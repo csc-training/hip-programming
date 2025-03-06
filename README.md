@@ -82,10 +82,10 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 - [Vector sum on two GPUs without MPI](multi-gpu/02-vector-sum)
 - [Ping-pong with multiple GPUs and MPI](multi-gpu/03-mpi)
 
-### Code design, conditional compilation, lambdas, hipify
+### Applications Portability
 
-- [Host-device lambda functions and general kernels](lambdas/01-lambda)
-- [Reductions with host-device lambdas and hipCUB](lambdas/02-reduction)
+- 
+- 
 - [Monte Carlo simulation with hipRAND library](lambdas/03-hipify)
 
 ### Bonus
