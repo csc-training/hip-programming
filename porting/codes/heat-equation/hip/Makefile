@@ -1,44 +1,21 @@
 ifeq ($(COMP),)
-COMP=hipcc
+COMP=lumi
 endif
 
 COMMONDIR=../common
 
-ifeq ($(COMP),pgi)
-CXX=mpicxx
-CC=pgcc
-NVCC=nvcc -ccbin pgc++
-NVCCFLAGS=-g -O3 -I$(COMMONDIR)
-CCFLAGS=-g -O3 -I$(COMMONDIR)
-LDFLAGS=-L$(CUDA_INSTALL_ROOT)/lib64
-LIBS=-lpng -lcudart
+ifeq ($(COMP),lumi)
+LIBPNG_DIR=/appl/lumi/SW/LUMI-22.12/C/EB/libpng/1.6.38-cpeCray-22.12
+CXX=CC
+CC=cc
+CXXFLAGS=-xhip -I$(COMMONDIR)
+CCFLAGS=-I$(LIBPNG_DIR)/include
+LDFLAGS=-L$(LIBPNG_DIR)/lib -Wl,-rpath=$(LIBPNG_DIR)/lib
+LIBS=-lpng
 endif
 
-ifeq ($(COMP),gnu)
-CXX=mpicxx
-CC=gcc
-NVCC=nvcc
-NVCCFLAGS=-g -O3 -I$(COMMONDIR)
-CCFLAGS=-g -O3 -Wall -I$(COMMONDIR)
-LDFLAGS=
-LIBS=-lpng -lcudart
-endif
-
-ifeq ($(COMP),hipcc)
-CXX=hipcc
-CC=gcc
-NVCC=hipcc --x cu
-NVCCFLAGS=-g -O3 -I$(COMMONDIR)
-CXXFLAGS=-g -O3 -Xcompiler -Wall -I$(COMMONDIR)
-CCFLAGS=-g -O3 -Wall -I$(COMMONDIR)
-LDFLAGS=
-LIBS=-lpng -lmpi
-endif
-
-
-
-EXE=heat_cuda
-OBJS=main.o core.o core_cuda.o setup.o utilities.o io.o 
+EXE=heat_hip
+OBJS=main.o core.o core_hip.o setup.o utilities.o io.o
 OBJS_PNG=$(COMMONDIR)/pngwriter.o
 
 
@@ -46,7 +23,7 @@ all: $(EXE)
 
 
 core.o: core.cpp heat.h
-core_cuda.o: core_cuda.cu heat.h
+core_hip.o: core_hip.cpp heat.h
 utilities.o: utilities.cpp heat.h
 setup.o: setup.cpp heat.h
 io.o: io.cpp heat.h
@@ -56,16 +33,13 @@ $(OBJS_PNG): C_COMPILER := $(CC)
 $(OBJS): C_COMPILER := $(CXX)
 
 $(EXE): $(OBJS) $(OBJS_PNG)
-	$(CXX) $(CXXFLAGS) $(OBJS) $(OBJS_PNG) -o $@ $(LDFLAGS) $(LIBS)
+	$(CXX) $(CCFLAGS) $(OBJS) $(OBJS_PNG) -o $@ $(LDFLAGS) $(LIBS)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 %.o: %.c
 	$(CC) $(CCFLAGS) -c $< -o $@
-
-%.o: %.cu
-	$(NVCC) $(NVCCFLAGS) -c $< -o $@
 
 .PHONY: clean
 clean:
