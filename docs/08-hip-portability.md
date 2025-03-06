@@ -120,9 +120,7 @@ hipify-clang, on the other hand, provides a more robust and accurate translation
 
 - `hipify-perl –examin <file>.cu`
      * basic statistics and number of replacements
-     * initial assement
      * no replacements
- 
 - `hipify-perl <file>.cu`
      * translation a file to standard output
 - `hipify-perl -inplace <file>.cu`
@@ -131,54 +129,6 @@ hipify-clang, on the other hand, provides a more robust and accurate translation
      * `hipconvertinplace-perl.sh`
 - `--print-stats` return a report for each file
 
-# Hipify Tools
-
-* Hipify tools convert automatically CUDA codes
-* It is possible that not all the code is converted, the remaining needs the implementaiton of the developer
-* Hipify-perl: text-based search and replace
-* Hipify-clang: source-to-source translator that uses clang compiler
-
-# Hipify-perl
-
-* It can scan directories and converts CUDA codes with replacement of the cuda to hip
-(sed –e ’s/cuda/hip/g’)
-```bash
-$ hipify-perl --inplace filename
-```
-* It modifies the filename input inplace, replacing input with hipified output, save backup in __.prehip__ file.
-```bash
-$ hipconvertinplace-perl.sh directory
-```
-It converts all the related files that are located inside the directory
-
-# Hipify-perl (cont.)
-
-```bash
-$ ls src/
-Makefile.am matMulAB.c matMulAB.h matMul.c
-$ hipconvertinplace-perl.sh src
-$ ls src/
-Makefile.am matMulAB.c matMulAB.c.prehip matMulAB.h matMul.c matMul.c.prehip
-```
-
-No compilation took place, just conversion.
-
-# Hipify-perl (cont.)
-
-The hipify-perl will return a report for each file with the option `--print-stats`, and it looks like this:
-```bash
-info: TOTAL-converted 53 CUDA->HIP refs ( error:0 init:0 version:0 device:1 ... library:16
-... numeric_literal:12 define:0 extern_shared:0 kernel_launch:0 )
-warn:0 LOC:888
-kernels (0 total) :
-hipFree 18
-HIPBLAS_STATUS_SUCCESS 6
-hipSuccess 4
-hipMalloc 3
-HIPBLAS_OP_N 2
-hipDeviceSynchronize 1
-hip_runtime 1
-```
 
 # Hipify-perl (cont.)
 ![](img/cublas_cuda_hip.png){ .center width=100% }
