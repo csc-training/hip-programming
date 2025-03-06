@@ -116,7 +116,7 @@ hipify-perl is the simplest tool for converting CUDA code to HIP. It works by sc
 hipify-clang, on the other hand, provides a more robust and accurate translation. It processes the code at a deeper level, generating warnings and offering assistance for further analysis. This tool is particularly useful for high-quality translations, especially when working with projects that involve complex build systems like Make.
 ::: 
 
-# HIPIFY-perl Example
+# HIPIFY-perl 
 
 - `hipify-perl –examin <file>.cu`
      * basic statistics and number of replacements
@@ -129,6 +129,8 @@ hipify-clang, on the other hand, provides a more robust and accurate translation
      * translation a file to standard output
      * modifies the input file inplace, saves the input file in .prehip file 
      * recursively do folders
+     * `hipconvertinplace-perl.sh`
+- `--print-stats` return a report for each file
 
 # Hipify Tools
 
