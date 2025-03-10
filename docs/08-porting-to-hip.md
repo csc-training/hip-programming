@@ -85,19 +85,20 @@ hipLaunchKernelGGL(kernel_name,
 </small>
 
 
-# Porting a CUDA Project
+# Porting a CUDA Project: Migrating Workflow
 
-- **Migrating Workflow**:
-    * start on a CUDA platform
-    * get a fully working HIP version
-    * compile the HIP code on an AMD machine
-    * handle platform-specific features through conditional compilation (or by adding them to the open-source HIP infrastructure)
-- **Conversion Methods**:
-    * **Manual Code Conversion** (search/replace)
-    * **HIPIFY Tools** (automated translation tools)
-    * **Header Porting** (on the fly translation)
+- start on a CUDA platform
+- get a fully working HIP version
+- compile the HIP code on an AMD machine
+- handle platform-specific features through conditional compilation (or by adding them to the open-source HIP infrastructure)
 
-# HIPIFY Tools. Automated Translation Tools
+# Porting a CUDA Project: Conversion Methods
+
+- **Manual Code Conversion** (search/replace or incremental)
+- **HIPIFY Tools** (automated translation tools)
+- **Header Porting** (on the fly translation)
+
+# Automated Translation Tools
 - collection of tools that automatically translate CUDA to HIP code
 - **hipify-perl**
    * translates to HIP using pattern matching
@@ -114,87 +115,83 @@ hipLaunchKernelGGL(kernel_name,
 hipify-perl is the simplest tool for converting CUDA code to HIP. It works by scanning a directory and performing basic string replacements, such as converting cudaMemcpy to hipMemcpy. However, since it relies on straightforward text substitution (sed -e 's/cuda/hip/g'), some manual post-processing may be required. It is best suited for quick scans of projects, but it does not handle unrecognized CUDA calls and will report them instead of translating them.
 
 hipify-clang, on the other hand, provides a more robust and accurate translation. It processes the code at a deeper level, generating warnings and offering assistance for further analysis. This tool is particularly useful for high-quality translations, especially when working with projects that involve complex build systems like Make.
+
+Hipify tools are not running your application, or checking correctness. Code relying on specific Nvidia hardware aspects (e.g., warp size == 32) may need attention after conversion. Certain functions may not have a correspondent hip version (e.g., __shfl_down_sync –-> _shfl_down instead). Hipifying can’t handle inline PTX assembly. Can either use inline GCN ISA, or convert it to HIP. Hipify-perl and hipify-clang can both convert library calls. None of the tools convert your build system script such as CMAKE or whatever else you use. The user is responsible to find the appropriate flags and paths to build the new converted HIP code.
 ::: 
 
-# HIPIFY-perl 
+# HIPIFY Tools Usage
 
-- `hipify-perl/clang –examin <file>.cu` or `hipexamine-perl.sh <file>.cu`
+- `hipify-perl/clang –examin <file>.cu` or `hipexamine/-perl.sh <file>.cu`
      * basic statistics and number of replacements
      * no replacements
 - `hipify-perl/clang <file>.cu`
      * translation a file to standard output
-- `hipify-perl/clang -inplace <file>.cu` or `hipconvertinplace-perl.sh <file>.cu`
+- `hipify-perl/clang -inplace <file>.cu` or `hipconvertinplace/-perl.sh <file>.cu`
      * modifies the input file inplace, saves the input file in .prehip file 
      * works with folders:recursively do folders
 - `--print-stats` return a report for each file
 
 
-# Hipify-perl (cont.)
+# Hipify-perl Example
 ![](img/cublas_cuda_hip.png){ .center width=100% }
 
-# Hipify-perl (cont.)
+# Hipify-perl Example (cont.)
 ![](img/kernel_cuda_hip.png){ .center width=100% }
 
+# Header Porting
 
-# Hipify-clang
+- one can create header files with macro definitions
+- code can run on different backends with single header
+```
+#define cudaFree hipFree
+#define cudaMalloc hipMalloc
+#define cudaMallocManaged hipMallocManaged
+#define cudaMemcpy hipMemcpy
+```
+- it is possible to build unified wrappers
 
-* Build from source
-*  Some times needs to include manually the headers -I/...
-```bash
-$ hipify-clang --print-stats -o matMul.o matMul.c
-[HIPIFY] info: file 'matMul.c' statistics:
-CONVERTED refs count: 0
-UNCONVERTED refs count: 0
-CONVERSION %: 0
-REPLACED bytes: 0
-TOTAL bytes: 4662
-CHANGED lines of code: 1
-TOTAL lines of code: 155
-CODE CHANGED (in bytes) %: 0
-CODE CHANGED (in lines) %: 1
-20 TIME ELAPSED s: 22.94
+```
+#ifdef _CUDA_ENABLED
+	using deviceStream_t = cudaStream_t;
+#elif _HIP_ENABLED
+	using deviceStream_t = hipStream_t;
+#endif
 ```
 
+- only works when there is no difference between API calls
 
-# Hipify-tools - translating CUDA to HIP
+# HOP: [https://github.com/cschpc/hop](https://github.com/cschpc/hop)
 
-* Hipify-tools can translate CUDA source code into portable HIP C++ automatically
-* Although most CUDA expressions are supported, manual intervention may be required
-  * For example, a CUDA macro ```__CUDA_ARCH__``` is not translated
-    * If the purpose of ```__CUDA_ARCH__``` is to distinguish between host and device code path, it can be replaced with ```__HIP_DEVICE_COMPILE__```
-    * If ```__CUDA_ARCH__``` is used to determine architectural feature support, another solution is required, eg, ```__HIP_ARCH_HAS_DOUBLES__```
+- light-weight header-only library for GPU porting between CUDA and HIP
+  	* no code modifications needed
+  	* only some extra flags at compile time to hop from CUDA to HIP or back
+  
+**CUDA** &rArr; **HIP**
+```
+export HOP_ROOT=/path/to/hop
+export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/cuda -DHOP_TARGET_HIP
+CC -x hip $HOP_FLAGS hello.cu -o hello
+./hello
+```
+**HIP**  &rArr; **CUDA**
+```
+export HOP_ROOT=/path/to/hop
+export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/hip -DHOP_TARGET_CUDA
+CC -x cu $HOP_FLAGS hello.cpp -o hello
+./hello
+```
 
+# Code Development with HOP
 
-# Hipify-tools - translating CUDA to HIP
+- write all code in CUDA and use HOP only on HIP platorms
+- write all code in HIP and use HOP only on CUDA platforms
+- use a mix off CUDA and HIP and use HOP on both CUDA and HIP platforms
+- uses generic identifiers as intermediates in the translation
+  	* `gpuMalloc, gpuMemcpyHostToDevice, …`
+- if needed, wrapper functions can be used to write backend-specific
+implementations
+	* use `gpuLaunchKernel()` instead of `<<<...>>>()`  
 
-<small>
-
-* To access Hipify-tools on Puhti, do:
-  ```
-   ml purge; ml gcc/11.3.0 hipify-clang/5.1.0
-  ```
-
-* hipify-clang: CUDA -> HIP translator based on LLVM clang
-  * Only syntactically correct CUDA code is translated
-  * Good support even for somewhat complicated constructs
-  * Requires third party dependencies: 
-    * 3.8.0 <= clang <= 13.0.1
-    * 7.0 <= CUDA <= 11.5.1
-  * Usage (-print-stats is optional, but on Puhti, --cuda-path must be specified):
-  ```
-    hipify-clang -print-stats -o src.cu.hip src.cu --cuda-path=/appl/spack/v018/install-tree/gcc-9.4.0/cuda-11.1.1-lfaa3j
-  ```
-
-* hipify-perl: a perl script for CUDA -> HIP translation that mostly uses regular expressions
-  * Does not check the input CUDA code for correctness
-  * No third party dependencies like clang or CUDA
-  * Not as reliable as hipify-clang
-  * Usage (-print-stats is optional):
-  ```
-    hipify-perl -print-stats -o src.cu.hip src.cu
-  ```
-
-</small>
 
 # Summary
 
