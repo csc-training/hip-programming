@@ -188,6 +188,10 @@ CC -x cu $HOP_FLAGS hello.cpp -o hello
 - use a mix off CUDA and HIP and use HOP on both CUDA and HIP platforms
 - uses generic identifiers as intermediates in the translation
   	* `gpuMalloc, gpuMemcpyHostToDevice, …`
+- if needed, wrapper functions can be used to write backend-specific
+implementations
+	* use `gpuLaunchKernel()` instead of `<<<...>>>()`  
+
 
 # Summary
 
