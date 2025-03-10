@@ -59,8 +59,8 @@ Memory management can be *Explicit* or *Implicit*.
 :::{.incremental}
 - *Explicit*: User manually manages data movement between host and device. Memory can be allocated with GPU-unaware allocators (`malloc`/`free` etc).
 - *Implicit*: The runtime manages data movement between host and device. Memory needs to be allocated with special allocated offered by HIP api.
-  - **Pinned** (page-locked) host allocations: Data moves to device with kernel invocations and is not stored there.
-  - **Unified memory** (Managed memory): Page faults will initiate data movement.
+  - **Page-locked** (pinned) host allocations: Data moves to device with kernel invocations and is not stored there.
+  - **Unified memory** (managed memory): Page faults will initiate data movement.
 :::
 
 * [HIP API documentation on memory](https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.2/doxygen/html/group___memory_m.html)
@@ -153,63 +153,40 @@ int main() {
 :::
 ::::::
 
-# Unified Memory workflow for GPU offloading
-
-1. Allocate memory for the arrays accessed by the GPU with
-   `hipMallocManaged()` instead of `malloc()`
-    - It is a good idea to have a wrapper function and use conditional compilation
-      for memory allocations
-2. Offload compute kernels to GPUs
-3. Check profiler backtrace for GPU->CPU Unified Memory page-faults (NVIDIA
-   Visual Profiler, Nsight Systems, AMD profiler?)
-    - This indicates where the data residing on the GPU is accessed by the CPU
-      (very useful for large codebases, especially if the developer is new to
-      the code)
-
-
-# Unified Memory workflow for GPU offloading
-
-4.  Move operations from CPU to GPU if possible, or use hints / prefetching
-    (`hipMemAdvice()` / `hipMemPrefetchAsync()`)
-    -  It is not necessary to eliminate all page faults, but eliminating the
-       most frequently occurring ones can provide significant performance
-       improvements
-5.  Allocating GPU memory can have a much higher overhead than allocating
-    standard host memory
-    - If GPU memory is allocated and deallocated in a loop, consider using a
-      GPU memory pool allocator for better performance (e.g. Umpire)
-
-
 # Side-topic: Virtual Memory addressing
 
-<div class="column">
+::::::{.columns}
+:::{.column width=70%}
 - Modern operating systems utilize virtual memory
-    - Memory is organized to memory pages
-    - Memory pages can reside on swap area on the disk (or on the GPU with
-      Unified Memory)
-</div>
+    - Memory is organized in memory pages
+    - Memory pages can reside on swap area on the disk 
+- `malloc` returns an address in the virtual memory
+:::
 
-<div class="column">
-![](img/virtual_memory_addressing.png){width=50%}
-</div>
+:::{.column}
+![](img/virtual_memory_addressing.png){width=80%}
+:::
+::::::
 
 # Page-locked (or pinned) memory
 
-- Normal `malloc()` allows swapping and page faults
-- User can page-lock an allocated memory block to a particular physical memory
-  location
-- Enables Direct Memory Access (DMA)
-- Higher transfer speeds between host and device
-- Copying can be interleaved with kernel execution (??)
+:::{.fragment}
+- Normal `malloc` allows swapping and page faults
+- `hipHostMalloc` page-locks the allocation to a physical memory location
+  - Deallocate with `hipFreeHost()`
+:::
+:::{.fragment}
+- **(A)** Direct Memory Access (DMA)
+  - Higher transfer speeds between host and device
+- **(B)** Access host memory from GPU without explicit `hipMemCpu`
+  - Useful in infrequent access pattern
+  - Implicit host-device bus access
+:::
+:::{.fragment}
 - Page-locking too much memory can degrade system performance due to paging
   problems
+:::
 
-# Allocating page-locked memory on host
-
-- Allocated with `hipHostMalloc()` functions instead of `malloc()`
-- Maps the allocated host memory to address space of all available GPUs
-- Memory can be accessed from GPU but the access is over host-device link (slow)
-- Deallocated using `hipFreeHost()`
 
 # Asynchronous memcopies
 
@@ -222,7 +199,7 @@ int main() {
 
 # Explicit memory API calls
 
-- Allocate (pinned) device memory
+- Allocate (page-locked) device memory
   ```cpp
   hipError_t hipMalloc(void **devPtr, size_t size)
   ```
@@ -241,9 +218,9 @@ int main() {
 
 # Explicit memory API calls
 
-Pinned *host* memory
+Page-locked *host* memory
 
-- Allocate/free pinned host memory
+- Allocate/free page-locked host memory
   ```cpp 
     hipHostMalloc(void **ptr, size_t size);
     hipHostFree(void *ptr);
@@ -265,40 +242,32 @@ Also known as [*Managed memory*](https://rocm.docs.amd.com/projects/HIP/en/docs-
   hipError_t hipFree(void *devPtr)
   ```
 
-# The stream-ordered memory allocator and memory pools
+# The stream-ordered memory allocator and memory pools 
+
+- Benefit of asynchronous memory management: allocate/free memory from/to a pool
+  - Full allocate/free is slower
+- Pool is deallocated after async free (`hipFreeAsync`) when it is synchronised (default behaviour)
 
 <small>
 
-* Obtain unused memory already allocated from the device's current memory pool in the specified stream (if not enough memory is available, more memory is allocated for the pool)
-```cpp
-​hipError_t hipMallocAsync ( void** devPtr, size_t size, hipStream_t hStream )
-```
-
-* Return memory to the pool in the specific stream (does not deallocate memory)
-```cpp
-hipError_t hipFreeAsync ( void* devPtr, hipStream_t hStream ) 
-```
-
-* By default, the pool is deallocated completely when the stream is synchronized
-
-* The `hipMemPoolAttrReleaseThreshold` represents the size down to which the pool is deallocated during a synchronization, and can be set by 
-
-```cpp
-hipMemPool_t mempool;
-hipDeviceGetDefaultMemPool(&mempool, device);
-uint64_t threshold = UINT64_MAX;
-hipMemPoolSetAttribute(mempool, hipMemPoolAttrReleaseThreshold, &threshold);
-```
-
-* Setting threshold to `UINT64_MAX` means, that the pool is practically never deallocated due to synchronization (because the threshold is a huge number)
+| Description | API call |
+|--|--|
+| Allocate memory from pool. If pool is too small, assign more memory to it. | `hipMallocAsync(void** devPtr, size_t size, hipStream_t hStream)` |
+| Free memory to the pool in the specific stream | `hipFreeAsync(void* devPtr, hipStream_t hStream)` |
 
 </small>
+
+:::{.notes}
+**Extra:**
+- Modify default behaviour: resize pool down to value when synchronizing (`hipDeviceGetDefaultMemPool`, `hipMemPoolSetAttribute`, `hipMemPoolAttrReleaseThreshold`)
+- beta version
+:::
 
 # Memory pools - Example
 <small>
 
 <div class="column">
-* Example 1 - slow
+Example 1 - slow
 ```cpp
 for (int i = 0; i < 100; i++) {
   // Allocate memory here (slow)
@@ -314,7 +283,7 @@ hipStreamSynchronize(0);
 * Allocating and deallocating memory in a loop is slow, and can have a significant impact on the performance
 </div>
 <div class="column">
-* Example 2 - fast
+Example 2 - fast
 ```cpp
 for (int i = 0; i < 100; i++) {
   // Obtain unused memory from the current memory pool, 
@@ -337,12 +306,10 @@ hipStreamSynchronize(stream);
 # Summary
 
 - Host and device have separate physical memories
-- Memory management can be explicit (managed by the user) or automatic (managed by the Unified Memory driver)
-- Using Unified Memory can improve developer productivity and result in a
-  cleaner implementation
-- The number of data copies between CPU and GPU should be minimized
-    - With Unified Memory, if data transfer cannot be avoided, using hints or
-      prefetching to mitigate page faults is beneficial
+  - The data copies between CPU and GPU should be minimized
+- Explicit or implicit memory management
+- Page-locked host allocation: DMA and kernel access to host memory 
+- Unified Memory: improve productivity and cleaner implementation
+    - Optimize with hints and prefetches
 - Recurring allocation and deallocation is slow, use memory pools instead 
   - Libraries provide pooled Unified Memory support as well (eg, Umpire)
-
