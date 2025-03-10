@@ -166,13 +166,20 @@ Hipify tools are not running your application, or checking correctness. Code rel
 - light-weight header-only library for GPU porting between CUDA and HIP
   	* no code modifications needed
   	* only some extra flags at compile time to hop from CUDA to HIP or back
-**CUDA** &rarr; **HIP**
+  
+**CUDA** &rArr; **HIP**
 ```
 export HOP_ROOT=/path/to/hop
 export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/cuda -DHOP_TARGET_HIP
 CC -x hip $HOP_FLAGS hello.cu -o hello
 ./hello
 ```
-
+**HIP**  &rArr; **CUDA**
+```
+export HOP_ROOT=/path/to/hop
+export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/hip -DHOP_TARGET_CUDA
+CC -x cu $HOP_FLAGS hello.cpp -o hello
+./hello
+```
 # Summary
 
