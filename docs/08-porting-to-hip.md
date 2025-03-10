@@ -196,5 +196,5 @@ implementations
 
 - various ways to port code from CUDA to HIP
 - HIPIFY tools can automatically convert code to HIP
-- header porting enables both ways convertion, **CUDA** &hArr; **HIP**
+- header porting enables both ways conversion, **CUDA** &hArr; **HIP**
   	* HOP is good start
