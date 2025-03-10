@@ -97,7 +97,7 @@ hipLaunchKernelGGL(kernel_name,
     * **HIPIFY Tools** (automated translation tools)
     * **Header Porting** (on the fly translation)
 
-# HIPIFY Tools. Automated Translation Tools
+# Automated Translation Tools
 - collection of tools that automatically translate CUDA to HIP code
 - **hipify-perl**
    * translates to HIP using pattern matching
@@ -116,7 +116,7 @@ hipify-perl is the simplest tool for converting CUDA code to HIP. It works by sc
 hipify-clang, on the other hand, provides a more robust and accurate translation. It processes the code at a deeper level, generating warnings and offering assistance for further analysis. This tool is particularly useful for high-quality translations, especially when working with projects that involve complex build systems like Make.
 ::: 
 
-# HIPIFY-perl 
+# HIPIFY Tools
 
 - `hipify-perl/clang –examin <file>.cu` or `hipexamine-perl.sh <file>.cu`
      * basic statistics and number of replacements
@@ -129,72 +129,12 @@ hipify-clang, on the other hand, provides a more robust and accurate translation
 - `--print-stats` return a report for each file
 
 
-# Hipify-perl (cont.)
+# Hipify-perl Example
 ![](img/cublas_cuda_hip.png){ .center width=100% }
 
-# Hipify-perl (cont.)
+# Hipify-perl Example (cont.)
 ![](img/kernel_cuda_hip.png){ .center width=100% }
 
-
-# Hipify-clang
-
-* Build from source
-*  Some times needs to include manually the headers -I/...
-```bash
-$ hipify-clang --print-stats -o matMul.o matMul.c
-[HIPIFY] info: file 'matMul.c' statistics:
-CONVERTED refs count: 0
-UNCONVERTED refs count: 0
-CONVERSION %: 0
-REPLACED bytes: 0
-TOTAL bytes: 4662
-CHANGED lines of code: 1
-TOTAL lines of code: 155
-CODE CHANGED (in bytes) %: 0
-CODE CHANGED (in lines) %: 1
-20 TIME ELAPSED s: 22.94
-```
-
-
-# Hipify-tools - translating CUDA to HIP
-
-* Hipify-tools can translate CUDA source code into portable HIP C++ automatically
-* Although most CUDA expressions are supported, manual intervention may be required
-  * For example, a CUDA macro ```__CUDA_ARCH__``` is not translated
-    * If the purpose of ```__CUDA_ARCH__``` is to distinguish between host and device code path, it can be replaced with ```__HIP_DEVICE_COMPILE__```
-    * If ```__CUDA_ARCH__``` is used to determine architectural feature support, another solution is required, eg, ```__HIP_ARCH_HAS_DOUBLES__```
-
-
-# Hipify-tools - translating CUDA to HIP
-
-<small>
-
-* To access Hipify-tools on Puhti, do:
-  ```
-   ml purge; ml gcc/11.3.0 hipify-clang/5.1.0
-  ```
-
-* hipify-clang: CUDA -> HIP translator based on LLVM clang
-  * Only syntactically correct CUDA code is translated
-  * Good support even for somewhat complicated constructs
-  * Requires third party dependencies: 
-    * 3.8.0 <= clang <= 13.0.1
-    * 7.0 <= CUDA <= 11.5.1
-  * Usage (-print-stats is optional, but on Puhti, --cuda-path must be specified):
-  ```
-    hipify-clang -print-stats -o src.cu.hip src.cu --cuda-path=/appl/spack/v018/install-tree/gcc-9.4.0/cuda-11.1.1-lfaa3j
-  ```
-
-* hipify-perl: a perl script for CUDA -> HIP translation that mostly uses regular expressions
-  * Does not check the input CUDA code for correctness
-  * No third party dependencies like clang or CUDA
-  * Not as reliable as hipify-clang
-  * Usage (-print-stats is optional):
-  ```
-    hipify-perl -print-stats -o src.cu.hip src.cu
-  ```
-
-</small>
 
 # Summary
 
