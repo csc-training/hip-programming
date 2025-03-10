@@ -180,5 +180,14 @@ export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/hip -DHOP_TARGET_CUDA
 CC -x cu $HOP_FLAGS hello.cpp -o hello
 ./hello
 ```
+
+# Code Development with HOP
+
+- write all code in CUDA and use HOP only on HIP platorms
+- write all code in HIP and use HOP only on CUDA platforms
+- use a mix off CUDA and HIP and use HOP on both CUDA and HIP platforms
+- uses generic identifiers as intermediates in the translation
+  	* `gpuMalloc, gpuMemcpyHostToDevice, …`
+
 # Summary
 
