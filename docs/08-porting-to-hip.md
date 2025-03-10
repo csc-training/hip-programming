@@ -138,6 +138,27 @@ Hipify tools are not running your application, or checking correctness. Code rel
 # Hipify-perl Example (cont.)
 ![](img/kernel_cuda_hip.png){ .center width=100% }
 
+# Header Porting
 
+- one can create header files with macro definitions
+- code can run on different backends with single header
+```
+#define cudaFree hipFree
+#define cudaMalloc hipMalloc
+#define cudaMallocManaged hipMallocManaged
+#define cudaMemcpy hipMemcpy
+```
+- it is possible to build unified wrappers
+
+```
+#ifdef _CUDA_ENABLED
+	using deviceStream_t = cudaStream_t;
+#elif _HIP_ENABLED
+	using deviceStream_t = hipStream_t;
+#endif
+```
+
+- only works when there is no difference between API calls
+  
 # Summary
 
