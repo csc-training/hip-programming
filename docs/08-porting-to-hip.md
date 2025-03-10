@@ -94,7 +94,7 @@ hipLaunchKernelGGL(kernel_name,
 
 # Porting a CUDA Project: Conversion Methods
 
-- **Manual Code Conversion** (search/replace)
+- **Manual Code Conversion** (search/replace or incremental)
 - **HIPIFY Tools** (automated translation tools)
 - **Header Porting** (on the fly translation)
 
