@@ -183,14 +183,13 @@ CC -x cu $HOP_FLAGS hello.cpp -o hello
 
 # Code Development with HOP
 
-- write all code in CUDA and use HOP only on HIP platorms
-- write all code in HIP and use HOP only on CUDA platforms
-- use a mix off CUDA and HIP and use HOP on both CUDA and HIP platforms
-- uses generic identifiers as intermediates in the translation
+- write code in CUDA or HIP or a mix of both
+- use generic identifiers as intermediates in the translation
   	* `gpuMalloc, gpuMemcpyHostToDevice, …`
-- if needed, wrapper functions can be used to write backend-specific
+- when needed, wrapper functions can be used to write backend-specific
 implementations
-	* use `gpuLaunchKernel()` instead of `<<<...>>>()`  
+- avoid implicit header includes
+- use `gpuLaunchKernel()` instead of `<<<...>>>()`  
 
 
 # Summary
