@@ -147,7 +147,7 @@ int main() {
 :::{.column}
 **Cons**
 
-- Data transfers between host and device are initially slower <br>⇒ Must be optimized with prefetches and hints
+- Data access in device code is initially slower <br>⇒ Must be optimized with prefetches and hints
 - Externalize memory management to library
 
 :::
@@ -171,20 +171,19 @@ int main() {
 # Page-locked (or pinned) memory
 
 :::{.fragment}
-- Normal `malloc` allows swapping and page faults
+- Normal `malloc` allows swapping, page migration and page faults
 - `hipHostMalloc` page-locks the allocation to a physical memory location
   - Deallocate with `hipFreeHost()`
 :::
 :::{.fragment}
 - **(A)** Direct Memory Access (DMA)
   - Higher transfer speeds between host and device
-- **(B)** Access host memory from GPU without explicit `hipMemCpu`
-  - Useful in infrequent access pattern
-  - Implicit host-device bus access
+- **(B)** Access host memory from GPU without explicit `hipMemCpy`
+  - Useful in sporadic access pattern
+  - Implicit host-device access
 :::
 :::{.fragment}
-- Page-locking too much memory can degrade system performance due to paging
-  problems
+- Excessive page-locking can degrade system performance
 :::
 
 
