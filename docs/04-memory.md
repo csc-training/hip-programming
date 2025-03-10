@@ -14,24 +14,13 @@ lang:     en
 * Page-locked memory
 * The stream-ordered memory allocator and memory pools
 
-# Memory model
-
-* Host and device have separate physical memories
-* It is generally not possible to allocate memory in device code
-* Memory management can be
-    * Explicit (user manages the movement of the data and makes sure CPU and
-      GPU pointers are not mixed)
-    * Automatic, using Unified Memory (data movement is managed in the
-      background by the Unified Memory driver)
-* [HIP API documentation](https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.2/doxygen/html/group___memory_m.html)
-
-# Device memory hierarchy
+# Memory model and hierarchy
 
 ::::::{.columns}
 :::{.column width="60%"}
 ::: {.fragment}
 - Registers (*VGPR, SGPR*)
-  - Compiler assigns automatically to warps / threads
+  - Compiler assigns automatically
 :::
 ::: {.fragment}
 - Shared memory (*Local data share, LDS*)
@@ -43,7 +32,10 @@ lang:     en
   - Automatically used when registers run out
 :::
 ::: {.fragment}
-- Global memory
+- Global device memory
+:::
+::: {.fragment}
+- Host memory
 :::
 :::
 ::: {.column width="40%"}
@@ -52,55 +44,26 @@ lang:     en
 ::::::
 
 ::: {.notes}
+Extra: 
 - Not covered: texture memory, constant memory
 - Could be considered only when lower hanging optimisation tricks are covered
+- This lecture: host ⇄ global device memory
 :::
 
 
-# Explicit memory API calls
 
-- Allocate (pinned) device memory
-  ```cpp
-  hipError_t hipMalloc(void **devPtr, size_t size)
-  ```
+# Memory management strategies
 
-- Copy data
-  ```cpp
-  hipError_t hipMemcpy(void *dst, const void *src, size_t count, enum hipMemcpyKind kind)
-  ```
-  Where `kind`:
-    - `hipMemcpyDeviceToHost`, `hipMemcpyHostToDevice`, <br>`hipMemcpyHostToHost`, `hipMemcpyDeviceToDevice`
+Memory management can be *Explicit* or *Implicit*.
 
-- Deallocate device memory
-  ```cpp
-  hipError_t hipFree(void *devPtr)
-  ```
+:::{.incremental}
+- *Explicit*: User manually manages data movement between host and device. Memory can be allocated with GPU-unaware allocators (`malloc`/`free` etc).
+- *Implicit*: The runtime manages data movement between host and device. Memory needs to be allocated with special allocated offered by HIP api.
+  - **Pinned** (page-locked) host allocations: Data moves to device with kernel invocations and is not stored there.
+  - **Unified memory** (Managed memory): Page faults will initiate data movement.
+:::
 
-# Explicit memory API calls
-
-Pinned *host* memory
-
-- Allocate/free pinned host memory
-  ```cpp 
-    hipHostMalloc(void **ptr, size_t size);
-    hipHostFree(void *ptr);
-  ```
-- Lower operating system overhead: faster device-host copies
-- Call kernels with host pointers: automatic copy to device and back
-- Memory paging is disabled: no swapping, must be contiguous
-
-# Unified memory API calls
-
-Also known as [*Managed memory*](https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.2/doxygen/html/group___memory_m.html)
-
-- Allocate Unified Memory
-  ```cpp
-  hipError_t hipMallocManaged(void **devPtr, size_t size)
-  ```
-- Deallocate unified memory (same as explicitly managed memory)
-  ```cpp
-  hipError_t hipFree(void *devPtr)
-  ```
+* [HIP API documentation on memory](https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.2/doxygen/html/group___memory_m.html)
 
 # Memory management strategies
 
@@ -184,9 +147,8 @@ int main() {
 :::{.column}
 **Cons**
 
-- Data transfers between host and device are initially slower <br>⇒ Must be optimized
-- Externalize memory management to unknown
-- Supported by the latest NVIDIA + AMD architectures
+- Data transfers between host and device are initially slower <br>⇒ Must be optimized with prefetches and hints
+- Externalize memory management to library
 
 :::
 ::::::
@@ -218,7 +180,7 @@ int main() {
       GPU memory pool allocator for better performance (e.g. Umpire)
 
 
-# Virtual Memory addressing
+# Side-topic: Virtual Memory addressing
 
 <div class="column">
 - Modern operating systems utilize virtual memory
@@ -238,18 +200,15 @@ int main() {
   location
 - Enables Direct Memory Access (DMA)
 - Higher transfer speeds between host and device
-- Copying can be interleaved with kernel execution
+- Copying can be interleaved with kernel execution (??)
 - Page-locking too much memory can degrade system performance due to paging
   problems
 
 # Allocating page-locked memory on host
 
-- Allocated with `hipMallocHost()` or `hipHostAlloc()` functions instead of `malloc()`
-- The allocation can be mapped to the device address space for device access
-  (slow)
-    - On some architectures, the host pointer to device-mapped allocation can
-      be directly used in device code (ie, it works similarly to Unified
-      Memory pointer, but the access from the device is slow)
+- Allocated with `hipHostMalloc()` functions instead of `malloc()`
+- Maps the allocated host memory to address space of all available GPUs
+- Memory can be accessed from GPU but the access is over host-device link (slow)
 - Deallocated using `hipFreeHost()`
 
 # Asynchronous memcopies
@@ -261,7 +220,53 @@ int main() {
 - User has to synchronize the program execution
 - Asynchronous memory copies require page-locked memory
 
+# Explicit memory API calls
+
+- Allocate (pinned) device memory
+  ```cpp
+  hipError_t hipMalloc(void **devPtr, size_t size)
+  ```
+
+- Copy data
+  ```cpp
+  hipError_t hipMemcpy(void *dst, const void *src, size_t count, enum hipMemcpyKind kind)
+  ```
+  Where `kind`:
+    - `hipMemcpyDeviceToHost`, `hipMemcpyHostToDevice`, <br>`hipMemcpyHostToHost`, `hipMemcpyDeviceToDevice`
+
+- Deallocate device memory
+  ```cpp
+  hipError_t hipFree(void *devPtr)
+  ```
+
+# Explicit memory API calls
+
+Pinned *host* memory
+
+- Allocate/free pinned host memory
+  ```cpp 
+    hipHostMalloc(void **ptr, size_t size);
+    hipHostFree(void *ptr);
+  ```
+- Lower operating system overhead: faster device-host copies
+- Call kernels with host pointers: automatic copy to device and back
+- Memory paging is disabled: no swapping, must be contiguous
+
+# Unified memory API calls
+
+Also known as [*Managed memory*](https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.2/doxygen/html/group___memory_m.html)
+
+- Allocate Unified Memory
+  ```cpp
+  hipError_t hipMallocManaged(void **devPtr, size_t size)
+  ```
+- Deallocate unified memory (same as explicitly managed memory)
+  ```cpp
+  hipError_t hipFree(void *devPtr)
+  ```
+
 # The stream-ordered memory allocator and memory pools
+
 <small>
 
 * Obtain unused memory already allocated from the device's current memory pool in the specified stream (if not enough memory is available, more memory is allocated for the pool)

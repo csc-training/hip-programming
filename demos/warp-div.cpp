@@ -95,9 +95,9 @@ __global__ void fill_kernel_noif(size_t n, double *x, double a, int Nz)
 int main(void)
 {
     // set problem size
-    const size_t n = 1<<30;
+    const size_t n = 1<<24;
     
-    int Nz = 1;
+    int Nz = 100;
     // allocate device memory
     double *d_x;
     double *d_y; 

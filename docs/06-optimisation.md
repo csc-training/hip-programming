@@ -466,19 +466,29 @@ The duration is `0.179 ms`  and the effective bandwidth `697 GB/s`
 # Other examples where shared memory is critical 
 
 - Matrix-matrix/vector multiplication
+ 
+  :::{.fragment}
   - Same elements are loaded in different threads
+  :::
 - N-body problem
+ 
+  :::{.fragment}
   - One thread evolves one body: each thread loads all data of each other body as well
+  :::
 - Reductions
+ 
+  :::{.fragment}
   - Cooperation between threads
+  :::
 
 # Summary
 
-- Existing specialized libraries are extremely optimised. Especially dense linear algebra (hipBLAS/cuBlAS) and FFTs
-- Host-Device vs Device-Compute Unit BW difference is order of 2
-- Keep data in registers and don't move it unnecessarily to device memory
+- Specialised libraries are highly optimised
+  - Especially dense linear algebra (hipBLAS/cuBlAS) and FFTs.
+- Host-Device vs Device-Compute Unit bandwidth difference is order of 2 magnitudes
+- Keep data in registers 
   - But there are a finite amount of registers!
-- Coalesced memory access is better!
+- Neighbouring threads access neighbouring memory locations
+  - Memory operations are coalesced
 - Local data share: a shared variable inside a block
-- Branching
-  - Condition varies in warp: Execute both branches and mask other to be *NoOp*
+- Branching in warp: execute both branches

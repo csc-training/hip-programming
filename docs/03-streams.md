@@ -144,41 +144,41 @@ hipError_t hipStreamCreate ( hipStream_t* stream )
 
 # Stream example
 
-<small>
-<div class="column">
+
+::::::{.columns}
+:::{.column width="50%"}
+
 ```cpp
-// Declare an array of 3 streams
 hipStream_t stream[3];
 
-// Create streams and schedule work
-for (int i = 0; i < 3; ++i){
+for (int i = 0; i < 3; ++i) {
   hipStreamCreate(&stream[i]);
 
-  // Each streams copies data from host to device
   hipMemcpyAsync(d_data[i], h_data[i], bytes, 
     hipMemcpyHostToDevice, stream[i]);
 
-  // Each streams runs a kernel
-  hipkernel<<<grid, block, 0, strm[i]>>>(d_data[i]);
+  hipkernel<<<grid, block, 0, stream[i]>>>
+      (d_data[i]);
 
-  // Each streams copies data from device to host
   hipMemcpyAsync(h_data[i], d_data[i],  bytes, 
     hipMemcpyDeviceToHost, stream[i]);
 }
 
 // Synchronize and destroy streams
-for (int i = 0; i < 3; ++i){
-  hipStreamSynchronize(stream[i]);
-  hipStreamDestroy(stream[i]);
-}
+
 ```
-</div>
 
-<div class="column">
-![](./img/streams-example-2.png){height=400px}
-</div>
+:::
+:::{.column width="49%"}
+![](./img/stream-example.svg){width=100%}
+:::
 
-</small>
+::::::
+
+:::{.notes}
+- host-device is bidirectional
+:::
+
 
 # Events
 
