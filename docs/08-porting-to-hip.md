@@ -119,7 +119,7 @@ hipify-clang, on the other hand, provides a more robust and accurate translation
 Hipify tools are not running your application, or checking correctness. Code relying on specific Nvidia hardware aspects (e.g., warp size == 32) may need attention after conversion. Certain functions may not have a correspondent hip version (e.g., __shfl_down_sync –-> _shfl_down instead). Hipifying can’t handle inline PTX assembly. Can either use inline GCN ISA, or convert it to HIP. Hipify-perl and hipify-clang can both convert library calls. None of the tools convert your build system script such as CMAKE or whatever else you use. The user is responsible to find the appropriate flags and paths to build the new converted HIP code.
 ::: 
 
-# HIPIFY Tools
+# HIPIFY Tools Usage
 
 - `hipify-perl/clang –examin <file>.cu` or `hipexamine/-perl.sh <file>.cu`
      * basic statistics and number of replacements
