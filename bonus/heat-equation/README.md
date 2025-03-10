@@ -16,21 +16,29 @@ are using doesn't have libpng installed.
 The heat equation is a partial differential equation that describes the
 variation of temperature in a given region over time
 
-<img src="images/laplacian.png" alt="du/dt = alpha * nabla^2 u" height="58" >
+$$\frac{\partial u}{\partial t} = \alpha \nabla^2 u $$
 
 where u(x, y, z, t) represents temperature variation over space at a given
 time, and α is a thermal diffusivity constant.
 
 We limit ourselves to two dimensions (plane) and discretize the equation onto
-a grid.  Then the Laplacian can be expressed as finite differences as
+a grid.  The two dimensional Laplacian can be
+discretized with finite differences as
 
-<img src="images/fidi.png" alt="" height="113" >
+```math
+\nabla^2 u  = \frac{u(i-1,j)-2u(i,j)+u(i+1,j)}{(\Delta x)^2} + \frac{u(i,j-1)-2u(i,j)+u(i,j+1)}{(\Delta y)^2}
 
-Where ∆x and ∆y are the grid spacing of the temperature grid u(i,j). We can
-study the development of the temperature grid with explicit time evolution
-over time steps ∆t:
+```
+ Given an initial condition (u(t=0) = u0) one can follow the time dependence
+ of
+ the temperature field with explicit time evolution method:
 
-<img src="images/timeevo.png" alt="" height="45" >
+$$u^{m+1}(i,j) = u^m(i,j) + \Delta t \alpha \nabla^2 u^m(i,j) $$
+
+ Note: Algorithm is stable only when
+
+$$ \Delta t < \frac{1}{2 \alpha} \frac{(\Delta x \Delta y)^2}{(\Delta x)^2+
+ (\Delta y)^2} $$
 
 There is a solver for the 2D equation implemented in C++ and Fortran. You can
 compile the program by adjusting the Makefile as needed and typing `make`. The

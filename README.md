@@ -38,7 +38,7 @@ part of the EuroCC training activities at CSC.
 | 13:00-13:30 | Fortran and HIP (CA) |
 | 13:30-13:45 | Break |
 | 13:45-14:15 | Exercises  |
-| 13:30-14:15 | Applications portability (CA) |
+| 13:30-14:15 | Porting Applications to HIP (CA) |
 | 14:15-14:30 | Break |
 | 14:30-15:45 | Exercises |
 | 15:45-16:00 | Close-up | 
@@ -82,11 +82,11 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 - [Vector sum on two GPUs without MPI](multi-gpu/02-vector-sum)
 - [Ping-pong with multiple GPUs and MPI](multi-gpu/03-mpi)
 
-### Code design, conditional compilation, lambdas, hipify
+### Applications Portability
 
-- [Host-device lambda functions and general kernels](lambdas/01-lambda)
-- [Reductions with host-device lambdas and hipCUB](lambdas/02-reduction)
-- [Monte Carlo simulation with hipRAND library](lambdas/03-hipify)
+- [HIPIFY Tools](porting)
+- 
+- 
 
 ### Bonus
 - [Heat equation with HIP](bonus/heat-equation)
