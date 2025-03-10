@@ -160,9 +160,8 @@ Hipify tools are not running your application, or checking correctness. Code rel
 
 - only works when there is no difference between API calls
 
-# HOP
+# HOP: [https://github.com/cschpc/hop](https://github.com/cschpc/hop)
 
-- [https://github.com/cschpc/hop](https://github.com/cschpc/hop)
 - light-weight header-only library for GPU porting between CUDA and HIP
   	* no code modifications needed
   	* only some extra flags at compile time to hop from CUDA to HIP or back
