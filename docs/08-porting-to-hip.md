@@ -85,17 +85,18 @@ hipLaunchKernelGGL(kernel_name,
 </small>
 
 
-# Porting a CUDA Project
+# Porting a CUDA Project: Migrating Workflow
 
-- **Migrating Workflow**:
-    * start on a CUDA platform
-    * get a fully working HIP version
-    * compile the HIP code on an AMD machine
-    * handle platform-specific features through conditional compilation (or by adding them to the open-source HIP infrastructure)
-- **Conversion Methods**:
-    * **Manual Code Conversion** (search/replace)
-    * **HIPIFY Tools** (automated translation tools)
-    * **Header Porting** (on the fly translation)
+- start on a CUDA platform
+- get a fully working HIP version
+- compile the HIP code on an AMD machine
+- handle platform-specific features through conditional compilation (or by adding them to the open-source HIP infrastructure)
+
+# Porting a CUDA Project: Conversion Methods
+
+- **Manual Code Conversion** (search/replace)
+- **HIPIFY Tools** (automated translation tools)
+- **Header Porting** (on the fly translation)
 
 # Automated Translation Tools
 - collection of tools that automatically translate CUDA to HIP code
@@ -114,6 +115,8 @@ hipLaunchKernelGGL(kernel_name,
 hipify-perl is the simplest tool for converting CUDA code to HIP. It works by scanning a directory and performing basic string replacements, such as converting cudaMemcpy to hipMemcpy. However, since it relies on straightforward text substitution (sed -e 's/cuda/hip/g'), some manual post-processing may be required. It is best suited for quick scans of projects, but it does not handle unrecognized CUDA calls and will report them instead of translating them.
 
 hipify-clang, on the other hand, provides a more robust and accurate translation. It processes the code at a deeper level, generating warnings and offering assistance for further analysis. This tool is particularly useful for high-quality translations, especially when working with projects that involve complex build systems like Make.
+
+Hipify tools are not running your application, or checking correctness. Code relying on specific Nvidia hardware aspects (e.g., warp size == 32) may need attention after conversion. Certain functions may not have a correspondent hip version (e.g., __shfl_down_sync –-> _shfl_down instead). Hipifying can’t handle inline PTX assembly. Can either use inline GCN ISA, or convert it to HIP. Hipify-perl and hipify-clang can both convert library calls. None of the tools convert your build system script such as CMAKE or whatever else you use. The user is responsible to find the appropriate flags and paths to build the new converted HIP code.
 ::: 
 
 # HIPIFY Tools
