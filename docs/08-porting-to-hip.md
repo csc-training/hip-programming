@@ -198,4 +198,7 @@ implementations
 - HIPIFY tools can automatically convert code to HIP
 - header porting enables both ways conversion, **CUDA** &hArr; **HIP**
   	* HOP is good start
+  
+
+
 **Note!** Not all features have one-to-one equivalent!
