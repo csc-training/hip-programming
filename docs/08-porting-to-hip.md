@@ -121,12 +121,12 @@ Hipify tools are not running your application, or checking correctness. Code rel
 
 # HIPIFY Tools Usage
 
-- `hipify-perl/clang –examin <file>.cu` or `hipexamine/-perl.sh <file>.cu`
+- `hipify-perl/clang --examine <file>.cu` or `hipexamine/-perl.sh <file>.cu`
      * basic statistics and number of replacements
      * no replacements
 - `hipify-perl/clang <file>.cu`
      * translation a file to standard output
-- `hipify-perl/clang -inplace <file>.cu` or `hipconvertinplace/-perl.sh <file>.cu`
+- `hipify-perl/clang --inplace <file>.cu` or `hipconvertinplace/-perl.sh <file>.cu`
      * modifies the input file inplace, saves the input file in .prehip file 
      * works with folders:recursively do folders
 - `--print-stats` return a report for each file
@@ -194,3 +194,11 @@ implementations
 
 # Summary
 
+- various ways to port code from CUDA to HIP
+- HIPIFY tools can automatically convert code to HIP
+- header porting enables both ways conversion, **CUDA** &hArr; **HIP**
+  	* HOP is good start
+  
+
+
+**Note!** Not all features have one-to-one equivalent!

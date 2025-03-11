@@ -28,7 +28,7 @@ int main(){
         float maxError = 0.0f;
 
 	for(int i = 0; i < N; i++)
-		maxError = max(maxError, abs(b_h[i]-4.0f));
+		maxError = fmax(maxError, abs(b_h[i]-4.0f));
 
         cout << "Max error: " << maxError << endl;
 

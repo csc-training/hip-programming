@@ -32,7 +32,7 @@ saxpy<<<(N+255)/256, 256>>>(N, 2.0f, d_x, d_y);
 
   float maxError = 0.0f;
   for (int i = 0; i < N; i++)
-    maxError = max(maxError, abs(y[i]-4.0f));
+    maxError = fmax(maxError, abs(y[i]-4.0f));
   printf("Max error: %f\n", maxError);
 
   cudaFree(d_x);
