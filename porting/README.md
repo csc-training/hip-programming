@@ -6,7 +6,7 @@ The tasks are to convert these codes to HIP using HIPIFY tools or compiled with 
 
 ## HIPIFY Tools
 
-1. First task is to examine the code. Both `hipify-perl` and `hipify-clang` support the option `--examine` option. Alternatively one can use the `hipexamine.sh`  or `hipexamine-perl.sh` scripts.
+1. First task is to examine the code. Both `hipify-perl` and `hipify-clang` support the option `--examine` option. Alternatively one can use the `hipexamine.sh`  or `hipexamine-perl.sh` scripts which will scan whole directories. This procedure will not change the source it will just determine which files contain CUDA code and how much of the code can be converted autoamtically.
 2. 
 
 ## HOP
