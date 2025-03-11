@@ -5,6 +5,7 @@ nvcc vecadd.cu
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <ctime>
 
 __global__ void vecAdd(int *A,int *B,int *C,int N)
 {
