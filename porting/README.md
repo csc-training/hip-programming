@@ -1,5 +1,15 @@
-# In this repository we include the files for the course of porting CUDA codes to HIP
+# Converting CUDA code to HIP with hipify-perl
 
+The folder [codes](codes) contains a few examples (vector addition, `saxpy` using HIP  kernel, and `saxpy`using `cublas` of CUDA codes. On Mahti or Puhti these codes will compile with the CUDA `nvcc` compiler and should run without issues. 
+
+The tasks are to convert these codes to HIP using HIPIFY tools or compiled with [HOP](https://github.com/cschpc/hop) library. 
+
+## HIPIFY Tools
+
+1. First task is to examine the code. Both `hipify-perl` and `hipify-clang` support the option `--examine` option. Alternatevely one can use the `hipexamine.sh`  or `hipexamine-perl.sh` scripts.
+2. 
+
+## HOP
 
 
 # Instructions about porting the CUDA codes to HIP on Puhti
