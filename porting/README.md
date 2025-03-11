@@ -6,7 +6,7 @@ The tasks are to convert these codes to HIP using HIPIFY tools or compiled with 
 
 ## HIPIFY Tools
 
-1. First task is to examine the code. Both `hipify-perl` and `hipify-clang` support the option `--examine` option. Alternatevely one can use the `hipexamine.sh`  or `hipexamine-perl.sh` scripts.
+1. First task is to examine the code. Both `hipify-perl` and `hipify-clang` support the option `--examine` option. Alternatively one can use the `hipexamine.sh`  or `hipexamine-perl.sh` scripts.
 2. 
 
 ## HOP
