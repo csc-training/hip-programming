@@ -18,10 +18,11 @@ lang:     en
 - Streams
   - Kernels in different streams are asynchronous
   - Kernels in same stream are executed in first-in-first-out order
+  - Execute Host-to-Device and Device-to-Host transfers concurrently with kernels
 :::
 :::{.fragment}
 - Events 
-  - Synchronize between streams and host
+  - Synchronize across streams and host
   - Measure time
 :::
 :::{.fragment}
@@ -34,7 +35,7 @@ lang:     en
 # What is a stream?
 
 * A sequence of operations that execute in order on the GPU
-* Operations in different streams may run concurrently if sufficient resources are available
+* Operations in different streams may run concurrently
 
 <small>
 <div class="column">
@@ -59,48 +60,31 @@ lang:     en
 
 # Asynchronous funtions and the default stream
 
-<small>
-
-* The functions without `Async`-postfix run on the default stream, and are synchronizing with host
-  ```cpp
-  ​hipError_t hipMalloc ( void** devPtr, size_t size )
-  ​hipError_t hipMemcpy ( void* dst, const void* src, size_t count, hipMemcpyKind kind )
-  ​hipError_t hipFree ( void* devPtr ) 
-  ```
-
-* When using non-default streams, functions with `Async`-postfix are needed
-  * These functions take the stream as an additional argument (`0` denotes the default stream)
-  ```cpp
-  hipError_t hipMallocAsync ( void** devPtr, size_t size, hipStream_t stream ) 
-  hipError_t hipMemcpyAsync ( void* dst, const void* src, size_t count, hipMemcpyKind kind, hipStream_t stream) 
-  hipError_t hipFreeAsync ( void* devPtr, hipStream_t stream ) 
-  ```
-
- * Asynchronous memory copies require page-locked host memory (more in Memory lectures)
-   * Allocate with `hipMallocHost()` or `hipHostAlloc()` instead of `malloc()`:
-  ```cpp
-  hipError_t hipMallocHost ( void** ptr, size_t size ) 
-  ```
-  ```cpp
-  ​hipError_t hipHostAlloc ( void** pHost, size_t size, unsigned int  flags ) 
-  ```
-  
-   * Deallocate with `hipFreeHost()`:
-  ```cpp
-  ​hipError_t hipFreeHost ( void* ptr ) 
-  ```
-
-  </small>
+- API functions operate on default stream: `hipMalloc, hipMemcpy, hipFree, ...`
+- Append `Async` to name and add `hipStream_t` as last argument for asynchronous version: 
+  - `hipMalloc(...)` ⟶ `hipMallocAsync(..., hipStream_t stream)`
+- The stream is supplied to the kernel invocation:
+  - `my_kernel<<<grid, block, 0, stream>>>(...)`
+  - `hipLaunchKernelGGL(my_kernel, grid, block, 0, stream, ...)`
+  - Default stream: `my_kernel<<<grid, block, 0, 0>>>(...)`
 
 ::: {.notes}
-- add `Async` prefix call name and
-- add `hipStream_t` argument list
-- Otherwise: default stream is assumed
+- `hipStream_t stream` must be created as well (later)
 :::
 
+# Memory caveat: 
+
+- Host memory needs to be page-locked, otherwise memory copies are synchronous
+```cpp
+hipError_t hipHostMalloc(void **ptr, size_t size);
+hipError_t hipHostFree(void *ptr);
+```
+::: {.notes}
+More on this in Memory lecture
+:::
+
+
 # Asynchronisity and kernels
-
-
 
 * Kernels are always asynchronous with host, and require explicit synchronization
   * If no stream is specified in the kernel launch, the default stream is used
@@ -134,12 +118,12 @@ hipError_t hipStreamCreate ( hipStream_t* stream )
 
 * Synchronize `stream`
 ```cpp
-​hipError_t hipStreamSynchronize ( hipStream_t stream ) 
+hipError_t hipStreamSynchronize ( hipStream_t stream ) 
 ``` 
 
 * Destroy `stream`
 ```cpp
-​hipError_t hipStreamDestroy ( hipStream_t stream ) 
+hipError_t hipStreamDestroy ( hipStream_t stream ) 
 ```
 
 # Stream example
@@ -150,22 +134,23 @@ hipError_t hipStreamCreate ( hipStream_t* stream )
 
 ```cpp
 hipStream_t stream[3];
-
-for (int i = 0; i < 3; ++i) {
+for (int i = 0; i<3; ++i) {
   hipStreamCreate(&stream[i]);
 
+for (int i = 0; i < 3; ++i) {
   hipMemcpyAsync(d_data[i], h_data[i], bytes, 
     hipMemcpyHostToDevice, stream[i]);
 
   hipkernel<<<grid, block, 0, stream[i]>>>
-      (d_data[i]);
+    (d_data[i], i);
 
   hipMemcpyAsync(h_data[i], d_data[i],  bytes, 
     hipMemcpyDeviceToHost, stream[i]);
 }
 
-// Synchronize and destroy streams
-
+for(int i = 0; i<3; ++i) {
+  hipStreamSynchronize(stream[i]);
+  hipStreamDestroy(stream[i]); }
 ```
 
 :::
@@ -184,7 +169,7 @@ for (int i = 0; i < 3; ++i) {
 
 - Synchronize other streams/host with events
 - Measure time between events
-
+- [HIP API Documentation](https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.0/doxygen/html/group___event.html)
 
 
 # Why events?
@@ -192,7 +177,7 @@ for (int i = 0; i < 3; ++i) {
 * Cut stream to fragments
   * Useful for inter-stream synchronization and timing asynchronous events
 * Events have a boolean state: occurred / not occurred
-  * Important: the default state = occurred
+  * Query with `hipError_t hipEventQuery(hipEvent_t event)`: `hipSuccess`/`hipErrorNotReady`
 
 ::::::{.columns}
 :::{.column}
