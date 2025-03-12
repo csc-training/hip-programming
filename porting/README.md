@@ -13,7 +13,7 @@ The tasks are to convert these codes to HIP. For shorter code one can do a manua
     B. Convert individual files `hipify-[perl|clang] --inplace --print-stats` or folders using the scripts `hipconvertinplace[.|-perl.]sh <folder>`.
 
 
-Note that on `hipify-clang` requires CUDA toolkit. On LUMI this is available via a container. 
+**Note** that `hipify-clang` requires the  CUDA toolkit. On LUMI this is available via a container. 
 The image can be created using:
 
 ```
