@@ -1,4 +1,4 @@
-# Converting CUDA code to HIP with hipify-perl
+# Converting CUDA code to HIP
 
 The folder [codes](codes) contains a few examples (vector addition, `saxpy` using HIP  kernel, and `saxpy`using `cublas` of CUDA codes. On Mahti or Puhti these codes will compile with the CUDA `nvcc` compiler and should run without issues. 
 
