@@ -7,8 +7,10 @@ The tasks are to convert these codes to HIP. For shorter code one can do a manua
 ## HIPIFY Tools
 0. **Optional** Convert the codes to HIP manually. On Nvidia platforms the conversion can be done in an incremental way becuase `hipcc` can compile mixed CUDA and HIP code. On AMD plaftormd the CUDA code can not be compiled. The whole code needs to be converted in order to be able to compile it. 
 1. Convert the codes using HIPIFY tools.
-    a) Examine the code. Both `hipify-perl` and `hipify-clang` support the option `--examine` option. Alternatively one can use the `hipexamine.sh`  or `hipexamine-perl.sh` scripts which will scan whole directories. This procedure will not change the source it will just determine which files contain CUDA code and how much of the code can be converted automatically.
-    b) Convert individual files `hipify-[perl|clang] -inplace -print-stats` or folders using the scripts ``hipconvertinplace[.|-perl.]sh <folder>`.
+   
+    A. Examine the code. Both `hipify-perl` and `hipify-clang` support the option `--examine` option. Alternatively one can use the `hipexamine.sh`  or `hipexamine-perl.sh` scripts which will scan whole directories. This procedure will not change the source it will just determine which files contain CUDA code and how much of the code can be converted automatically.
+   
+    B. Convert individual files `hipify-[perl|clang] --inplace --print-stats` or folders using the scripts ``hipconvertinplace[.|-perl.]sh <folder>`.
 
 
 Note that on `hipify-clang` requires CUDA toolkit. On LUMI this is available via a container. 
@@ -24,13 +26,14 @@ module load partition/G
 module load rocm
 ```
 Finally open a shell in the container which has access to the working directory and the `rocm` 
+```
 singularity shell -B $PWD,/opt:/opt cuda_11.4.0-devel-ubuntu20.04.sif 
 export PATH=$ROCM_PATH/bin:$PATH
 ```
 
 The CUDA code can be converted now  using:
 ```
-hipify-clang <file>.cu -inplace -print stats  --cuda-path=/usr/local/cuda-11.4 -I /usr/local/cuda-11.4/include
+hipify-clang <file>.cu --inplace --print stats  --cuda-path=/usr/local/cuda-11.4 -I /usr/local/cuda-11.4/include
 ```
 This command works as well on Nvidia platforms with HIP installed. 
 
