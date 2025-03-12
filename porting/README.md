@@ -37,6 +37,7 @@ hipify-clang <file>.cu --inplace --print stats  --cuda-path=/usr/local/cuda-11.4
 ```
 This command works as well on Nvidia platforms with HIP installed. 
 
+
 2. Compile CUDA codes on AMD platorms using `hipcc` + HOP and compile HIP codes on Nvidia platforms using `nvcc` + HOP.
 
 **CUDA** &rArr; **HIP**
