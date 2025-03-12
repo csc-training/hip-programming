@@ -175,6 +175,7 @@ lang:     en
   - CPU: 32 kiB L1 cache per core
 - Lot of register storage
 - MI250x has also matrix units but they are tricker. Need intrinsics.
+- `hipcc -Rpass-analysis=kernel-resource-usage`!
 :::
 
 
@@ -462,6 +463,10 @@ __global__ void transpose_lds_kernel(float *in, float *out, int width,
 </small>
 
 The duration is `0.179 ms`  and the effective bandwidth `697 GB/s`
+
+:::{.notes}
+- Timings on puhti NVidia V100
+:::
 
 # Other examples where shared memory is critical 
 

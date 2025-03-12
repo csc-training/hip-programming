@@ -57,8 +57,8 @@ Extra:
 Memory management can be *Explicit* or *Implicit*.
 
 :::{.incremental}
-- *Explicit*: User manually manages data movement between host and device. Memory can be allocated with GPU-unaware allocators (`malloc`/`free` etc).
-- *Implicit*: The runtime manages data movement between host and device. Memory needs to be allocated with special allocated offered by HIP api.
+- *Explicit*: User manually manages data movement between host and device. Host memory can be allocated with GPU-unaware allocators (`malloc`/`free` etc).
+- *Implicit*: The runtime manages data movement between host and device. Host memory needs to be allocated with special allocators.
   - **Page-locked** (pinned) host allocations: Data moves to device with kernel invocations and is not stored there.
   - **Unified memory** (managed memory): Page faults will initiate data movement.
 :::
@@ -181,9 +181,14 @@ int main() {
 - **(B)** Access host memory from GPU without explicit `hipMemCpy`
   - Useful in sporadic access pattern
   - Implicit host-device access
+  - *Very* slow
 :::
 :::{.fragment}
 - Excessive page-locking can degrade system performance
+:::
+
+:::{.notes}
+- having too much page-locked allocs is almost never a problem
 :::
 
 
@@ -194,11 +199,11 @@ int main() {
 - To overlap copying and program execution, asynchronous functions are required
     - Such functions have Async suffix, eg, `hipMemcpyAsync()`
 - User has to synchronize the program execution
-- Asynchronous memory copies require page-locked memory
+- Concurrency with memory copy and computation requires page-locked host allocations
 
 # Explicit memory API calls
 
-- Allocate (page-locked) device memory
+- Allocate device memory
   ```cpp
   hipError_t hipMalloc(void **devPtr, size_t size)
   ```
@@ -217,7 +222,7 @@ int main() {
 
 # Explicit memory API calls
 
-Page-locked *host* memory
+Page-locked host memory
 
 - Allocate/free page-locked host memory
   ```cpp 
@@ -225,8 +230,12 @@ Page-locked *host* memory
     hipHostFree(void *ptr);
   ```
 - Lower operating system overhead: faster device-host copies
-- Call kernels with host pointers: automatic copy to device and back
+- ***SLOW***: Call kernels with host pointers: automatic copy to device and back
 - Memory paging is disabled: no swapping, must be contiguous
+
+:::{.notes}
+- the speedup is not very big usually
+:::
 
 # Unified memory API calls
 
@@ -301,6 +310,10 @@ hipStreamSynchronize(stream);
 
 </div>
 </small>
+
+:::{.notes}
+- ROCm has memory leak bug related to mallocasync and freeasync
+:::
 
 # Summary
 
