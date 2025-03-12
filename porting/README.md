@@ -2,7 +2,7 @@
 
 The folder [codes](codes) contains a few examples (vector addition, `saxpy` using HIP  kernel, and `saxpy`using `cublas` of CUDA codes. On Mahti or Puhti these codes will compile with the CUDA `nvcc` compiler and should run without issues. 
 
-The tasks are to convert these codes to HIP using HIPIFY tools or compiled with [HOP](https://github.com/cschpc/hop) library. 
+The tasks are to convert these codes to HIP using HIPIFY tools or compile them with [HOP](https://github.com/cschpc/hop) library. 
 
 ## HIPIFY Tools
 
