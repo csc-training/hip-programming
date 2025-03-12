@@ -149,7 +149,7 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
   easier and less invasive (if MPI is used anyway)
     * apart from each process selecting a different device, the implementation
       looks much like a single-GPU program
-    * easy manage device selection using  `ROC_VISIBLE_DEVICES` or `CUDA_VISIBLE_DEVICES`
+    * easy manage device selection using environment variables `ROC_VISIBLE_DEVICES` or `CUDA_VISIBLE_DEVICES`
 
 
 # Many GPUs per Process
@@ -157,9 +157,9 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 * process switches the active GPU using `hipSetDevice()` function 
 * after selecting the default device, operations such as the following are effective only
   on the selected GPU:
-    * Memory operations
-    * Kernel execution
-    * Streams and events
+    * memory operations
+    * kernel execution
+    * streams and events
 * asynchronous function calls are required to overlap work
 
 # Many GPUs per Process. Code Example
