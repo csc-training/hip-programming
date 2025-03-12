@@ -10,7 +10,7 @@ The tasks are to convert these codes to HIP. For shorter code one can do a manua
    
     A. Examine the code. Both `hipify-perl` and `hipify-clang` support the option `--examine` option. Alternatively one can use the `hipexamine.sh`  or `hipexamine-perl.sh` scripts which will scan whole directories. This procedure will not change the source it will just determine which files contain CUDA code and how much of the code can be converted automatically.
    
-    B. Convert individual files `hipify-[perl|clang] --inplace --print-stats` or folders using the scripts ``hipconvertinplace[.|-perl.]sh <folder>`.
+    B. Convert individual files `hipify-[perl|clang] --inplace --print-stats` or folders using the scripts `hipconvertinplace[.|-perl.]sh <folder>`.
 
 
 Note that on `hipify-clang` requires CUDA toolkit. On LUMI this is available via a container. 
