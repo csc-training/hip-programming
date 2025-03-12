@@ -143,23 +143,24 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 
 # One GPU per process
 
-* Recommended for multi-process applications using MPI
-* Message passing library takes care of all GPU-GPU communication
-* Each process interacts with only one GPU which makes the implementation
+* recommended for multi-process applications using MPI
+* message passing library takes care of all GPU-GPU communication
+* mach process interacts with only one GPU which makes the implementation
   easier and less invasive (if MPI is used anyway)
-    * Apart from each process selecting a different device, the implementation
+    * apart from each process selecting a different device, the implementation
       looks much like a single-GPU program
+    * device selection can be simplified using `ROC_VISIBLE_DEVICES`/`CUDA_VISIBLE_DEVICES`
 
 
 # Many GPUs per Process
 
-* Process switches the active GPU using `hipSetDevice()` function 
-* After selecting the default device, operations such as the following are effective only
+* process switches the active GPU using `hipSetDevice()` function 
+* after selecting the default device, operations such as the following are effective only
   on the selected GPU:
     * Memory operations
     * Kernel execution
     * Streams and events
-* Asynchronous function calls are required to overlap work
+* asynchronous function calls are required to overlap work
 
 # Many GPUs per Process. Code Example
 
