@@ -5,7 +5,7 @@ The folder [codes](codes) contains a few examples (vector addition, `saxpy` usin
 The tasks are to convert these codes to HIP. For shorter code one can do a manual conversion, but for larger codes it is recomended to use HIPIFY tools or compile them with [HOP](https://github.com/cschpc/hop) library. 
 
 ## HIPIFY Tools
-0. **Optional** Convert the codes to HIP manually. On Nvidia platforms the conversion can be done in an incremental way becuase `hipcc` can compile mixed CUDA and HIP code. On AMD plaftormd the CUDA code can not be compiled. The whole code needs to be converted in order to be able to compile it. 
+0. **Optional** Convert the codes to HIP manually. On Nvidia platforms the conversion can be done in an incremental way because `hipcc` can compile mixed CUDA and HIP code. On AMD plaftorms `hipcc` can not compile CUDA code. The whole code needs to be converted in order to be able to compile it. 
 1. Convert the codes using HIPIFY tools.
    
     A. Examine the code. Both `hipify-perl` and `hipify-clang` support the option `--examine` option. Alternatively one can use the `hipexamine.sh`  or `hipexamine-perl.sh` scripts which will scan whole directories. This procedure will not change the source it will just determine which files contain CUDA code and how much of the code can be converted automatically.
