@@ -162,7 +162,7 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
     * streams and events
 * asynchronous function calls are required to overlap work
 
-# Many GPUs per Process. Code Example
+# Many GPUs per Process: Code Example
 
 ```cpp
 // Launch kernels
@@ -190,7 +190,7 @@ for(unsigned n = 0; n < num_devices; n++) {
 * Communication between threads still not trivial
 
 
-# Multi-GPU, One GPU per Thread. Code Example
+# Multi-GPU, One GPU per Thread: Code Example
 
 ```cpp
 // Launch and synchronize kernels from parallel CPU threads using HIP
