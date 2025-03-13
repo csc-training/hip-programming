@@ -74,14 +74,6 @@ lang:     en
 A GPU context is an execution environment that manages resources such as memory allocations, streams, and kernel execution for a specific GPU. It acts as an interface between the application and the GPU, ensuring that operations like memory management and kernel launches are handled correctly.
 :::
 
-# Device Selection and Management 
-
-* Driver associates a number for each available GPU device starting from 0
-
-
-* The functions `hipSetDevice()` is used for selecting the desired device 
-
-
 # Device Selection and Management
 
 - Return the number of hip capable devices by `count`
