@@ -279,5 +279,6 @@ hipSetDevice(nodeRank % deviceCount);
 - If you have an MPI program, it is often best to use one GPU per process, and
   let MPI handle data transfers between GPUs 
 - GPU-aware MPI is required when passing device pointers to MPI
-        * Using host pointers does not require any GPU awareness
+
+     * Using host pointers does not require any GPU awareness
 
