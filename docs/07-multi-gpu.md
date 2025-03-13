@@ -21,7 +21,7 @@ lang:     en
     <small>Lumi - Pre-exascale system in Finland</small>
  </div>
 
-# Three levels of parallelism
+# Three Levels of Parallelism
 
 1. GPU - GPU threads on the CUs: HIP
 2. Node - Multiple GPUs and CPUs: MPI, OpenMP
@@ -29,7 +29,7 @@ lang:     en
 
 ![](img/parallel_regions.png){.center width=60% }
 
-# Computing in parallel
+# Computing in Parallel
 
 - Parallel computing
     - A problem is split into smaller subtasks
@@ -38,7 +38,7 @@ lang:     en
 <!-- Copyright CSC -->
  ![](img/compp.svg){.center width=40%}
 
-# Parallel programming models
+# Parallel Programming Models
 
 <!-- Copyright CSC -->
  ![](img/processes-threads.svg){.center width=80%}
@@ -74,7 +74,7 @@ lang:     en
 A GPU context is an execution environment that manages resources such as memory allocations, streams, and kernel execution for a specific GPU. It acts as an interface between the application and the GPU, ensuring that operations like memory management and kernel launches are handled correctly.
 :::
 
-# Selecting device
+# Device Selection and Management 
 
 * Driver associates a number for each available GPU device starting from 0
 
@@ -82,12 +82,13 @@ A GPU context is an execution environment that manages resources such as memory 
 * The functions `hipSetDevice()` is used for selecting the desired device 
 
 
-# Device management
+# Device Selection and Management
 
 - Return the number of hip capable devices by `count`
 ```cpp
 hipError_t hipGetDeviceCount(int *count)
 ```
+- GPU device numbering starting from 0
 - Set device as the current device for the calling host thread
 ```cpp
 hipError_t hipSetDevice(int device)
@@ -101,7 +102,7 @@ hipError_t hipGetDevice(int *device)
 hipError_t hipDeviceReset(void)
 ```
 
-# Querying or verifying device properties
+# Querying Device Properties
 
 * One can query the properties of different devices in the system using
   `hipGetDeviceProperties()` function
@@ -115,7 +116,7 @@ Return the properties of a HIP capable device by `prop`
 hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 ```
 
-# Three levels of parallelism
+# Three Levels of Parallelism
 
 1. GPU - GPU threads on the CUs: HIP
 2. Node - Multiple GPUs and CPUs: MPI, OpenMP
@@ -141,7 +142,7 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 ![](img/single_proc_thread_gpu.png){width=50%}
 </div>
 
-# One GPU per process
+# One GPU per Process
 
 * recommended for multi-process applications using MPI
 * message passing library takes care of all GPU-GPU communication
@@ -177,7 +178,7 @@ for(unsigned n = 0; n < num_devices; n++) {
 }
 ```
 
-# Multi-GPU, One GPU per Thread
+# Many GPUs per Process, One GPU per Thread
 
 * One GPU per CPU thread
     * E.g. one OpenMP CPU thread per GPU being used
@@ -190,7 +191,7 @@ for(unsigned n = 0; n < num_devices; n++) {
 * Communication between threads still not trivial
 
 
-# Multi-GPU, One GPU per Thread: Code Example
+# Many GPUs per Process, One GPU per Thread: Code Example
 
 ```cpp
 // Launch and synchronize kernels from parallel CPU threads using HIP
@@ -203,7 +204,7 @@ for(unsigned n = 0; n < num_devices; n++) {
 }
 ```
 
-# Direct peer to peer access
+# Direct Peer to Peer Access
 
 * Access peer GPU memory directly from another GPU
     * Pass a pointer to data on GPU 1 to a kernel running on GPU 0
@@ -222,7 +223,7 @@ hipError_t hipDeviceDisablePeerAccess(int peerDevice)
 ```
 * Between AMD GPUs, the peer access is always enabled (if supported)
 
-# Peer to peer communication
+# Peer to Peer Communication
 
 * Devices have separate memories
 * With devices supporting unified virtual addressing, `hipMemCpy()` with
@@ -251,7 +252,7 @@ OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
     * Link object files in a separate step using `mpicxx` or `hipcc`
 * on LUMI, `cc` and `CC` wrappers know about both MPI and HIP
 
-# Selecting the correct GPU
+# Selecting the Correct GPU
 
 * Typically all processes on the node can access all GPUs of that node
 * The following implementation allows utilizing all GPUs using one process per GPU
@@ -268,7 +269,7 @@ hipSetDevice(nodeRank % deviceCount);
 * Can be done from slurm using `ROCR_VISIBLE_DEVICES` or `CUDA_VISIBLE_DEVICES`
 :::
 
-# GPU-GPU communication through MPI
+# GPU-GPU Communication through MPI
 
 * CUDA/ROCm aware MPI libraries support direct GPU-GPU transfers
     * Can take a pointer to device buffer (avoids host/device data copies)
@@ -280,11 +281,11 @@ hipSetDevice(nodeRank % deviceCount);
 
 # Summary
 
-- There are many options to write a multi-GPU program
+- There are various options to write a multi-GPU program
 - Use `hipSetDevice()` to select the device, and the subsequent HIP calls
   operate on that device
-* If you have an MPI program, it is often best to use one GPU per process, and
+- If you have an MPI program, it is often best to use one GPU per process, and
   let MPI handle data transfers between GPUs 
-* GPU-aware MPI is required when passing device pointers to MPI
-  * Using host pointers does not require any GPU awareness
+- GPU-aware MPI is required when passing device pointers to MPI
+        * Using host pointers does not require any GPU awareness
 
