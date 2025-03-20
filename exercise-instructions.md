@@ -97,7 +97,7 @@ tar -xvzf rocm-6.1.0.tar.gz;
 cd hipfort-rocm-6.1.0;
 mkdir build;
 cd build;
-cmake -DHIPFORT_INSTALL_DIR=<path-to>/HIPFORT -DHIPFORT_COMPILER_FLAGS="-ffree -eZ" -DHIPFORT_COMPILER=<path-to>/ftn -DHIPFORT_AR=${CRAY_BINUTILS_BIN_X86_64}/ar -DHIPFORT_RANLIB=${CRAY_BINUTILS_BIN_X86_64}/ranlib  ..
+cmake -DHIPFORT_INSTALL_DIR=/projappl/<project_number>/apps/HIPFORT -DHIPFORT_COMPILER_FLAGS="-ffree -eZ" -DHIPFORT_COMPILER=<path-to>/ftn -DHIPFORT_AR=${CRAY_BINUTILS_BIN_X86_64}/ar -DHIPFORT_RANLIB=${CRAY_BINUTILS_BIN_X86_64}/ranlib  ..
 make -j 64
 make install
 ```
@@ -177,20 +177,25 @@ module load gcc hip
 - make a directory in your working directory for installing it and get the absolute path, <hipfort_install_folder>.
 - clone & compile the package:
 ```
-git clone https://github.com/ROCmSoftwarePlatform/hipfort.git
-cd hipfort; mkdir build ; cd build
-cmake -DHIPFORT_INSTALL_DIR=<hipfort_install_folder> ..
+# In some temporary folder
+wget https://github.com/ROCm/hipfort/archive/refs/tags/rocm-6.1.0.tar.gz # one can try various realeases
+tar -xvzf rocm-6.1.0.tar.gz;
+cd hipfort-rocm-6.1.0;
+mkdir build;
+cd build;
+cmake -DHIPFORT_INSTALL_DIR=/projappl/<project_number>/apps/HIPFORT ..
+make -j 32
 make install
 ```
-For this training try  replacing `<hipfort_install_folder>` with  `/scratch/project_2000745/training160/hip-programming/hipfort/hipfort/build/hipfort_install` 
 
 #### Compilation
 The `rocm` repository folder `hipfort` contains a set of example (test) codes `.../hipfort/test/f2003`. One can start with the `vecadd` example:
 
 ```
+export HIPFORT_HOME=/projappl/<project_number>/apps/HIPFORT
 hipcc "--gpu-architecture=sm_80" --x cu -c hip_implementation.cpp -o hip_implementation.o
-gfortran -cpp -I<hipfort_install_folder>/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\""  -c main.f03 -o main.o 
-hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_80" -I<hipfort_install_folder>/include/hipfort/nvptx -L<hipfort_install_folder>/lib/ -lhipfort-nvptx
+gfortran -cpp -I$HIPFORT_HOME/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\""  -c main.f03 -o main.o 
+hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_80" -I$HIPFORT_HOME/include/hipfort/nvptx -L$HIPFORT_HOME/lib/ -lhipfort-nvptx
 ```
 Now the executable `a.out` can be executed as a normal gpu program. 
 **Note** HIPFORT provides as well the `hipfc` script which can be used to compilations, though by using this script the linking is always done using fortran and it is more difficult to instegrate with `make` when working with big projects.
