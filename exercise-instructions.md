@@ -1,3 +1,4 @@
+
 # Generic instructions for the exercises
 
 For most of the exercises, skeleton codes are provided to serve as a starting
@@ -16,46 +17,68 @@ git clone https://github.com/csc-training/hip-programming.git
 If you have a GitHub account you can also **Fork** this repository and clone
 then your fork.
 
-### Puhti
+### LUMI
 
-We provide you with access to CSC's Puhti system that has NVIDIA's V100 GPUs, but has a working HIP installation to support code porting activities.
+We provide you with access to LUMI system with AMD's MI250X GPUs.
 
-To get started with Puhti, you should log in to Puhti and load the appropriate modules to get working with HIP:
+#### Login to LUMI
+
+To get started, log in to LUMI:
 ```shell
-ssh -Y trainingXXX@puhti.csc.fi
-module load gcc cuda hip
+ssh -Y username@lumi.csc.fi
 ```
 
-For the November 2022 the `xxx` is `141-164`. Password will be provided on-site. 
-For more detailed instructions, please refer to the system documentation at
-[Docs CSC](https://docs.csc.fi/).
+The username and password will be provided on site.
+For more information, refer to the [LUMI documentation](https://docs.lumi-supercomputer.eu/firststeps/).
 
 #### Compiling
 
-In order to compile code with the `hipcc` on Puhti, one needs to add a the target architecture with `--gpu-architecture=sm_70`:
 ```shell
-hipcc hello.cpp -o hello --gpu-architecture=sm_70
+module load PrgEnv-cray
+module load craype-accel-amd-gfx90a
+module load rocm
+
+CC -xhip -o <yourapp> <hip_source.cpp>
 ```
+
+or with `hipcc`
+
+```shell
+module load PrgEnv-amd
+
+export HIPCC_COMPILE_FLAGS_APPEND="--offload-arch=gfx90a $(CC --cray-print-opts=cflags)"
+export HIPCC_LINK_FLAGS_APPEND=$(CC --cray-print-opts=libs)
+
+hipcc -o <yourapp> <hip_source.cpp>
+```
+
+More information on compiling can be found in the [LUMI documentation](https://docs.lumi-supercomputer.eu/firststeps/).
 
 #### Running
 
-Puhti uses SLURM for batch jobs. Please see [Docs CSC](https://docs.csc.fi/)
+LUMI uses SLURM for batch jobs. Please see [LUMI documentation](https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/slurm-quickstart/)
 for more details. If you are using CSC training accounts, you should use the
-following project as your account: `--account=project_2000745`.
+following project as your account: `--account=project_462000877`.
 
 We have also reserved some GPU nodes for the course. In order to use these
 dedicated nodes, you need to run your job with the option
-`--reservation=HIPtraining`, such as
+`--reservation=TODO_FIND_OUT_THE_NAME`, such as
 
 ```shell
-srun --reservation=HIPtraining -n1 -p gpu --gres=gpu:v100:1 --account=project_2000745 ./my_program
+srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_462000877 --partition=dev-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1 ./executable
 ```
-For a multi-gpu application more cards can be requested. For example if 3 cards are needed one would use `--gres=gpu:v100:3`.
-The number of mpi processes can be as well controled by changing by the `-n` parameter. In order to assign cores for OpenMP theading the parameter `--cpus-per-task`must be set as well.
 
-Please note that the normal GPU partition (`-p gpu`) needs to be used with
-the reservation. Otherwise you may use the `gputest` partition for rapid fire
-testing.
+For a multi-gpu application more cards can be requested.
+
+##### Examples
+
+The common part for all of these examples includes: `srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_462000877 --partition=dev-g --time=00:05:00`
+
+- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1`
+- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=3`
+- 3 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=3 --cpus-per-task=1 --gpus-per-task=1`
+- 3 MPI process(es), 1 GPU(s) per process, 7 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=3 --cpus-per-task=7 --gpus-per-task=1`
+- 2 MPI process(es), 3 GPU(s) per process, 7 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=2 --cpus-per-task=7 --gpus-per-task=3`
 
 ### HIPFORT on LUMI
 
