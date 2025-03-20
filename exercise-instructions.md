@@ -130,7 +130,9 @@ For more information, refer to the [CSC documentation](https://docs.csc.fi/compu
 ```shell
 module purge
 module use /appl/spack/v021/summerschool/modules/linux-rhel8-x86_64/Core
-module load gcc hip cuda
+module load gcc
+module load hip
+module load cuda
 hipcc "--gpu-architecture=sm_80" --x cu -o <yourapp> <hip_source.cpp>
 ```
 
