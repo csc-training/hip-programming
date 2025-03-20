@@ -52,17 +52,15 @@ export HIPCC_LINK_FLAGS_APPEND=$(CC --cray-print-opts=libs)
 hipcc -o <yourapp> <hip_source.cpp>
 ```
 
-More information on compiling can be found in the [LUMI documentation](https://docs.lumi-supercomputer.eu/firststeps/).
+More information on compiling can be found in the [LUMI documentation](https://docs.lumi-supercomputer.eu/development/compiling/prgenv/#compile-hip-code).
 
 ### Running
 
 LUMI uses SLURM for batch jobs. Please see [LUMI documentation](https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/slurm-quickstart/)
-for more details. If you are using CSC training accounts, you should use the
-following project as your account: `--account=project_462000877`.
+for more details. If you are using CSC training accounts, you should use the following project as your account: `--account=project_462000877`.
 
-We have also reserved some GPU nodes for the course. In order to use these
-dedicated nodes, you need to run your job with the option
-`--reservation=TODO_FIND_OUT_THE_NAME`, such as
+We have also reserved some GPU nodes for the course.
+In order to use these dedicated nodes, you need to run your job with the option `--reservation=TODO_FIND_OUT_THE_NAME`, such as
 
 ```shell
 srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_462000877 --partition=dev-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1 ./executable
@@ -88,7 +86,8 @@ module load LUMI/24.0.3
 module load partition/G
 module load rocm
 ```
-Because the default `HIPFORT` installation only supports gfortran,  we use a custom installation  prepared in the training project. This package provide Fortran modules compatible with the Cray Fortran compiler as well as direct use of HIPFFORT with the Fortran Cray Compiler wrapper (ftn).
+Because the default `HIPFORT` installation only supports gfortran,  we use a custom installation  prepared in the training project.
+This package provide Fortran modules compatible with the Cray Fortran compiler as well as direct use of HIPFFORT with the Fortran Cray Compiler wrapper (ftn).
 
 The package was installed via:
 ```bash
@@ -114,7 +113,51 @@ ftn  -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$HIPFORT_
 This option gives enough flexibility for calling HIP libraries from Fortran or for a mix of OpenMP/OpenACC offloading to GPUs and HIP kernels/libraries.
 
 ## Mahti
-TODO add information on Mahti
+In case LUMI is inaccessible during the training, we can use Mahti as a backup.
+
+### Login to Mahti
+
+To get started, log in to Mahti:
+```shell
+ssh -i identity_file username@mahti.csc.fi
+```
+
+The username is the CSC account you created before the training.
+For more information, refer to the [CSC documentation](https://docs.csc.fi/computing/#accessing-puhti-and-mahti).
+
+### Compiling
+
+```shell
+module load gcc hip
+hipcc "--gpu-architecture=sm_80" --x cu -o <yourapp> <hip_source.cpp>
+```
+
+More information on compiling can be found in the [CSC documentation](https://docs.csc.fi/computing/compiling-mahti/#general-instructions).
+
+### Running
+
+Mahti uses SLURM for batch jobs. Please see [CSC documentation](https://docs.csc.fi/computing/running/getting-started/)
+for more details. If you are using CSC training accounts, you should use the following project as your account: `--account=project_2013645`.
+
+We have also reserved some GPU nodes for the course.
+In order to use these dedicated nodes, you need to run your job with the option `--reservation=TODO_FIND_OUT_THE_NAME`, such as
+
+```shell
+srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_2013645 --partition=gpusmall --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100_1g.5gb:1 ./executable
+```
+
+For a multi-gpu application more cards can be requested.
+
+#### Examples
+
+The common part for all of these examples includes: `srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_2013645 --time=00:05:00`
+
+- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall  --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100_1g.5gb:1`
+- 3 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpumedium --nodes=1 --ntasks-per-node=3 --cpus-per-task=1 --gres=gpu:a100:3`
+- 3 MPI process(es), 1 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpumedium --nodes=1 --ntasks-per-node=3 --cpus-per-task=7 --gres=gpu:a100:3`
+- 2 MPI process(es), 4 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpumedium --nodes=2 --ntasks-per-node=1 --cpus-per-task=7 --gres=gpu:a100:8`
+
+More information about the number of GPUs and reserving them can be found in the [CSC documentation](https://docs.csc.fi/computing/running/creating-job-scripts-mahti/#gpu-batch-jobs).
 
 ### HIPFORT on Mahti
 CSC national systems, Puhti and Mahti, have Nvidia GPUs which use CUDA. However HIP supports also Nvidia architecture. HIPFORT can be installed as well on Nvidia architectures if HIP is setup. 
