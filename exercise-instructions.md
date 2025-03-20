@@ -130,7 +130,7 @@ For more information, refer to the [CSC documentation](https://docs.csc.fi/compu
 ```shell
 module purge
 module use /appl/spack/v021/summerschool/modules/linux-rhel8-x86_64/Core
-module load gcc hip
+module load gcc hip cuda
 hipcc "--gpu-architecture=sm_80" --x cu -o <yourapp> <hip_source.cpp>
 ```
 
@@ -145,7 +145,7 @@ We have also reserved some GPU nodes for the course.
 In order to use these dedicated nodes, you need to run your job with the option `--reservation=HIPcourse`, such as
 
 ```shell
-srun --reservation=HIPcourse --account=project_2013645 --partition=gpumedium --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1 ./executable
+srun --reservation=HIPcourse --account=project_2013645 --partition=gpusmall --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1 ./executable
 ```
 
 For a multi-gpu application more cards can be requested.
@@ -154,10 +154,10 @@ For a multi-gpu application more cards can be requested.
 
 The common part for all of these examples includes: `srun --reservation=HIPcourse --account=project_2013645 --time=00:05:00`
 
-- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpumedium --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1`
-- 1 MPI process(es), 3 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpumedium --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:3`
-- 3 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpumedium --nodes=1 --ntasks-per-node=3 --cpus-per-task=1 --gres=gpu:a100:3`
-- 3 MPI process(es), 1 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpumedium --nodes=1 --ntasks-per-node=3 --cpus-per-task=7 --gres=gpu:a100:3`
+- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1`
+- 1 MPI process(es), 3 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:3`
+- 3 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=3 --cpus-per-task=1 --gres=gpu:a100:3`
+- 3 MPI process(es), 1 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=3 --cpus-per-task=7 --gres=gpu:a100:3`
 - 2 MPI process(es), 4 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpumedium --nodes=2 --ntasks-per-node=1 --cpus-per-task=7 --gres=gpu:a100:8`
 
 More information about the number of GPUs and reserving them can be found in the [CSC documentation](https://docs.csc.fi/computing/running/creating-job-scripts-mahti/#gpu-batch-jobs).
