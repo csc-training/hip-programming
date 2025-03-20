@@ -143,7 +143,7 @@ We have also reserved some GPU nodes for the course.
 In order to use these dedicated nodes, you need to run your job with the option `--reservation=HIPcourse`, such as
 
 ```shell
-srun --reservation=HIPcourse --account=project_2013645 --partition=gpusmall --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100_1g.5gb:1 ./executable
+srun --reservation=HIPcourse --account=project_2013645 --partition=gpumedium --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1 ./executable
 ```
 
 For a multi-gpu application more cards can be requested.
