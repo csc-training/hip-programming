@@ -17,21 +17,21 @@ git clone https://github.com/csc-training/hip-programming.git
 If you have a GitHub account you can also **Fork** this repository and clone
 then your fork.
 
-### LUMI
+## LUMI
 
 We provide you with access to LUMI system with AMD's MI250X GPUs.
 
-#### Login to LUMI
+### Login to LUMI
 
 To get started, log in to LUMI:
 ```shell
-ssh -Y username@lumi.csc.fi
+ssh -i identity_file username@lumi.csc.fi
 ```
 
-The username and password will be provided on site.
+The username is the CSC account you created before the training.
 For more information, refer to the [LUMI documentation](https://docs.lumi-supercomputer.eu/firststeps/).
 
-#### Compiling
+### Compiling
 
 ```shell
 module load PrgEnv-cray
@@ -54,7 +54,7 @@ hipcc -o <yourapp> <hip_source.cpp>
 
 More information on compiling can be found in the [LUMI documentation](https://docs.lumi-supercomputer.eu/firststeps/).
 
-#### Running
+### Running
 
 LUMI uses SLURM for batch jobs. Please see [LUMI documentation](https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/slurm-quickstart/)
 for more details. If you are using CSC training accounts, you should use the
@@ -70,7 +70,7 @@ srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_462000877 --partitio
 
 For a multi-gpu application more cards can be requested.
 
-##### Examples
+#### Examples
 
 The common part for all of these examples includes: `srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_462000877 --partition=dev-g --time=00:05:00`
 
@@ -113,11 +113,14 @@ ftn  -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$HIPFORT_
 ```
 This option gives enough flexibility for calling HIP libraries from Fortran or for a mix of OpenMP/OpenACC offloading to GPUs and HIP kernels/libraries.
 
-### HIPFORT on Puhti and Mahti
-CSC national systems, Puhti and Mahti, have Nvidia GPUs which use CUDA. However HIP supports also Nvidia architecture. HIPFORT can be installed as well on Nvidia architectures is HIP is setup. 
+## Mahti
+TODO add information on Mahti
+
+### HIPFORT on Mahti
+CSC national systems, Puhti and Mahti, have Nvidia GPUs which use CUDA. However HIP supports also Nvidia architecture. HIPFORT can be installed as well on Nvidia architectures if HIP is setup. 
 
 #### HIPFORT installation
-HIPFORT package at the moment is not installed on Puhti. It is straightforward to compile and use it:
+HIPFORT package at the moment is not installed on Mahti. It is straightforward to compile and use it:
 - load `hip` module:
 ```
 module load gcc hip
