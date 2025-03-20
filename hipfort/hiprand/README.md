@@ -53,7 +53,7 @@ __global__ void countInsideCircle(float* x_d, float* y_d, int* inside_d,  int64_
     }
 }
 ```
-The kernel checks each point in parallel and increments `inside_d` if the point lies within the circle. An `atomicAdd` is used to avoid race conditions when updating the counter. In this code `atomicAdd` is called for each point inside circle, but an optimized version would much less calls. 
+The kernel checks each point in parallel and increments `inside_d` if the point lies within the circle. The `atomicAdd` function is used to avoid race conditions when updating the counter. In this code `atomicAdd` is called for each point inside circle, but an optimized version would much less calls. 
 In this case there is no need for transfering the arrays with the random numbers to the CPU. Only the result of the counting needs to be transferd to CPU. 
 Note that an additional variable is needed to store the GPU result (could be `inside_d`). The actual kernel and its wrapper are found in the [hip_kernels.cpp](hip_kernels.cpp), but an interface is needed in the main fortran code to be able to call it. 
 
