@@ -60,20 +60,20 @@ LUMI uses SLURM for batch jobs. Please see [LUMI documentation](https://docs.lum
 for more details. If you are using CSC training accounts, you should use the following project as your account: `--account=project_462000877`.
 
 We have also reserved some GPU nodes for the course.
-In order to use these dedicated nodes, you need to run your job with the option `--reservation=TODO_FIND_OUT_THE_NAME`, such as
+In order to use these dedicated nodes, you need to run your job with the option `--reservation=HIPcourse`, such as
 
 ```shell
-srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_462000877 --partition=dev-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1 ./executable
+srun --reservation=HIPcourse --account=project_462000877 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1 ./executable
 ```
 
 For a multi-gpu application more cards can be requested.
 
 #### Examples
 
-The common part for all of these examples includes: `srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_462000877 --partition=dev-g --time=00:05:00`
+The common part for all of these examples includes: `srun --reservation=HIPcourse --account=project_462000877 --partition=small-g --time=00:05:00`
 
 - 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1`
-- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=3`
+- 1 MPI process(es), 3 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=3`
 - 3 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=3 --cpus-per-task=1 --gpus-per-task=1`
 - 3 MPI process(es), 1 GPU(s) per process, 7 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=3 --cpus-per-task=7 --gpus-per-task=1`
 - 2 MPI process(es), 3 GPU(s) per process, 7 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=2 --cpus-per-task=7 --gpus-per-task=3`
@@ -140,19 +140,20 @@ Mahti uses SLURM for batch jobs. Please see [CSC documentation](https://docs.csc
 for more details. If you are using CSC training accounts, you should use the following project as your account: `--account=project_2013645`.
 
 We have also reserved some GPU nodes for the course.
-In order to use these dedicated nodes, you need to run your job with the option `--reservation=TODO_FIND_OUT_THE_NAME`, such as
+In order to use these dedicated nodes, you need to run your job with the option `--reservation=HIPcourse`, such as
 
 ```shell
-srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_2013645 --partition=gpusmall --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100_1g.5gb:1 ./executable
+srun --reservation=HIPcourse --account=project_2013645 --partition=gpusmall --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100_1g.5gb:1 ./executable
 ```
 
 For a multi-gpu application more cards can be requested.
 
 #### Examples
 
-The common part for all of these examples includes: `srun --reservation=TODO_FIND_OUT_THE_NAME --account=project_2013645 --time=00:05:00`
+The common part for all of these examples includes: `srun --reservation=HIPcourse --account=project_2013645 --time=00:05:00`
 
-- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall  --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100_1g.5gb:1`
+- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpumedium --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1`
+- 1 MPI process(es), 3 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpumedium --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:3`
 - 3 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpumedium --nodes=1 --ntasks-per-node=3 --cpus-per-task=1 --gres=gpu:a100:3`
 - 3 MPI process(es), 1 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpumedium --nodes=1 --ntasks-per-node=3 --cpus-per-task=7 --gres=gpu:a100:3`
 - 2 MPI process(es), 4 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpumedium --nodes=2 --ntasks-per-node=1 --cpus-per-task=7 --gres=gpu:a100:8`
