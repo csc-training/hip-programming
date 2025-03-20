@@ -102,6 +102,7 @@ make -j 64
 make install
 ```
 Where `<path-to>/ftn` can be obtain by running `which ftn`.
+The repository folder `hipfort-rocm-6.1.0` contains a set of example (test) codes  in the folder `test/`. One can start with the `vecadd` example.
 
 We will use the Cray 'ftn' compiler wrapper as you would do to compile any fortran code plus some additional flags:
 ```bash
@@ -111,6 +112,7 @@ CC -xhip -c <hip_kernels>.cpp
 ftn  -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$HIPFORT_HOME/lib -lhipfort-amdgcn $LIB_FLAGS -o main <fortran_code>.o hip_kernels.o
 ```
 This option gives enough flexibility for calling HIP libraries from Fortran or for a mix of OpenMP/OpenACC offloading to GPUs and HIP kernels/libraries.
+**Note** HIPFORT provides as well the `hipfc` script which can be used to compilations in which the linking is also done using fortran, but it is more difficult to integrate with `make` when working with big projects.
 
 ## Mahti
 In case LUMI is inaccessible during the training, we can use Mahti as a backup.
@@ -189,7 +191,7 @@ make install
 ```
 
 #### Compilation
-The `rocm` repository folder `hipfort` contains a set of example (test) codes `.../hipfort/test/f2003`. One can start with the `vecadd` example:
+The repository folder `hipfort-rocm-6.1.0` contains a set of example (test) codes `test`. One can start with the `vecadd` example:
 
 ```
 export HIPFORT_HOME=/projappl/<project_number>/apps/HIPFORT
@@ -198,4 +200,4 @@ gfortran -cpp -I$HIPFORT_HOME/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\""  
 hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_80" -I$HIPFORT_HOME/include/hipfort/nvptx -L$HIPFORT_HOME/lib/ -lhipfort-nvptx
 ```
 Now the executable `a.out` can be executed as a normal gpu program. 
-**Note** HIPFORT provides as well the `hipfc` script which can be used to compilations, though by using this script the linking is always done using fortran and it is more difficult to instegrate with `make` when working with big projects.
+**Note** HIPFORT provides as well the `hipfc` script which can be used to compilations, though by using this script the linking is always done using fortran and it is more difficult to integrate with `make` when working with big projects.
