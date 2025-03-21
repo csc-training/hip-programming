@@ -86,12 +86,12 @@ end program testSaxpy
 #include <hip/hip_runtime.h>
 #include <cstdio>
 
-__global__ void saxpy(float *y, float *x, 
+__global__ void saxpy(float *dy, float *dx, 
                       float a, int n)
 {
     int i = blockDim.x*blockIdx.x+threadIdx.x;
     if (i < n) {
-      y[i] = y[i] + a*x[i];
+      dy[i] = dy[i] + a*dx[i];
     }
 }
 ``` 
@@ -101,13 +101,13 @@ __global__ void saxpy(float *y, float *x,
 <div class="column">
 ``` cpp
 extern "C"{
-void launch(float *dout, float *da, 
-            float db, int N)
+void launch(float *dy, float *dx, 
+            float a, int N)
   {
      dim3 tBlock(256,1,1);
      dim3 grid(ceil((float)N/tBlock.x),1,1);
      
-     saxpy<<<grid, tBlock>>>(dout, da, db, N);
+     saxpy<<<grid, tBlock>>>(dx, dy, a, N);
   }
 }
 ```
