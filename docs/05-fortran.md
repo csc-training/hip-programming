@@ -31,12 +31,12 @@ program saxpy
 
   implicit none
   interface
-     subroutine launch(y,x,b,N) bind(c)
+     subroutine launch(dy,dx,b,N) bind(c)
        use iso_c_binding
        implicit none
-       type(c_ptr),value :: y,x
+       type(c_ptr),value :: dy,dx
        integer, value :: N
-       real, value :: b
+       real, value :: a
      end subroutine
   end interface
 
