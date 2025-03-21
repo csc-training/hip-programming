@@ -20,7 +20,7 @@ lang:     en
       - ROCm: rocBLAS, rocSPARSE, rocFFT, rocRAND, rocSOLVER
       - memory management: `hipMalloc`, `hipMemcpy`
 
-# HIPFort for SAXPY (`Y=Y+a*X`). Fortran Code
+# HIPFort for SAXPY (`Y=Y+a*X`): Fortran Code
 <small>
 <div class="column" width=45%>>
 ```cpp
@@ -80,7 +80,7 @@ end program testSaxpy
 </div>
 </small>
 
-# HIPFort for SAXPY (`Y=Y+a*X`). HIP code
+# HIPFort for SAXPY (`Y=Y+a*X`): HIP code
 <div class="column">
 ```cpp
 #include <hip/hip_runtime.h>
