@@ -22,7 +22,7 @@ lang:     en
 
 # HIPFort for SAXPY (`Y=Y+a*X`): Fortran Code
 <small>
-<div class="column" width=45%>>
+<div class="column" width=40%>>
 ```cpp
 program saxpy
   use iso_c_binding
@@ -50,7 +50,7 @@ program saxpy
 ```
 </div>
 
-<div class="column" width=53%>>
+<div class="column" width=59%>>
 ```cpp
   allocate(x(N), y(N))
 
