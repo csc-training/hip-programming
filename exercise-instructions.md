@@ -1,3 +1,4 @@
+
 # Generic instructions for the exercises
 
 For most of the exercises, skeleton codes are provided to serve as a starting
@@ -16,46 +17,66 @@ git clone https://github.com/csc-training/hip-programming.git
 If you have a GitHub account you can also **Fork** this repository and clone
 then your fork.
 
-### Puhti
+## LUMI
 
-We provide you with access to CSC's Puhti system that has NVIDIA's V100 GPUs, but has a working HIP installation to support code porting activities.
+We provide you with access to LUMI system with AMD's MI250X GPUs.
 
-To get started with Puhti, you should log in to Puhti and load the appropriate modules to get working with HIP:
+### Login to LUMI
+
+To get started, log in to LUMI:
 ```shell
-ssh -Y trainingXXX@puhti.csc.fi
-module load gcc cuda hip
+ssh -i identity_file username@lumi.csc.fi
 ```
 
-For the November 2022 the `xxx` is `141-164`. Password will be provided on-site. 
-For more detailed instructions, please refer to the system documentation at
-[Docs CSC](https://docs.csc.fi/).
+The username is the CSC account you created before the training.
+For more information, refer to the [LUMI documentation](https://docs.lumi-supercomputer.eu/firststeps/).
 
-#### Compiling
-
-In order to compile code with the `hipcc` on Puhti, one needs to add a the target architecture with `--gpu-architecture=sm_70`:
-```shell
-hipcc hello.cpp -o hello --gpu-architecture=sm_70
-```
-
-#### Running
-
-Puhti uses SLURM for batch jobs. Please see [Docs CSC](https://docs.csc.fi/)
-for more details. If you are using CSC training accounts, you should use the
-following project as your account: `--account=project_2000745`.
-
-We have also reserved some GPU nodes for the course. In order to use these
-dedicated nodes, you need to run your job with the option
-`--reservation=HIPtraining`, such as
+### Compiling
 
 ```shell
-srun --reservation=HIPtraining -n1 -p gpu --gres=gpu:v100:1 --account=project_2000745 ./my_program
-```
-For a multi-gpu application more cards can be requested. For example if 3 cards are needed one would use `--gres=gpu:v100:3`.
-The number of mpi processes can be as well controled by changing by the `-n` parameter. In order to assign cores for OpenMP theading the parameter `--cpus-per-task`must be set as well.
+module load PrgEnv-cray
+module load craype-accel-amd-gfx90a
+module load rocm
 
-Please note that the normal GPU partition (`-p gpu`) needs to be used with
-the reservation. Otherwise you may use the `gputest` partition for rapid fire
-testing.
+CC -xhip -o <yourapp> <hip_source.cpp>
+```
+
+or with `hipcc`
+
+```shell
+module load PrgEnv-amd
+
+export HIPCC_COMPILE_FLAGS_APPEND="--offload-arch=gfx90a $(CC --cray-print-opts=cflags)"
+export HIPCC_LINK_FLAGS_APPEND=$(CC --cray-print-opts=libs)
+
+hipcc -o <yourapp> <hip_source.cpp>
+```
+
+More information on compiling can be found in the [LUMI documentation](https://docs.lumi-supercomputer.eu/development/compiling/prgenv/#compile-hip-code).
+
+### Running
+
+LUMI uses SLURM for batch jobs. Please see [LUMI documentation](https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/slurm-quickstart/)
+for more details. If you are using CSC training accounts, you should use the following project as your account: `--account=project_462000877`.
+
+We have also reserved some GPU nodes for the course.
+In order to use these dedicated nodes, you need to run your job with the option `--reservation=HIPcourse`, such as
+
+```shell
+srun --reservation=HIPcourse --account=project_462000877 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1 ./executable
+```
+
+For a multi-gpu application more cards can be requested.
+
+#### Examples
+
+The common part for all of these examples includes: `srun --reservation=HIPcourse --account=project_462000877 --partition=small-g --time=00:05:00`
+
+- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1`
+- 1 MPI process(es), 3 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=3`
+- 3 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=3 --cpus-per-task=1 --gpus-per-task=1`
+- 3 MPI process(es), 1 GPU(s) per process, 7 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=3 --cpus-per-task=7 --gpus-per-task=1`
+- 2 MPI process(es), 3 GPU(s) per process, 7 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=2 --cpus-per-task=7 --gpus-per-task=3`
 
 ### HIPFORT on LUMI
 
@@ -65,7 +86,8 @@ module load LUMI/24.0.3
 module load partition/G
 module load rocm
 ```
-Because the default `HIPFORT` installation only supports gfortran,  we use a custom installation  prepared in the training project. This package provide Fortran modules compatible with the Cray Fortran compiler as well as direct use of HIPFFORT with the Fortran Cray Compiler wrapper (ftn).
+Because the default `HIPFORT` installation only supports gfortran,  we use a custom installation  prepared in the training project.
+This package provide Fortran modules compatible with the Cray Fortran compiler as well as direct use of HIPFFORT with the Fortran Cray Compiler wrapper (ftn).
 
 The package was installed via:
 ```bash
@@ -75,11 +97,12 @@ tar -xvzf rocm-6.1.0.tar.gz;
 cd hipfort-rocm-6.1.0;
 mkdir build;
 cd build;
-cmake -DHIPFORT_INSTALL_DIR=<path-to>/HIPFORT -DHIPFORT_COMPILER_FLAGS="-ffree -eZ" -DHIPFORT_COMPILER=<path-to>/ftn -DHIPFORT_AR=${CRAY_BINUTILS_BIN_X86_64}/ar -DHIPFORT_RANLIB=${CRAY_BINUTILS_BIN_X86_64}/ranlib  ..
+cmake -DHIPFORT_INSTALL_DIR=/projappl/<project_number>/apps/HIPFORT -DHIPFORT_COMPILER_FLAGS="-ffree -eZ" -DHIPFORT_COMPILER=<path-to>/ftn -DHIPFORT_AR=${CRAY_BINUTILS_BIN_X86_64}/ar -DHIPFORT_RANLIB=${CRAY_BINUTILS_BIN_X86_64}/ranlib  ..
 make -j 64
 make install
 ```
 Where `<path-to>/ftn` can be obtain by running `which ftn`.
+The repository folder `hipfort-rocm-6.1.0` contains a set of example (test) codes  in the folder `test/`. One can start with the `vecadd` example.
 
 We will use the Cray 'ftn' compiler wrapper as you would do to compile any fortran code plus some additional flags:
 ```bash
@@ -90,11 +113,65 @@ ftn  -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$HIPFORT_
 ```
 This option gives enough flexibility for calling HIP libraries from Fortran or for a mix of OpenMP/OpenACC offloading to GPUs and HIP kernels/libraries.
 
-### HIPFORT on Puhti and Mahti
-CSC national systems, Puhti and Mahti, have Nvidia GPUs which use CUDA. However HIP supports also Nvidia architecture. HIPFORT can be installed as well on Nvidia architectures is HIP is setup. 
+**Note** HIPFORT provides as well the `hipfc` script which can be used to compilations in which the linking is also done using fortran, but it is more difficult to integrate with `make` when working with big projects.
+
+## Mahti
+In case LUMI is inaccessible during the training, we can use Mahti as a backup.
+
+### Login to Mahti
+
+To get started, log in to Mahti:
+```shell
+ssh -i identity_file username@mahti.csc.fi
+```
+
+The username is the CSC account you created before the training.
+For more information, refer to the [CSC documentation](https://docs.csc.fi/computing/#accessing-puhti-and-mahti).
+
+### Compiling
+
+```shell
+module purge
+module use /appl/spack/v021/summerschool/modules/linux-rhel8-x86_64/Core
+module load gcc
+module load hip
+module load cuda
+hipcc "--gpu-architecture=sm_80" --x cu -o <yourapp> <hip_source.cpp>
+```
+
+More information on compiling can be found in the [CSC documentation](https://docs.csc.fi/computing/compiling-mahti/#general-instructions).
+
+### Running
+
+Mahti uses SLURM for batch jobs. Please see [CSC documentation](https://docs.csc.fi/computing/running/getting-started/)
+for more details. If you are using CSC training accounts, you should use the following project as your account: `--account=project_2013645`.
+
+We have also reserved some GPU nodes for the course.
+In order to use these dedicated nodes, you need to run your job with the option `--reservation=HIPcourse`, such as
+
+```shell
+srun --reservation=HIPcourse --account=project_2013645 --partition=gpusmall --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1 ./executable
+```
+
+For a multi-gpu application more cards can be requested.
+
+#### Examples
+
+The common part for all of these examples includes: `srun --reservation=HIPcourse --account=project_2013645 --time=00:05:00`
+
+- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1`
+- 1 MPI process(es), 3 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:3`
+- 3 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=3 --cpus-per-task=1 --gres=gpu:a100:3`
+- 3 MPI process(es), 1 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=3 --cpus-per-task=7 --gres=gpu:a100:3`
+- 2 MPI process(es), 4 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpumedium --nodes=2 --ntasks-per-node=1 --cpus-per-task=7 --gres=gpu:a100:8`
+
+More information about the number of GPUs and reserving them can be found in the [CSC documentation](https://docs.csc.fi/computing/running/creating-job-scripts-mahti/#gpu-batch-jobs).
+
+### HIPFORT on Mahti
+CSC national systems, Puhti and Mahti, have Nvidia GPUs which use CUDA. However HIP supports also Nvidia architecture. HIPFORT can be installed as well on Nvidia architectures if HIP is setup. 
 
 #### HIPFORT installation
-HIPFORT package at the moment is not installed on Puhti. It is straightforward to compile and use it:
+HIPFORT package at the moment is not installed on Mahti. It is straightforward to compile and use it:
 - load `hip` module:
 ```
 module load gcc hip
@@ -103,20 +180,26 @@ module load gcc hip
 - make a directory in your working directory for installing it and get the absolute path, <hipfort_install_folder>.
 - clone & compile the package:
 ```
-git clone https://github.com/ROCmSoftwarePlatform/hipfort.git
-cd hipfort; mkdir build ; cd build
-cmake -DHIPFORT_INSTALL_DIR=<hipfort_install_folder> ..
+# In some temporary folder
+wget https://github.com/ROCm/hipfort/archive/refs/tags/rocm-6.1.0.tar.gz # one can try various realeases
+tar -xvzf rocm-6.1.0.tar.gz;
+cd hipfort-rocm-6.1.0;
+mkdir build;
+cd build;
+cmake -DHIPFORT_INSTALL_DIR=/projappl/<project_number>/apps/HIPFORT ..
+make -j 32
 make install
 ```
-For this training try  replacing `<hipfort_install_folder>` with  `/scratch/project_2000745/training160/hip-programming/hipfort/hipfort/build/hipfort_install` 
 
 #### Compilation
-The `rocm` repository folder `hipfort` contains a set of example (test) codes `.../hipfort/test/f2003`. One can start with the `vecadd` example:
+The repository folder `hipfort-rocm-6.1.0` contains a set of example (test) codes `test`. One can start with the `vecadd` example:
 
 ```
+export HIPFORT_HOME=/projappl/<project_number>/apps/HIPFORT
 hipcc "--gpu-architecture=sm_80" --x cu -c hip_implementation.cpp -o hip_implementation.o
-gfortran -cpp -I<hipfort_install_folder>/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\""  -c main.f03 -o main.o 
-hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_80" -I<hipfort_install_folder>/include/hipfort/nvptx -L<hipfort_install_folder>/lib/ -lhipfort-nvptx
+gfortran -cpp -I$HIPFORT_HOME/include/hipfort/nvptx "-DHIPFORT_ARCH=\"nvptx\""  -c main.f03 -o main.o 
+hipcc -lgfortran main.o hip_implementation.o  "--gpu-architecture=sm_80" -I$HIPFORT_HOME/include/hipfort/nvptx -L$HIPFORT_HOME/lib/ -lhipfort-nvptx
 ```
 Now the executable `a.out` can be executed as a normal gpu program. 
-**Note** HIPFORT provides as well the `hipfc` script which can be used to compilations, though by using this script the linking is always done using fortran and it is more difficult to instegrate with `make` when working with big projects.
+
+**Note** HIPFORT provides as well the `hipfc` script which can be used to compilations, though by using this script the linking is always done using fortran and it is more difficult to integrate with `make` when working with big projects.

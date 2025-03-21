@@ -489,7 +489,7 @@ The duration is `0.179 ms`  and the effective bandwidth `697 GB/s`
 # Summary
 
 - Specialised libraries are highly optimised
-  - Especially dense linear algebra (hipBLAS/cuBlAS) and FFTs.
+  - Especially dense linear algebra (hipBLAS/cuBLAS) and FFTs.
 - Host-Device vs Device-Compute Unit bandwidth difference is order of 2 magnitudes
 - Keep data in registers 
   - But there are a finite amount of registers!

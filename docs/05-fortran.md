@@ -20,9 +20,9 @@ lang:     en
       - ROCm: rocBLAS, rocSPARSE, rocFFT, rocRAND, rocSOLVER
       - memory management: `hipMalloc`, `hipMemcpy`
 
-# HIPFort for SAXPY (`Y=Y+a*X`). Fortran Code
+# HIPFort for SAXPY (`Y=Y+a*X`): Fortran Code
 <small>
-<div class="column" width=45%>>
+<div class="column" width=40%>>
 ```cpp
 program saxpy
   use iso_c_binding
@@ -31,12 +31,12 @@ program saxpy
 
   implicit none
   interface
-     subroutine launch(y,x,b,N) bind(c)
+     subroutine launch(dy,dx,b,N) bind(c)
        use iso_c_binding
        implicit none
-       type(c_ptr),value :: y,x
+       type(c_ptr),value :: dy,dx
        integer, value :: N
-       real, value :: b
+       real, value :: a
      end subroutine
   end interface
 
@@ -50,7 +50,7 @@ program saxpy
 ```
 </div>
 
-<div class="column" width=53%>>
+<div class="column" width=59%>>
 ```cpp
   allocate(x(N), y(N))
 
@@ -80,18 +80,18 @@ end program testSaxpy
 </div>
 </small>
 
-# HIPFort for SAXPY (`Y=Y+a*X`). HIP code
+# HIPFort for SAXPY (`Y=Y+a*X`): HIP code
 <div class="column">
 ```cpp
 #include <hip/hip_runtime.h>
 #include <cstdio>
 
-__global__ void saxpy(float *y, float *x, 
+__global__ void saxpy(float *dy, float *dx, 
                       float a, int n)
 {
     int i = blockDim.x*blockIdx.x+threadIdx.x;
     if (i < n) {
-      y[i] = y[i] + a*x[i];
+      dy[i] = dy[i] + a*dx[i];
     }
 }
 ``` 
@@ -101,13 +101,13 @@ __global__ void saxpy(float *y, float *x,
 <div class="column">
 ``` cpp
 extern "C"{
-void launch(float *dout, float *da, 
-            float db, int N)
+void launch(float *dy, float *dx, 
+            float a, int N)
   {
      dim3 tBlock(256,1,1);
      dim3 grid(ceil((float)N/tBlock.x),1,1);
      
-     saxpy<<<grid, tBlock>>>(dout, da, db, N);
+     saxpy<<<grid, tBlock>>>(dx, dy, a, N);
   }
 }
 ```

@@ -4,7 +4,7 @@ endif
 
 ifeq ($(COMP),lumi)
 HIPFORT_HOME = /projappl/project_462000007/cristian/apps/HIPFORT
-LIB_FLAGS = -lhiprand
+LIB_FLAGS = 
 CXX = CC -xhip
 FC = ftn -I$(HIPFORT_HOME)/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$(HIPFORT_HOME)/lib -lhipfort-amdgcn $(LIB_FLAGS)
 endif 
