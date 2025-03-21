@@ -1,6 +1,10 @@
 #include <cstdio>
 #include <time.h>
 #include <hip/hip_runtime.h>
+#include <chrono>
+
+#define get_mus(X) std::chrono::duration_cast<std::chrono::microseconds>(X).count()
+#define chrono_clock std::chrono::high_resolution_clock::now()
 
 /* A simple GPU kernel definition */
 __global__ void kernel(int *d_a, int n_total)
@@ -14,7 +18,7 @@ __global__ void kernel(int *d_a, int n_total)
 int main(){
   
   // Problem size
-  constexpr int n_total = 4194304; // pow(2, 22);
+  constexpr int n_total = 1<<22;
 
   // Device grid sizes
   constexpr int blocksize = 256;
@@ -37,13 +41,13 @@ int main(){
   #error record the events somewhere across the below lines of code
   #error such that you can get the timing for the kernel, the
   #error memory copy, and the total combined time of these
-  clock_t start_kernel_clock = clock();
+  auto start_kernel_clock = chrono_clock;
   kernel<<<gridsize, blocksize, 0, stream>>>(d_a, n_total);
 
-  clock_t start_d2h_clock = clock();
+  auto start_d2h_clock = chrono_clock;
   hipMemcpyAsync(a, d_a, bytes, hipMemcpyDeviceToHost, stream);
 
-  clock_t stop_clock = clock();
+  auto stop_clock = chrono_clock;
   hipStreamSynchronize(stream);
 
   // Exctract elapsed timings from event recordings
@@ -68,9 +72,9 @@ int main(){
 
   // Print clock timings
   printf("clock_t timings:\n");
-  printf("  %.3f ms - kernel\n", 1e3 * (double)(start_d2h_clock - start_kernel_clock) / CLOCKS_PER_SEC);
-  printf("  %.3f ms - device to host copy\n", 1e3 * (double)(stop_clock - start_d2h_clock) / CLOCKS_PER_SEC);
-  printf("  %.3f ms - total time\n", 1e3 * (double)(stop_clock - start_kernel_clock) / CLOCKS_PER_SEC);
+  printf("  %.3f ms - kernel\n", 1e3 * (double)get_mus(start_d2h_clock - start_kernel_clock));
+  printf("  %.3f ms - device to host copy\n", 1e3 * (double)get_mus(stop_clock - start_d2h_clock));
+  printf("  %.3f ms - total time\n", 1e3 * (double)get_mus(stop_clock - start_kernel_clock));
 
   // Destroy Stream
   hipStreamDestroy(stream);
