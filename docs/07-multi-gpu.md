@@ -21,14 +21,6 @@ lang:     en
     <small>Lumi - Pre-exascale system in Finland</small>
  </div>
 
-# Three Levels of Parallelism
-
-1. GPU - GPU threads on the CUs: HIP
-2. Node - Multiple GPUs and CPUs: MPI, OpenMP
-3. Supercomputer - Many nodes connected with interconnect: MPI 
-
-![](img/parallel_regions.png){.center width=60% }
-
 # Computing in Parallel
 
 - Parallel computing
