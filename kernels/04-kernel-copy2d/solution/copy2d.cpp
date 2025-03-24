@@ -66,6 +66,11 @@ int main() {
     HIP_ERRCHK(hipFree(d_x));
     HIP_ERRCHK(hipFree(d_y));
 
+    printf("reference: %f %f %f %f ... %f %f\n", x[0], x[1], x[2],
+           x[3], x[num_values - 2], x[num_values - 1]);
+    printf("   result: %f %f %f %f ... %f %f\n", y[0], y[1], y[2], y[3],
+           y[num_values - 2], y[num_values - 1]);
+
     // Check result of computation on the GPU
     double error = 0.0;
     for (size_t i = 0; i < num_values; i++) {
