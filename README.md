@@ -9,7 +9,9 @@ part of the EuroCC training activities at CSC.
 
 | Time | Topic |
 | ---- | ----- |
-| 09:00–10:30 | Welcome (lumi/mahti access, slurm etc) & Introduction to GPU programming w/ break (JL) (timing: WIP) |
+| 09:00–09:30 | Welcome, LUMI access, slurm, git (JL) |
+| 09:30–09:45 | Break/debugging access |
+| 09:45–10:30 | Introduction to GPU programming (JL) |
 | 10:30–10:45 | Break & Snacks |
 | 10:45-11:30 | HIP and GPU kernels (JL) |
 | 11:30-11:45 | Break |
