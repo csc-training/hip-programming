@@ -13,35 +13,28 @@ For reference, there is also a CPU-to-CPU implementation in the skeleton
 code ([ping-pong.cpp](ping-pong.cpp)). Timing of all tests is also included to
 compare the execution times.
 
-To compile, just load the required modules and type `make`. On Mahti, a gpu-aware MPI is
-available with:
-```
-ml openmpi/4.1.4-cuda
-```
-On LUMI, enable gpu-aware MPI on runtime (and compiling) by eexecuting:
-```
-MPICH_GPU_SUPPORT_ENABLED=1
-```
-For running, one should use two GPUs and two MPI processes.
-
 On **Lumi**, one can compile the MPI example simply using the Cray compiler with
 ```
 CC -xhip ping-pong.cpp
 ```
-and run with
+
+On LUMI, enable gpu-aware MPI on runtime (and compiling) by eexecuting:
+```
+MPICH_GPU_SUPPORT_ENABLED=1
+```
+For running, one should use two GPUs and two MPI processes:
+
 ```
 srun --account=XXXXXX --partition=dev-g -N1 -n2 --cpus-per-task=1 --gpus-per-task=2 --time=00:15:00 ./a.out
 ```
 
-On **Mahti**, compile the MPI example with
+
+On **Mahti**, to compile, just load the required modules and type `make`. A gpu-aware MPI is
+available with:
 ```
-OMPI_CXXFLAGS='' OMPI_CXX='hipcc --x cu' mpicxx -c -o ping-pong.o ping-pong.cpp
+ml openmpi/4.1.4-cuda
 ```
-then link with
-```
-hipcc ping-pong.o -lmpi
-```
-and finally run:
+Run iwth two MPI tasks and two GPUs:
 ```
 srun --account=XXXXXX --partition=gputest -N1 -n2 --cpus-per-task=1 --gres=gpu:v100:2 --time=00:15:00 ./a.out
 ```
