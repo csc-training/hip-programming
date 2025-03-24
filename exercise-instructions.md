@@ -80,7 +80,14 @@ The common part for all of these examples includes: `srun --reservation=HIPcours
 
 ### HIPFORT on LUMI
 
-The following modules are required:
+For hipfort one can use the same modules:
+
+```shell
+module load PrgEnv-cray
+module load craype-accel-amd-gfx90a
+module load rocm
+```
+or with the same effect these ones:
 ```bash
 module load LUMI/24.0.3
 module load partition/G
