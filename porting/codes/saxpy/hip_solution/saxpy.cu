@@ -27,7 +27,7 @@ int main(void)
   hipMemcpy(d_y, y, N*sizeof(float), hipMemcpyHostToDevice);
 
   // Perform SAXPY on 1M elements
-hipLaunchKernelGGL(saxpy, dim3((N+255)/256), dim3(256), 0, 0, N, 2.0f, d_x, d_y);
+  saxpy<<<(N+255)/256, 256>>>(N, 2.0f, d_x, d_y);
 
   hipMemcpy(y, d_y, N*sizeof(float), hipMemcpyDeviceToHost);
 
@@ -41,3 +41,4 @@ hipLaunchKernelGGL(saxpy, dim3((N+255)/256), dim3(256), 0, 0, N, 2.0f, d_x, d_y)
   free(x);
   free(y);
 }
+
