@@ -44,5 +44,6 @@ memory requests using the `rocprof` profiler.
 - How many device global memory read requests (64 B and 32 B combined) are
   issued?
 - The number of L2 read requests drop when the stride is around 4096. Why?
-    *Hint*: Collect the values of `index` for some block in a 16x16 matrix.
+    *Hint*: (WIP) Collect the values of `index` for some block in a 16x16 matrix.
+- Profile similarly matrix transpose codes in exercise `01-matrix_transpose`. (WIP)
     

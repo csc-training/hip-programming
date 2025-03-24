@@ -5,7 +5,7 @@ ml rocm/6.0.3
 
 # Environment variables for compiling
 export CXX=CC
-export CXXFLAGS='-xhip -O3 -Wno-unused-result'
+export CXXFLAGS='-xhip -O3'
 
 # Aliases for easy running
 alias runit='srun --reservation=HIPcourse --account=project_462000877 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1'
