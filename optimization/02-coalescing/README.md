@@ -45,4 +45,5 @@ memory requests using the `rocprof` profiler.
   issued?
 - The number of L2 read requests drop when the stride is around 4096. Why?
     *Hint*: Collect the values of `index` for some block in a 16x16 matrix.
+- Profile similarly matrix transpose codes in exercise `01-matrix_transpose`. (WIP)
     
