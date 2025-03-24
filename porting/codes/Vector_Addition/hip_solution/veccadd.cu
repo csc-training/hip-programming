@@ -1,11 +1,12 @@
 #include "hip/hip_runtime.h"
 /*
-hipcc vecadd.cu
+nvcc vecadd.cu
 */
 #include <hip/hip_runtime.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <ctime>
 
 __global__ void vecAdd(int *A,int *B,int *C,int N)
 {
@@ -52,7 +53,7 @@ int main(int argc,char **argv)
    hipMemcpy(b_d,b,nBytes,hipMemcpyHostToDevice);
    clock_t start_d=clock();
    printf("Doing GPU Vector add\n");
-   hipLaunchKernelGGL(vecAdd, dim3(gridSize), dim3(blockSize), 0, 0, a_d,b_d,c_d,n);
+   vecAdd<<<gridSize,blockSize>>>(a_d,b_d,c_d,n);
    hipDeviceSynchronize();
    clock_t end_d = clock();
    clock_t start_h = clock();
