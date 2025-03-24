@@ -9,7 +9,7 @@ part of the EuroCC training activities at CSC.
 
 | Time | Topic |
 | ---- | ----- |
-| 09:00–09:30 | Welcome, LUMI access, slurm, git (JL) |
+| 09:00–09:30 | Welcome, LUMI access, slurm, git, (OnDemand) (JL) |
 | 09:30–09:45 | Break/debugging access |
 | 09:45–10:30 | Introduction to GPU programming (JL) |
 | 10:30–10:45 | Break & Snacks |
