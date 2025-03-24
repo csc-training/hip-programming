@@ -9,3 +9,5 @@ In this code all calls to HIP API are done via HIPFORT. The exercise is to check
 If you have previous experience with CUDA Fortran you can compare it to the equivalent code in the [cuda](../cuda) folder.
 
 In addition to the memory management, HIPFORT provides also  bindings for the mathematical libraries running on GPUs. You can find examples of how various `hipxxx` & `rocxxx` libraries are called in `Fortran` programs in the [HIPFORT repository](https://github.com/ROCm/hipfort/tree/develop/test).
+
+The instructions for compilation are found in the [exercise-instructions page]( ../../../exercise-instructions.md).
