@@ -1,56 +1,76 @@
 #include <hip/hip_runtime.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
+#include <vector>
 
-__global__ void saxpy_(int n, float a, float *x, float *y)
-{
-  int tid = threadIdx.x + blockIdx.x * blockDim.x;
-
-  if(tid < n) {
-    y[tid] += a * x[tid];
-  }
+#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+static inline void hip_errchk(hipError_t result, const char *file, int line) {
+    if (result != hipSuccess) {
+        printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
+               line);
+        exit(EXIT_FAILURE);
+    }
 }
 
-int main(void)
-{
-    int i;
-    const int n = 10000;
-    float a = 3.4;
-    float x[n], y[n], y_ref[n];
-    float *x_, *y_;
+__global__ void saxpy(int n, float a, float *x, float *y) {
+    const int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    const int stride = blockDim.x * gridDim.x;
 
-    // initialise data and calculate reference values on CPU
-    for (i=0; i < n; i++) {
+    for (int i = tid; i < n; i += stride) {
+        y[i] += a * x[i];
+    }
+}
+
+int main() {
+    static constexpr size_t n = 100000;
+    static constexpr size_t num_bytes = sizeof(float) * n;
+    static constexpr float a = 3.4f;
+
+    std::vector<float> x(n);
+    std::vector<float> y(n);
+    std::vector<float> y_ref(n);
+
+    // Initialise data and calculate reference values on CPU
+    for (size_t i = 0; i < n; i++) {
         x[i] = sin(i) * 2.3;
         y[i] = cos(i) * 1.1;
         y_ref[i] = a * x[i] + y[i];
     }
 
-    // allocate + copy initial values
-    hipMalloc((void **) &x_, sizeof(float) * n);
-    hipMalloc((void **) &y_, sizeof(float) * n);
-    hipMemcpy(x_, x, sizeof(float) * n, hipMemcpyHostToDevice);
-    hipMemcpy(y_, y, sizeof(float) * n, hipMemcpyHostToDevice);
+    // Allocate + copy initial values
+    void *d_x = nullptr;
+    void *d_y = nullptr;
+    HIP_ERRCHK(hipMalloc(&d_x, num_bytes));
+    HIP_ERRCHK(hipMalloc(&d_y, num_bytes));
+    HIP_ERRCHK(hipMemcpy(d_x, static_cast<void *>(x.data()), num_bytes,
+                         hipMemcpyDefault));
+    HIP_ERRCHK(hipMemcpy(d_y, static_cast<void *>(y.data()), num_bytes,
+                         hipMemcpyDefault));
 
-    // define grid dimensions + launch the device kernel
-    const int threads = 256;
-    const int blocks = (n - 1 + threads) / threads;
-    saxpy_<<<blocks, threads>>>(n, a, x_, y_);
+    // Define grid dimensions + launch the device kernel
+    static constexpr int threads = 1024;
+    static constexpr int blocks = 128;
+    saxpy<<<blocks, threads>>>(n, a, static_cast<float *>(d_x),
+                               static_cast<float *>(d_y));
 
-    // copy results back to CPU
-    hipMemcpy(y, y_, sizeof(float) * n, hipMemcpyDeviceToHost);
+    // Copy results back to CPU
+    HIP_ERRCHK(hipMemcpy(static_cast<void *>(y.data()), d_y, num_bytes,
+                         hipMemcpyDefault));
 
-    printf("reference: %f %f %f %f ... %f %f\n",
-            y_ref[0], y_ref[1], y_ref[2], y_ref[3], y_ref[n-2], y_ref[n-1]);
-    printf("   result: %f %f %f %f ... %f %f\n",
-            y[0], y[1], y[2], y[3], y[n-2], y[n-1]);
+    // Free device memory
+    HIP_ERRCHK(hipFree(d_x));
+    HIP_ERRCHK(hipFree(d_y));
 
-    // confirm that results are correct
+    printf("reference: %f %f %f %f ... %f %f\n", y_ref[0], y_ref[1], y_ref[2],
+           y_ref[3], y_ref[n - 2], y_ref[n - 1]);
+    printf("   result: %f %f %f %f ... %f %f\n", y[0], y[1], y[2], y[3],
+           y[n - 2], y[n - 1]);
+
+    // Check result of computation on the GPU
     float error = 0.0;
-    float tolerance = 1e-6;
-    float diff;
-    for (i=0; i < n; i++) {
-        diff = abs(y_ref[i] - y[i]);
+    static constexpr float tolerance = 1e-6f;
+    for (size_t i = 0; i < n; i++) {
+        const auto diff = abs(y_ref[i] - y[i]);
         if (diff > tolerance)
             error += diff;
     }

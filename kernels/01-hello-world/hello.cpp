@@ -3,10 +3,11 @@
 
 int main(void)
 {
-    int count, device;
+    int count = 0;
+    auto result = hipGetDeviceCount(&count);
 
-    hipGetDeviceCount(&count);
-    hipGetDevice(&device);
+    int device = 0;
+    result = hipGetDevice(&device);
 
     printf("Hello! I'm GPU %d out of %d GPUs in total.\n", device, count);
 

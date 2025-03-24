@@ -1,66 +1,80 @@
-#include <stdio.h>
-#include <math.h>
 #include <hip/hip_runtime.h>
+#include <math.h>
+#include <stdio.h>
+#include <vector>
 
-/* copy all elements using threads in a 2D grid */
-__global__ void copy2d_(int n, int m, double *src, double *tgt)
-{
-  int tidx = threadIdx.x + blockIdx.x * blockDim.x;
-  int tidy = threadIdx.y + blockIdx.y * blockDim.y;  
-  
-  if (tidy < m && tidx < n) 
-    tgt[tidy * n + tidx] = src[tidy * n + tidx];
+#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+static inline void hip_errchk(hipError_t result, const char *file, int line) {
+    if (result != hipSuccess) {
+        printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
+               line);
+        exit(EXIT_FAILURE);
+    }
 }
 
+// Copy all elements using threads in a 2D grid
+__global__ void copy2d(double *dst, double *src, size_t num_cols,
+                       size_t num_rows) {
+    const size_t row_start = threadIdx.x + blockIdx.x * blockDim.x;
+    const size_t col_start = threadIdx.y + blockIdx.y * blockDim.y;
+    const size_t row_stride = blockDim.x * gridDim.x;
+    const size_t col_stride = blockDim.y * gridDim.y;
 
-int main(void)
-{
-    const int n = 600;
-    const int m = 400;
-    const int size = n * m;
-    double x[size], y[size], y_ref[size];
-    double *x_, *y_;
-
-    // initialise data
-    for (int i=0; i < size; i++) {
-        x[i] = (double) i / 1000.0;
-        y[i] = 0.0;
+    for (size_t row = row_start; row < num_rows; row += row_stride) {
+        for (size_t col = col_start; col < num_cols; col += col_stride) {
+            const size_t index = row * num_cols + col;
+            dst[index] = src[index];
+        }
     }
-    // copy reference values (C ordered)
-    for (int j=0; j < m; j++) {
-      for (int i=0; i < n; i++) {
-        y_ref[j * n + i] = x[j * n + i];
-      }
+}
+
+int main() {
+    static constexpr size_t num_cols = 600;
+    static constexpr size_t num_rows = 400;
+    static constexpr size_t num_values = num_cols * num_rows;
+    static constexpr size_t num_bytes = sizeof(double) * num_values;
+    std::vector<double> x(num_values);
+    std::vector<double> y(num_values, 0.0);
+
+    // Initialise data
+    for (size_t i = 0; i < num_values; i++) {
+        x[i] = static_cast<double>(i) / 1000.0;
     }
 
-    // allocate + copy initial values
-    hipMalloc((void **) &x_, sizeof(double) * size);
-    hipMalloc((void **) &y_, sizeof(double) * size);
-    hipMemcpy(x_, x, sizeof(double) * size, hipMemcpyHostToDevice);
-    hipMemcpy(y_, y, sizeof(double) * size, hipMemcpyHostToDevice);
+    void *d_x = nullptr;
+    void *d_y = nullptr;
+    // Allocate + copy initial values
+    HIP_ERRCHK(hipMalloc(&d_x, num_bytes));
+    HIP_ERRCHK(hipMalloc(&d_y, num_bytes));
+    HIP_ERRCHK(hipMemcpy(d_x, static_cast<void *>(x.data()), num_bytes,
+                         hipMemcpyDefault));
+    HIP_ERRCHK(hipMemcpy(d_y, static_cast<void *>(y.data()), num_bytes,
+                         hipMemcpyDefault));
 
-    // define grid dimensions + launch the device kernel
-    const int blocksize_x = 64;
-    const int blocksize_y = 4;
+    // Define grid dimensions + launch the device kernel
+    const dim3 threads(64, 16, 1);
+    const dim3 blocks(64, 64, 1);
 
-    dim3 threads(blocksize_x, blocksize_y, 1);
-    dim3 blocks(
-        (n - 1 + blocksize_x) / blocksize_x, 
-        (m - 1 + blocksize_y) / blocksize_y, 
-        1);
-    copy2d_<<<blocks, threads>>>(n, m, x_, y_);
+    copy2d<<<blocks, threads>>>(static_cast<double *>(d_y),
+                                static_cast<double *>(d_x), num_cols, num_rows);
 
-    // copy results back to CPU
-    hipMemcpy(y, y_, sizeof(double) * size, hipMemcpyDeviceToHost);
+    // Copy results back to CPU
+    HIP_ERRCHK(hipMemcpy(static_cast<void *>(y.data()), d_y, num_bytes,
+                         hipMemcpyDefault));
 
-    // confirm that results are correct
+    // Free device memory
+    HIP_ERRCHK(hipFree(d_x));
+    HIP_ERRCHK(hipFree(d_y));
+
+    // Check result of computation on the GPU
     double error = 0.0;
-    for (int i=0; i < size; i++) {
-        error += abs(y_ref[i] - y[i]);
+    for (size_t i = 0; i < num_values; i++) {
+        error += abs(x[i] - y[i]);
     }
+
     printf("total error: %f\n", error);
-    printf("  reference: %f at (42,42)\n", y_ref[42 * m + 42]);
-    printf("     result: %f at (42,42)\n", y[42 * m + 42]);
+    printf("  reference: %f at (42,42)\n", x[42 * num_rows + 42]);
+    printf("     result: %f at (42,42)\n", y[42 * num_rows + 42]);
 
     return 0;
 }
