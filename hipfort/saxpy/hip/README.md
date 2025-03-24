@@ -10,4 +10,4 @@ If you have previous experience with CUDA Fortran you can compare it to the equi
 
 In addition to the memory management, HIPFORT provides also  bindings for the mathematical libraries running on GPUs. You can find examples of how various `hipxxx` & `rocxxx` libraries are called in `Fortran` programs in the [HIPFORT repository](https://github.com/ROCm/hipfort/tree/develop/test).
 
-The instructions for compilation are found in the [exercise-instructions page]( ../../../exercise-instructions.md).
+The instructions for compilation are found in the [exercise-instructions page]( ../../../exercise-instructions.md#hipfort-on-lumi).
