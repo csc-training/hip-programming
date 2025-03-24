@@ -111,7 +111,7 @@ make install
 Where `<path-to>/ftn` can be obtain by running `which ftn`.
 The repository folder `hipfort-rocm-6.1.0` contains a set of example (test) codes  in the folder `test/`. One can start with the `vecadd` example.
 
-We will use the Cray 'ftn' compiler wrapper as you would do to compile any fortran code plus some additional flags:
+We will use the Cray `ftn` compiler wrapper as you would do to compile any fortran code plus some additional flags:
 ```bash
 export HIPFORT_HOME=/projappl/<project_number>/apps/HIPFORT
 ftn -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" -L$HIPFORT_HOME/lib -lhipfort-amdgcn $LIB_FLAGS -c <fortran_code>.f90
