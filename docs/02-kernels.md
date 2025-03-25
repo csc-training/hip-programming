@@ -314,7 +314,12 @@ int main() {
 
     // copy data to the host and print
     std::vector<double> x(n);
-    HIP_ERRCHK(hipMemcpy(static_cast<void *>(x.data()), d_x, num_bytes, hipMemcpyDefault));
+    HIP_ERRCHK(hipMemcpy(
+        static_cast<void *>(x.data()),
+        d_x,
+        num_bytes,
+        hipMemcpyDefault));
+
     printf("%f %f %f %f ... %f %f\n",
             x[0], x[1], x[2], x[3], x[n-2], x[n-1]);
 
