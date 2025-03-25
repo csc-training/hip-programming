@@ -261,12 +261,11 @@ void* alloc(size_t bytes) {
 ```
 </small>
 
-
 # Example: fill (complete device code and launch)
 
 <small>
 
-::: {.column width=40%}
+::: {.column width=45%}
 ```cpp
 #include <hip/hip_runtime.h>
 #include <stdio.h>
@@ -281,8 +280,14 @@ __global__ void fill(int n, double a, double *x) {
     }
 }
 
-#define HIP_ERRCHK(result) hip_errchk(result, __FILE__, __LINE__)
-static inline void hip_errchk(hipError_t result, const char *file, int line) {
+#define HIP_ERRCHK(result)\
+    hip_errchk(result, __FILE__, __LINE__)
+
+void hip_errchk(
+    hipError_t result,
+    const char *file,
+    int line)
+{
     if (result != hipSuccess) {
         printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
                line);
@@ -291,7 +296,7 @@ static inline void hip_errchk(hipError_t result, const char *file, int line) {
 }
 ```
 :::
-::: {.column width=50%}
+::: {.column width=45%}
 ```cpp
 int main() {
     static constexpr size_t n = 10000;
@@ -319,7 +324,6 @@ int main() {
 :::
 
 </small>
-
 
 # Summary
 
