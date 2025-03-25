@@ -264,6 +264,7 @@ void* alloc(size_t bytes) {
 # Example: fill (complete device code and launch)
 
 <small>
+<small>
 
 ::: {.column width=45%}
 ```cpp
@@ -328,6 +329,7 @@ int main() {
 ```
 :::
 
+</small>
 </small>
 
 # Summary
