@@ -13,9 +13,8 @@ static inline void hip_errchk(hipError_t result, const char *file, int line) {
 }
 
 /*
-TODO: add a device kernel that calculates y = a * x + y
-Hints:
-What attribute(s) do you need to add on a kernel declaration?
+TODO: add a device kernel that calculates y = a * x + y for vectors x, y and
+constant a Hints: What attribute(s) do you need to add on a kernel declaration?
   - __device__?
   - __global__?
   - __shared__?
@@ -27,7 +26,8 @@ What is the return type of a kernel?
   - void?
   - depends on the kernel?
 
-What data do you need in the kernel to compute y = a * x + y?
+What data do you need in the kernel to compute y = a * x + y, for vectors x, y,
+and constant a?
 
 What built-in variables can you use to calculate the (global) index for a
 thread?
@@ -43,7 +43,7 @@ int main() {
     // Ctrl-click this to open it in a browser:
     // https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.0/doxygen/html/group___memory.html
 
-    static constexpr size_t n = 100000;
+    static constexpr size_t n = 1000000;
     static constexpr size_t num_bytes = sizeof(float) * n;
     static constexpr float a = 3.4f;
 
@@ -72,7 +72,7 @@ int main() {
     // TODO: Free device memory
     // - hipFree
 
-    // Check result of computation on the GPU
+    // Check the result of the GPU computation
     printf("reference: %f %f %f %f ... %f %f\n", y_ref[0], y_ref[1], y_ref[2],
            y_ref[3], y_ref[n - 2], y_ref[n - 1]);
     printf("   result: %f %f %f %f ... %f %f\n", y[0], y[1], y[2], y[3],

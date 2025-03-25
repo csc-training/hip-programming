@@ -14,6 +14,10 @@ static inline void hip_errchk(hipError_t result, const char *file, int line) {
 int main() {
     int count = 0;
     HIP_ERRCHK(hipGetDeviceCount(&count));
+    // When setting the device, the argument must be 0 <= arg < #devices
+    // See
+    // https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.0/doxygen/html/group___device.html#ga43c1e7f15925eeb762195ccb5e063eae
+    // for the API
     HIP_ERRCHK(hipSetDevice(count - 1));
 
     int device = 0;
