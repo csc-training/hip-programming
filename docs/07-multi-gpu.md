@@ -131,7 +131,7 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 
 * recommended for multi-process applications using MPI
 * message passing library takes care of all GPU-GPU communication
-* mach process interacts with only one GPU which makes the implementation
+* each process interacts with only one GPU which makes the implementation
   easier and less invasive (if MPI is used anyway)
     * apart from each process selecting a different device, the implementation
       looks much like a single-GPU program
