@@ -280,11 +280,8 @@ __global__ void fill(int n, double a, double *x) {
         x[i] = a;
     }
 }
-```
-:::
-::: {.column width=50%}
-```cpp
-#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+
+#define HIP_ERRCHK(result) hip_errchk(result, __FILE__, __LINE__)
 static inline void hip_errchk(hipError_t result, const char *file, int line) {
     if (result != hipSuccess) {
         printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
@@ -292,7 +289,10 @@ static inline void hip_errchk(hipError_t result, const char *file, int line) {
         exit(EXIT_FAILURE);
     }
 }
-
+```
+:::
+::: {.column width=50%}
+```cpp
 int main() {
     static constexpr size_t n = 10000;
     static constexpr size_t num_bytes = n * sizeof(double);
