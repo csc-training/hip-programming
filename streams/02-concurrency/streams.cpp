@@ -2,18 +2,32 @@
 #include <string>
 #include "hip/hip_runtime.h"
 
+#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+static inline void hip_errchk(hipError_t result, const char *file, int line) {
+    if (result != hipSuccess) {
+        printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
+               line);
+        exit(EXIT_FAILURE);
+    }
+}
+
+// DO 2^WORK loops of work in kernel
+#define WORK 0
+
 // Switch between pinned and pageable host memory
 #define USE_PINNED_HOST_MEM 1
 
 // GPU kernel definition 
-__global__ void kernel(float *a, int n_total)
+__global__ void kernel(float *a, int n_total, int bias)
 {
   int i = threadIdx.x + blockIdx.x * blockDim.x;
   if(i < n_total){
-    float x = (float)i;
-    float s = sinf(x); 
-    float c = cosf(x);
-    a[i] = a[i] + sqrtf(s*s+c*c);
+    for (int k=0; k < 1<<WORK; ++k) {
+      float x = (float)(bias+i);
+      float s = sinf(x); 
+      float c = cosf(x);
+      a[i] = a[i] + sqrtf(s*s+c*c);
+    }
   }
 }
 
@@ -21,8 +35,9 @@ __global__ void kernel(float *a, int n_total)
 float max_error(float *a, int n) 
 {
   float max_err = 0;
+  constexpr float target = float(1<<WORK);
   for (int i = 0; i < n; i++) {
-    float error = fabs(a[i]-1.0f);
+    float error = fabs(a[i]-target);
     if (error > max_err) max_err = error;
   }
   return max_err;
@@ -49,9 +64,9 @@ void case_0(hipEvent_t *start_event, hipEvent_t *stop_event, hipStream_t *stream
   hipEventRecord(start_event[0], 0);
 
   // Copy data to device, launch kernel, copy data back to host
-  hipMemcpy(d_a, a, n_total * sizeof(float), hipMemcpyHostToDevice);
+  HIP_ERRCHK(hipMemcpy(d_a, a, n_total * sizeof(float), hipMemcpyHostToDevice));
   kernel<<<gridsize, blocksize>>>(d_a, n_total);
-  hipMemcpy(a, d_a, n_total * sizeof(float), hipMemcpyDeviceToHost);
+  HIP_ERRCHK(hipMemcpy(a, d_a, n_total * sizeof(float), hipMemcpyDeviceToHost));
 
   // Record the stop event for the total time
   hipEventRecord(stop_event[0], 0);
@@ -90,8 +105,8 @@ void case_1(hipEvent_t *start_event, hipEvent_t *stop_event, hipStream_t *stream
   // Synchronize with the events and capture timings between start_events and stop_events
   float timing[n_streams + 1];
   for (int i = 0; i < n_streams + 1; ++i) {
-    hipEventSynchronize(stop_event[i]);
-    hipEventElapsedTime(&timing[i], start_event[i], stop_event[i]);
+    HIP_ERRCHK(hipEventSynchronize(stop_event[i]));
+    HIP_ERRCHK(hipEventElapsedTime(&timing[i], start_event[i], stop_event[i]));
   }
   
   // Print timings and the maximum error
@@ -157,18 +172,18 @@ int main(){
   const int bytes = n_total * sizeof(float);
 
   #if USE_PINNED_HOST_MEM == 1
-    hipHostMalloc((void**)&a, bytes);      // host pinned
+    HIP_ERRCHK(hipHostMalloc((void**)&a, bytes);      // host pinne)d
   #else
     a=(float *)malloc(bytes);              // host pageable
   #endif
-  hipMalloc((void**)&d_a, bytes);          // device pinned
+  HIP_ERRCHK(hipMalloc((void**)&d_a, bytes);          // device pinne)d
 
   // Create events
   hipEvent_t start_event[n_streams + 1];
   hipEvent_t stop_event[n_streams + 1];
   for (int i = 0; i < n_streams + 1; ++i){
-    hipEventCreate(&start_event[i]);
-    hipEventCreate(&stop_event[i]);
+    HIP_ERRCHK(hipEventCreate(&start_event[i]));
+    HIP_ERRCHK(hipEventCreate(&stop_event[i]));
   }
 
   // Create streams
@@ -193,8 +208,8 @@ int main(){
 
   // Destroy events
   for (int i = 0; i < n_streams + 1; ++i){
-    hipEventDestroy(start_event[i]);
-    hipEventDestroy(stop_event[i]);
+    HIP_ERRCHK(hipEventDestroy(start_event[i]));
+    HIP_ERRCHK(hipEventDestroy(stop_event[i]));
   }
 
   // Destroy Streams
@@ -202,11 +217,11 @@ int main(){
 
   // Free host memory
   #if USE_PINNED_HOST_MEM == 1
-    hipHostFree(a);
+    HIP_ERRCHK(hipHostFree(a));
   #else
     free(a);
   #endif
 
   //Free device memory
-  hipFree(d_a);
+  HIP_ERRCHK(hipFree(d_a));
 }
