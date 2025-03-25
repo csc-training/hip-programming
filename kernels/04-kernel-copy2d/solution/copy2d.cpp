@@ -49,6 +49,9 @@ __global__ void output_indices(int *tx, int *ty, int *bx, int *by, int *cols,
 }
 
 void output() {
+    // Changing the number of columns and rows
+    // and the threads/blocks configuration below
+    // produces different kind of output.
     static constexpr size_t num_cols = 40;
     static constexpr size_t num_rows = 80;
     static constexpr size_t num_values = num_cols * num_rows;
@@ -203,20 +206,37 @@ __global__ void copy2d(double *dst, double *src, size_t num_cols,
      * - 4x4 threads
      * - going over a 10 x 10 2D array:
      *
-     *           ______col_stride_______
-     *          |                       |
-     *         _|_______________________|_________
-     *        | 00 01 02 03 | 04 05 06 07 | 08 09 |---
-     *        | 10 11 12 13 | 14 15 16 17 | 18 19 |   |
-     *        | 20 21 22 23 | 24 25 26 27 | 28 29 |   |
-     *        |_30_31_32_33_|_34_35_36_37_|_38_39_|   |
-     *        | 40 41 42 43 | 44 45 46 47 | 48 49 |   | row_stride
-     *        | 50 51 52 53 | 54 55 56 57 | 58 59 |   |
-     *        | 60 61 62 63 | 64 65 66 67 | 68 69 |   |
-     *        |_70_71_72_73_|_74_75_76_77_|_78_79_|---
-     *        | 80 81 82 83 | 84 85 86 87 | 88 89 |
-     *        |_90_91_92_93_| 94_95_96_97_|_98_99_|
+     *     ______col_stride_______
+     *    |                       |
+     *   _|_______________________|_________
+     *  | 00 01 02 03 | 04 05 06 07 | 08 09 |---
+     *  | 10 11 12 13 | 14 15 16 17 | 18 19 |   |
+     *  | 20 21 22 23 | 24 25 26 27 | 28 29 |   |
+     *  |_30_31_32_33_|_34_35_36_37_|_38_39_|   |
+     *  | 40 41 42 43 | 44 45 46 47 | 48 49 |   | row_stride
+     *  | 50 51 52 53 | 54 55 56 57 | 58 59 |   |
+     *  | 60 61 62 63 | 64 65 66 67 | 68 69 |   |
+     *  |_70_71_72_73_|_74_75_76_77_|_78_79_|---
+     *  | 80 81 82 83 | 84 85 86 87 | 88 89 |
+     *  |_90_91_92_93_| 94_95_96_97_|_98_99_|
      *
+     *
+     *    Which block processes which area?
+     *   ___________________________________
+     *  |             |             |       |
+     *  |   (0, 0)    |   (1, 0)    | (0, 0)|
+     *  |             |             |       |
+     *  |____________ |_____________|_______|
+     *  |             |             |       |
+     *  |   (0, 1)    |   (1, 1)    | (0, 1)|
+     *  |             |             |       |
+     *  |_____________|_____________|_______|
+     *  |   (0, 0)    |   (1, 0)    | (0, 0)|
+     *  |_____________| ____________|_______|
+     *
+     *
+     * # The first iteration of the outer loop (rows)
+     * ## The first iteration of the inner loop (columns)
      *
      * | blockIdx (x, y) | processed values           |
      * |-----------------|----------------------------|
@@ -225,6 +245,7 @@ __global__ void copy2d(double *dst, double *src, size_t num_cols,
      * |          (0, 1) | 40-43, 50-53, 60-63, 70-73 |
      * |          (1, 1) | 44-47, 54-57, 64-67, 74-77 |
      *
+     * ## The second iteration of the inner loop (columns)
      * block (0, 0) will add col_stride to its columns and its threads will process
      * the remaining eight values in the top right area:
      *
@@ -247,6 +268,8 @@ __global__ void copy2d(double *dst, double *src, size_t num_cols,
      * Blocks (1, 0) and (1, 1) add col_stride to their columns,
      * but those are outside the 10x10 array.
      *
+     * # The second iteration of the outer loop (rows)
+     * ## The first iteration of the inner loop (columns)
      * Every block adds row_stride to their rows.
      *
      * block (0, 0) will process the 8 values on the bottom left:
@@ -264,7 +287,8 @@ __global__ void copy2d(double *dst, double *src, size_t num_cols,
      * Similarly block (1, 0) will process the 8 values on the bottom center.
      * Blocks (0, 1) and (1, 1) are outside the 10x10 array, so they do nothing.
      *
-     * Then blocks (0, 0) and (1, 0) add col_strid to their columns.
+     * ## The second iteration of the inner loop (columns)
+     * Blocks (0, 0) and (1, 0) add col_stride to their columns.
      * Block (0, 0) will process the remaining four values at the bottom right corner:
      *
      * | thread (x, y) | processed value |
@@ -277,6 +301,7 @@ __global__ void copy2d(double *dst, double *src, size_t num_cols,
      * Block (1, 0) is outside the 10x10 array and does nothing.
      *
      * Now every value of the 10x10 array has been processed.
+     * --------------------------------------------------------------------------------
      *
      * Do note, that with this artificially small problem the work is quite unbalanced:
      * | block (x, y) | #areas processed |
@@ -288,6 +313,38 @@ __global__ void copy2d(double *dst, double *src, size_t num_cols,
      *
      * But in real problems the data sizes are usually much, much larger and the ratio
      * of data elements to threads in grid is also much larger, thus yielding a better balance.
+     *
+     * The looped 2D grid "extends to infinity", i.e. one can repeat the
+     * structure of the 2D grid over and over again in columns and in rows
+     * to cover an arbitrary large/small area.
+     *
+     * Below, the 2D grid is repeated three times in the x direction and twice in the y direction.
+     * 'a' marks the extent of a 2D array that would produce this kind of repetition.
+     * The values (x, y) inside the boxes tell the blockIdx of the block processing the area.
+     * Note that changing the number of threads in a block or the number of blocks in a grid
+     * changes this configuration.
+     *
+     *
+     *    first iteration of cols     second iteration of cols    third iteration of cols    
+     *  |<------------------------->|<------------------------->|<------------------------->|
+     *  |___________________________|___________________________|___________________________|__first_iteration of rows
+     *  |             |             |             |             |          a  |             |             ^
+     *  |   (0, 0)    |   (1, 0)    |   (0, 0)    |   (1, 0)    |   (0, 0) a  |   (1, 0)    |             |
+     *  |             |             |             |             |          a  |             |             |
+     *  |_____________|_____________|_____________|_____________|__________a__|_____________|             |
+     *  |             |             |             |             |          a  |             |             |
+     *  |   (0, 1)    |   (1, 1)    |   (0, 1)    |   (1, 1)    |   (0, 1) a  |   (1, 1)    |             |
+     *  |             |             |             |             |          a  |             |             v
+     *  |_____________|_____________|_____________|_____________|__________a__|_____________|__second_iteration of rows
+     *  |             |             |             |             |          a  |             |             ^
+     *  |   (0, 0)    |   (1, 0)    |   (0, 0)    |   (1, 0)    |   (0, 0) a  |   (1, 0)    |             |
+     *  |             |             |             |             |          a  |             |             |
+     *  |_____________|_____________|_____________|_____________|__________a__|_____________|             |
+     *  |             |             |             |             |          a  |             |             |
+     *  |   (0, 1)    |   (1, 1)    |   (0, 1)    |   (1, 1)    |   (0, 1) a  |   (1, 1)    |             |
+     *  |aaaaaaaaaaaaa|aaaaaaaaaaaaa|aaaaaaaaaaaaa|aaaaaaaaaaaaa|aaaaaaaaaaa  |             |             |
+     *  |_____________|_____________|_____________|_____________|_____________|_____________|_____________v
+     *
      */
     // clang-format on
 }
