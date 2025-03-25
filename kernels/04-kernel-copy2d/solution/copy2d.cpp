@@ -24,7 +24,8 @@ namespace index_visualisation {
 
 __global__ void output_indices(int *tx, int *ty, int *bx, int *by, int *cols,
                                int *rows, int *col_starts, int *row_starts,
-                               int *indices, size_t num_cols, size_t num_rows) {
+                               int *indices, int *block_idx, size_t num_cols,
+                               size_t num_rows) {
     const size_t col_start = threadIdx.x + blockIdx.x * blockDim.x;
     const size_t row_start = threadIdx.y + blockIdx.y * blockDim.y;
     const size_t col_stride = blockDim.x * gridDim.x;
@@ -42,13 +43,14 @@ __global__ void output_indices(int *tx, int *ty, int *bx, int *by, int *cols,
             col_starts[index] = col_start;
             row_starts[index] = row_start;
             indices[index] = index;
+            block_idx[index] = blockIdx.x + blockIdx.y * blockDim.x;
         }
     }
 }
 
 void output() {
-    static constexpr size_t num_cols = 51;
-    static constexpr size_t num_rows = 27;
+    static constexpr size_t num_cols = 40;
+    static constexpr size_t num_rows = 80;
     static constexpr size_t num_values = num_cols * num_rows;
     static constexpr size_t num_bytes = sizeof(int) * num_values;
 
@@ -61,6 +63,7 @@ void output() {
     void *col_starts = nullptr;
     void *row_starts = nullptr;
     void *indices = nullptr;
+    void *block_idx = nullptr;
 
     HIP_ERRCHK(hipMalloc(&tx, num_bytes));
     HIP_ERRCHK(hipMalloc(&ty, num_bytes));
@@ -71,8 +74,9 @@ void output() {
     HIP_ERRCHK(hipMalloc(&col_starts, num_bytes));
     HIP_ERRCHK(hipMalloc(&row_starts, num_bytes));
     HIP_ERRCHK(hipMalloc(&indices, num_bytes));
+    HIP_ERRCHK(hipMalloc(&block_idx, num_bytes));
 
-    const dim3 threads(32, 16, 1);
+    const dim3 threads(16, 16, 1);
     const dim3 blocks(2, 2, 1);
 
     // clang-format off
@@ -86,6 +90,7 @@ void output() {
         static_cast<int *>(col_starts),
         static_cast<int *>(row_starts),
         static_cast<int *>(indices),
+        static_cast<int *>(block_idx),
         num_cols,
         num_rows
         );
@@ -101,6 +106,7 @@ void output() {
     std::vector<int> hcol_starts(num_values);
     std::vector<int> hrow_starts(num_values);
     std::vector<int> hindices(num_values);
+    std::vector<int> hblock_idx(num_values);
     HIP_ERRCHK(hipMemcpy(static_cast<void *>(htx.data()), tx, num_bytes,
                          hipMemcpyDefault));
     HIP_ERRCHK(hipMemcpy(static_cast<void *>(hty.data()), ty, num_bytes,
@@ -119,6 +125,8 @@ void output() {
                          num_bytes, hipMemcpyDefault));
     HIP_ERRCHK(hipMemcpy(static_cast<void *>(hindices.data()), indices,
                          num_bytes, hipMemcpyDefault));
+    HIP_ERRCHK(hipMemcpy(static_cast<void *>(hblock_idx.data()), block_idx,
+                         num_bytes, hipMemcpyDefault));
 
     // Free device memory
     HIP_ERRCHK(hipFree(tx));
@@ -130,6 +138,7 @@ void output() {
     HIP_ERRCHK(hipFree(row_starts));
     HIP_ERRCHK(hipFree(col_starts));
     HIP_ERRCHK(hipFree(indices));
+    HIP_ERRCHK(hipFree(block_idx));
 
     // Output values
     auto write = [](const char *name, std::vector<int> &buffer) {
@@ -168,6 +177,7 @@ void output() {
     write("row_starts.txt", hrow_starts);
     write("col_starts.txt", hcol_starts);
     write("indices.txt", hindices);
+    write("block_idx.txt", hblock_idx);
 }
 } // namespace index_visualisation
 
