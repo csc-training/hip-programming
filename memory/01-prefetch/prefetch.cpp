@@ -3,6 +3,15 @@
 #include <time.h>
 #include <hip/hip_runtime.h>
 
+#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+static inline void hip_errchk(hipError_t result, const char *file, int line) {
+    if (result != hipSuccess) {
+        printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
+               line);
+        exit(EXIT_FAILURE);
+    }
+}
+
 /* Blocksize divisible by the warp size */
 #define BLOCKSIZE 64
 
@@ -64,9 +73,7 @@ void explicitMem(int nSteps, int nx, int ny)
     #error Copy data to device (A to d_A)
 
     // Launch GPU kernel
-    hipLaunchKernelGGL(hipKernel,
-      gridsize, BLOCKSIZE, 0, 0,
-      d_A, nx, ny);
+    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
 
     #error Synchronization
   }
@@ -112,9 +119,7 @@ void explicitMemPinned(int nSteps, int nx, int ny)
     #error Copy data to device (A to d_A)
 
     // Launch GPU kernel
-    hipLaunchKernelGGL(hipKernel,
-      gridsize, BLOCKSIZE, 0, 0,
-      d_A, nx, ny);
+    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
 
     #error Synchronization
   }
@@ -156,9 +161,7 @@ void explicitMemNoCopy(int nSteps, int nx, int ny)
     #error Initialize array to 0 from device
 
     // Launch GPU kernel
-    hipLaunchKernelGGL(hipKernel,
-      gridsize, BLOCKSIZE, 0, 0,
-      d_A, nx, ny);
+    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
   }
 
   #error Copy data back to host (d_A to A)

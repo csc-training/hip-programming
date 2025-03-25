@@ -126,11 +126,11 @@ void recurringAllocMallocAsync(int nSteps, int size)
   {
     int *d_A;
     // Allocate pinned device memory
-    cudaMallocAsync((void**)&d_A, sizeof(int) * size, stream);
+    hipMallocAsync((void**)&d_A, sizeof(int) * size, stream);
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, stream>>>(d_A, size);
     // Free allocation
-    cudaFreeAsync(d_A, stream);
+    hipFreeAsync(d_A, stream);
   }
   // Synchronization
   HIP_ERR(hipStreamSynchronize(stream));
