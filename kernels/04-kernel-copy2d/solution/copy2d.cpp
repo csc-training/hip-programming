@@ -43,7 +43,7 @@ __global__ void output_indices(int *tx, int *ty, int *bx, int *by, int *cols,
             col_starts[index] = col_start;
             row_starts[index] = row_start;
             indices[index] = index;
-            block_idx[index] = blockIdx.x + blockIdx.y * blockDim.x;
+            block_idx[index] = blockIdx.x + blockIdx.y * gridDim.x;
         }
     }
 }
