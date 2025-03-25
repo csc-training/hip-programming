@@ -14,7 +14,7 @@ lang:     en
       CUDA and ROCm devices
 - HIP is a C++ runtime API **and** a kernel programming language
     - standard C++ syntax, uses nvcc/clang++ compiler in the background
-    - almost a one-on-one clone of CUDA from the user perspective
+    - almost a one-to-one clone of CUDA from the user perspective
     - allows one to write portable GPU codes
 - AMD offers also a wide set of optimised libraries and tools
 :::
@@ -205,6 +205,7 @@ __global__ void axpy(int n, double a, double *x, double *y)
 # Simple memory management
 
 <small>
+
 ::: incremental
 - GPU has it's own memory area
     - allocate device usable memory with `hipMalloc` (cf. `cudaMalloc` and `std::malloc`)
@@ -227,6 +228,7 @@ hipMemcpy(x, dx, num_bytes, hipMemcpyDeviceToHost);
 hipMemcpy(dx, x, num_bytes, hipMemcpyDefault);
 hipMemcpy(x, dx, num_bytes, hipMemcpyDefault);
 ```
+
 </small>
 
 # Error checking
@@ -264,7 +266,7 @@ void* alloc(size_t bytes) {
 
 <small>
 
-::: {.column width=50%}
+::: {.column width=40%}
 ```cpp
 #include <hip/hip_runtime.h>
 #include <stdio.h>
