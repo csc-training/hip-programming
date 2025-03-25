@@ -1,8 +1,8 @@
 #include <fstream>
 #include <hip/hip_runtime.h>
 #include <math.h>
+#include <sstream>
 #include <stdio.h>
-#include <strstream>
 #include <vector>
 
 #define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
@@ -133,7 +133,7 @@ void output() {
 
     // Output values
     auto write = [](const char *name, std::vector<int> &buffer) {
-        std::strstream ss;
+        std::stringstream ss;
         for (size_t row = 0; row < num_rows; row++) {
             for (size_t col = 0; col < num_cols; col++) {
                 const size_t index = row * num_cols + col;
