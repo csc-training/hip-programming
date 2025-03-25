@@ -10,9 +10,9 @@ lang:     en
 
  <div class="column" width=60%>
 
-* Supercomputer are a collection of thousands of nodes
-* Currently there are  2 to 8 GPUs per node
-* More GPU resources per node, better per-node-performance 
+* supercomputer are a collection of thousands of nodes
+* currently there are  2 to 8 GPUs per node
+* more GPU resources per node, better per-node-performance 
  
 </div>
 
@@ -23,9 +23,9 @@ lang:     en
 
 # Computing in Parallel
 
-- Parallel computing
-    - A problem is split into smaller subtasks
-    - Multiple subtasks are processed simultaneously using multiple CPUs/GPUS
+- parallel computing
+    - a problem is split into smaller subtasks
+    - multiple subtasks are processed simultaneously using multiple GPUs
 
 <!-- Copyright CSC -->
  ![](img/compp.svg){.center width=40%}
@@ -37,29 +37,29 @@ lang:     en
 <div class=column>
 **MPI: Processes**
 
-- Independent execution units
+- independent execution units
 - MPI launches N processes at application startup
-- Works over multiple nodes
-- Data exchange via messages
+- works over multiple nodes
+- data exchange via messages
 </div>
 <div class=column>
 
 **OpenMP: Threads**
 
-- Threads share memory space
-- Threads are created and destroyed  (parallel regions)
-- Limited to a single node
-- Directive based
+- threads share memory space
+- threads are created and destroyed  (parallel regions)
+- limited to a single node
+- directive based
 
 </div>
 
 # GPU Context
 
-* A context is established implicitly on the current device when the first HIP function requiring an active context is evaluated 
-* Several processes can create contexts for a single device
-    * The device resources are allocated per context
-* By default, one context per device per process in HIP
-    * (CPU) Threads of the same process share the primary context (for each device)
+* a context is established implicitly on the current device when the first HIP function requiring an active context is evaluated 
+* several processes can create contexts for a single device
+    * the device resources are allocated per context
+* by default, one context per device per process in HIP
+    * (CPU) threads of the same process share the primary context (for each device)
 * HIP supports explicit context management 
 
 ::: notes
