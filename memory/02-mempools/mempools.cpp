@@ -3,6 +3,15 @@
 #include <time.h>
 #include <hip/hip_runtime.h>
 
+#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+static inline void hip_errchk(hipError_t result, const char *file, int line) {
+    if (result != hipSuccess) {
+        printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
+               line);
+        exit(EXIT_FAILURE);
+    }
+}
+
 /* Blocksize divisible by the warp size */
 #define BLOCKSIZE 64
 
@@ -29,7 +38,7 @@ void ignoreTiming(int nSteps, int size)
 
   int *d_A;
   // Allocate pinned device memory
-  hipMalloc((void**)&d_A, sizeof(int) * size);
+  HIP_ERRCHK(hipMalloc((void**)&d_A, sizeof(int) * size));
 
   // Start timer and begin stepping loop
   clock_t tStart = clock();
@@ -38,10 +47,10 @@ void ignoreTiming(int nSteps, int size)
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
     // Synchronization
-    hipStreamSynchronize(0);
+    HIP_ERRCHK(hipStreamSynchronize(0));
   }
   // Free allocation
-  hipFree(d_A);
+  HIP_ERRCHK(hipFree(d_A));
 }
 
 /* Run without recurring allocation */
@@ -101,7 +110,7 @@ void recurringAllocMallocAsync(int nSteps, int size)
 {
   // Create HIP stream
   hipStream_t stream;
-  hipStreamCreate(&stream);
+  HIP_ERRCHK(hipStreamCreate(&stream));
 
   // Determine grid and block size
   const int blocksize = BLOCKSIZE;
@@ -125,7 +134,7 @@ void recurringAllocMallocAsync(int nSteps, int size)
   checkTiming("recurringAllocMallocAsync", (double)(clock() - tStart) / CLOCKS_PER_SEC);
 
   // Destroy the stream
-  hipStreamDestroy(stream);
+  HIP_ERRCHK(hipStreamDestroy(stream));
 }
 
 /* The main function */
