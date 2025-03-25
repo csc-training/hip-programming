@@ -76,6 +76,7 @@ Code on the CPU to control the larger context and the flow of execution
 - execution control: `kernel<<<blocks, threads>>>`
 - synchronisation: device, stream, events: `hipDeviceSynchronize`
 - error handling, context handling, ... : `hipGetErrorString`
+- https://rocm.docs.amd.com/projects/HIP/en/latest/reference/hip_runtime_api/modules.html#modules-reference
 :::
 
 # API example: Hello world
@@ -86,10 +87,11 @@ Code on the CPU to control the larger context and the flow of execution
 
 int main(void)
 {
-    int count, device;
+    int count = 0;
+    auto result = hipGetDeviceCount(&count);
 
-    hipGetDeviceCount(&count);
-    hipGetDevice(&device);
+    int device = 0;
+    result = hipGetDevice(&device);
 
     printf("Hello! I'm GPU %d out of %d GPUs in total.\n", device, count);
 
@@ -127,7 +129,7 @@ Code on the GPU from the point of view of a single thread
 # Kernel example: axpy
 
 ```cpp
-__global__ void axpy_(int n, double a, double *x, double *y)
+__global__ void axpy(int n, double a, double *x, double *y)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -147,13 +149,13 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 # Kernel example: axpy (revisited)
 
 ```cpp
-__global__ void axpy_(int n, double a, double *x, double *y)
+__global__ void axpy(int n, double a, double *x, double *y)
 {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    int stride = gridDim.x * blockDim.x;
+    const int stride = blockDim.x * gridDim.x;
 
-    for (; tid < n; tid += stride) {
-        y[tid] += a * x[tid];
+    for (int i = tid; i < n; i += stride) {
+        y[i] += a * x[i];
     }
 }
 ```
@@ -184,7 +186,7 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 
 ::: incremental
 - kernels are launched with one of the two following options:
-  - CUDA syntax (recommended, because it works on CUDA and HIP both):
+  - CUDA syntax (recommended, because it works both on CUDA and HIP):
   ```cpp
   somekernel<<<blocks, threads, shmem, stream>>>(args)
   ```
@@ -210,10 +212,19 @@ __global__ void axpy_(int n, double a, double *x, double *y)
 :::
 
 ```cpp
-double *x_
-hipMalloc((void **) &x_, sizeof(double) * n);
-hipMemcpy(x_, x, sizeof(double) * n, hipMemcpyHostToDevice);
-hipMemcpy(x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
+const size_t num_bytes = sizeof(double) * n;
+void *dx = nullptr;
+hipMalloc(&dx, num_bytes);
+
+// Explicit copy direction with the 'kind' parameter
+hipMemcpy(dx, x, num_bytes, hipMemcpyHostToDevice);
+hipMemcpy(x, dx, num_bytes, hipMemcpyDeviceToHost);
+
+// Implicit copy direction, runtime figures it out
+// from the virtual address of the pointer.
+// Recommended, as it's simpler and less error prone.
+hipMemcpy(dx, x, num_bytes, hipMemcpyDefault);
+hipMemcpy(x, dx, num_bytes, hipMemcpyDefault);
 ```
 
 # Error checking
@@ -223,22 +234,23 @@ hipMemcpy(x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
 ::: incremental
 - always use HIP error checking with larger codebases!
   - it has low overhead, and can save a lot of debugging time!
-- for teaching purposes many exercises of this course do not have error checking
+- some exercises of this course do not have error checking, mostly to focus on the taught topic
 :::
 
 ```cpp
-#define HIP_ERR(err) (hip_error(err, __FILE__, __LINE__))
-inline static void hip_error(hipError_t err, const char *file, int line) {
-  if (err != hipSuccess) {
-    printf("\n\n%s in %s at line %d\n", hipGetErrorString(err), file, line);
-    exit(1);
-  }
+#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+static inline void hip_errchk(hipError_t result, const char *file, int line) {
+    if (result != hipSuccess) {
+        printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
+               line);
+        exit(EXIT_FAILURE);
+    }
 }
 
  // Wrap API call with the macro
-inline static void* alloc(size_t bytes) {
-  void* ptr;
-  HIP_ERR(hipMallocManaged(&ptr, bytes));
+void* alloc(size_t bytes) {
+  void* ptr = nullptr;
+  HIP_ERRCHK(hipMalloc(&ptr, bytes));
   return ptr;
 }
 
@@ -249,49 +261,57 @@ inline static void* alloc(size_t bytes) {
 # Example: fill (complete device code and launch)
 
 <small>
-<div class="column">
+::: {.column width=50%}
 ```cpp
 #include <hip/hip_runtime.h>
 #include <stdio.h>
+#include <vector>
 
-__global__ void fill_(int n, double *x, double a)
-{
-    int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    int stride = gridDim.x * blockDim.x;
+__global__ void fill(int n, double a, double *x) {
+    const int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    const int stride = gridDim.x * blockDim.x;
 
-    for (; tid < n; tid += stride) {
-        x[tid] = a;
+    for (int i = tid; i < n; i += stride) {
+        x[i] = a;
     }
 }
 ```
-</div>
-
-<div class="column">
+:::
+::: {.column width=50%}
 ```cpp
-int main(void)
-{
-    const int n = 10000;
-    double a = 3.4;
-    double x[n];
-    double *x_;
+#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+static inline void hip_errchk(hipError_t result, const char *file, int line) {
+    if (result != hipSuccess) {
+        printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
+               line);
+        exit(EXIT_FAILURE);
+    }
+}
+
+int main() {
+    static constexpr size_t n = 10000;
+    static constexpr size_t num_bytes = n * sizeof(double);
+    static constexpr double a = 3.4;
 
     // allocate device memory
-    hipMalloc(&x_, sizeof(double) * n);
+    void *d_x = nullptr;
+    HIP_ERRCHK(hipMalloc(&d_x, num_bytes));
 
     // launch kernel
-    dim3 blocks(32);
-    dim3 threads(256);
-    fill_<<<blocks, threads>>>(n, x_, a);
+    const int threads = 256;
+    const int blocks = 32;
+    fill<<<blocks, threads>>>(n, a, static_cast<double *>(d_x));
 
     // copy data to the host and print
-    hipMemcpy(x, x_, sizeof(double) * n, hipMemcpyDeviceToHost);
+    std::vector<double> x(n);
+    HIP_ERRCHK(hipMemcpy(static_cast<void *>(x.data()), d_x, num_bytes, hipMemcpyDefault));
     printf("%f %f %f %f ... %f %f\n",
             x[0], x[1], x[2], x[3], x[n-2], x[n-1]);
 
     return 0;
 }
 ```
-</div>
+:::
 </small>
 
 
