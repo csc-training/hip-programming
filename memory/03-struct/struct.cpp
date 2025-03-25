@@ -1,5 +1,18 @@
 #include <cstdio>
 #include <hip/hip_runtime.h>
+#include <iostream>
+
+#define HIP_CHECK(expression)                  \
+{                                              \
+    const hipError_t status = expression;      \
+    if(status != hipSuccess){                  \
+        std::cerr << "HIP error "              \
+                  << status << ": "            \
+                  << hipGetErrorString(status) \
+                  << " at " << __FILE__ << ":" \
+                  << __LINE__ << std::endl;    \
+    }                                          \
+}
 
 /* Blocksize divisible by the warp size */
 #define BLOCKSIZE 64
@@ -57,9 +70,15 @@ void runHost()
 /* Run on device using Unified Memory */
 void runDeviceUnifiedMem()
 {
-  #error Allocate struct using Unified Memory
+  Example *ex;
+  /* #error Allocate struct using Unified Memory */
+  HIP_CHECK(hipMallocManaged((void**) &ex, sizeof(Example)));
 
-  #error Allocate struct members using Unified Memory
+  ex->size = 10;
+  /* #error Allocate struct members using Unified Memory */
+  HIP_CHECK(hipMallocManaged((void**) &(ex->x), sizeof(float) * ex->size));
+  HIP_CHECK(hipMallocManaged((void**) &(ex->idx), sizeof(int) * ex->size));
+
 
   // Initialize struct from host
   for(int i = 0; i < ex->size; i++)
@@ -68,12 +87,16 @@ void runDeviceUnifiedMem()
     ex->idx[i] = i;
   }
 
-  #error Print struct values from device by calling hipKernel()
+  dim3 grid(1,1,1);
+  dim3 block(16,16,1);
+/* #error Print struct values from device by calling hipKernel() */
+  hipKernel<<<grid, block, 0, 0>>>(ex);
   printf("\nDevice (UnifiedMem):\n");
 
-  #error Free struct
+  hipFree(ex->x); hipFree(ex->idx); hipFree(ex);
 }
 
+#if 0
 /* Create the device struct (needed for explicit memory management) */
 Example* createDeviceExample(Example *ex)
 {
@@ -87,7 +110,9 @@ Example* createDeviceExample(Example *ex)
 
   #error Return device struct
 }
+#endif
 
+#if 0
 /* Free the device struct (needed for explicit memory management) */
 void freeDeviceExample(Example *d_ex)
 {
@@ -97,7 +122,9 @@ void freeDeviceExample(Example *d_ex)
 
   #error Free device struct
 }
+#endif
 
+#if 0
 /* Run on device using Explicit memory management */
 void runDeviceExplicitMem()
 {
@@ -123,11 +150,12 @@ void runDeviceExplicitMem()
 
   #error Free host struct
 }
+#endif
 
 /* The main function */
 int main(int argc, char* argv[])
 {
   runHost();
   runDeviceUnifiedMem();
-  runDeviceExplicitMem();
+  /* runDeviceExplicitMem(); */
 }
