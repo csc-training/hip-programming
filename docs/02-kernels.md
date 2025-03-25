@@ -131,7 +131,7 @@ Code on the GPU from the point of view of a single thread
 ```cpp
 __global__ void axpy(int n, double a, double *x, double *y)
 {
-    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    const int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     if (tid < n) {
         y[tid] += a * x[tid];
@@ -151,7 +151,7 @@ __global__ void axpy(int n, double a, double *x, double *y)
 ```cpp
 __global__ void axpy(int n, double a, double *x, double *y)
 {
-    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    const int tid = threadIdx.x + blockIdx.x * blockDim.x;
     const int stride = blockDim.x * gridDim.x;
 
     for (int i = tid; i < n; i += stride) {
@@ -204,6 +204,7 @@ __global__ void axpy(int n, double a, double *x, double *y)
 
 # Simple memory management
 
+<small>
 ::: incremental
 - GPU has it's own memory area
     - allocate device usable memory with `hipMalloc` (cf. `cudaMalloc` and `std::malloc`)
@@ -226,6 +227,7 @@ hipMemcpy(x, dx, num_bytes, hipMemcpyDeviceToHost);
 hipMemcpy(dx, x, num_bytes, hipMemcpyDefault);
 hipMemcpy(x, dx, num_bytes, hipMemcpyDefault);
 ```
+</small>
 
 # Error checking
 
@@ -238,7 +240,7 @@ hipMemcpy(x, dx, num_bytes, hipMemcpyDefault);
 :::
 
 ```cpp
-#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+#define HIP_ERRCHK(result) hip_errchk(result, __FILE__, __LINE__)
 static inline void hip_errchk(hipError_t result, const char *file, int line) {
     if (result != hipSuccess) {
         printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
@@ -249,7 +251,7 @@ static inline void hip_errchk(hipError_t result, const char *file, int line) {
 
  // Wrap API call with the macro
 void* alloc(size_t bytes) {
-  void* ptr = nullptr;
+  void *ptr = nullptr;
   HIP_ERRCHK(hipMalloc(&ptr, bytes));
   return ptr;
 }
@@ -261,6 +263,7 @@ void* alloc(size_t bytes) {
 # Example: fill (complete device code and launch)
 
 <small>
+
 ::: {.column width=50%}
 ```cpp
 #include <hip/hip_runtime.h>
@@ -312,6 +315,7 @@ int main() {
 }
 ```
 :::
+
 </small>
 
 

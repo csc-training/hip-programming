@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 /* HIP error handling macro */
-#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+#define HIP_ERRCHK(result) hip_errchk(result, __FILE__, __LINE__)
 static inline void hip_errchk(hipError_t result, const char *file, int line) {
     if (result != hipSuccess) {
         printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,

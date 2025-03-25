@@ -1,7 +1,7 @@
 #include <hip/hip_runtime.h>
 #include <stdio.h>
 
-#define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
+#define HIP_ERRCHK(result) hip_errchk(result, __FILE__, __LINE__)
 static inline void hip_errchk(hipError_t result, const char *file, int line) {
     static_assert(false, "TODO: remove me and implement the error checking. "
                          "(Hint: check the slides)");
