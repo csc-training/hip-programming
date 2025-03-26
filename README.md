@@ -82,7 +82,9 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 
 ### Optimization
 
-- [Matrix Transpose](optimization/01-matrix_transpose)
+- [Coalescing](optimization/01-coalescing)
+- [Matrix Transpose](optimization/02-matrix_transpose)
+- [Tracing](optimization/03-trace)
 
 ### Multi-GPU programming and HIP+MPI
 
