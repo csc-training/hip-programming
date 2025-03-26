@@ -7,11 +7,18 @@ Skeleton code [p2pcopy.cpp](p2pcopy.cpp) tests peer to peer device access betwee
 
 In order to make the code work, you need to fix the missing parts marked with TODOs.
 
-NOTE: Remember to request 2 GPUs when running this exercise. On Lumi, use
+NOTE: Remember to request 2 GPUs when running this exercise. 
+On Lumi, use
 ```
 srun --account=XXXXXX --partition=dev-g -N1 -n1 --cpus-per-task=1 --gpus-per-task=2 --time=00:15:00 ./a.out
 ```
-and on Mahti use
+
+When the code is running correct run it several times and observe the bandwidths. What are the bandwidths=?
+
+Disable the DMA engine with `export HSA_ENABLE_SDMA=0` and then try again code. What are the results now?
+
+
+On Mahti use
 ```
 srun --account=XXXXXX --partition=gputest -N1 -n1 --cpus-per-task=1 --gres=gpu:v100:2 --time=00:15:00 ./a.out
 ```
