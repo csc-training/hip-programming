@@ -14,7 +14,11 @@ static inline void hip_errchk(hipError_t result, const char *file, int line) {
 
 /*
 TODO: add a device kernel that calculates y = a * x + y for vectors x, y and
-constant a Hints: What attribute(s) do you need to add on a kernel declaration?
+constant a
+
+Hints:
+
+What attribute(s) do you need to add on a kernel declaration?
   - __device__?
   - __global__?
   - __shared__?
