@@ -3,7 +3,7 @@
 Write a device kernel that performs the double precision BLAS operation
 **dcopy**, i.e. `y = x` using GPU threads in a 2D grid.
 
-- Assume that the vectors `x` and `y` are used to store a 600x400 matrix (in row-major format)
+- Assume that the vectors `x` and `y` are used to store a 400x600 matrix (in row-major format)
 - Initialise the matrix `x` with some values on the CPU
 - Allocate memory for `x` and `y` on the device
 - Copy the host `x` to the device `x`
