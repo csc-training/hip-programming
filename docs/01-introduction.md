@@ -899,6 +899,9 @@ Let's see if we've learned something.
 
 Say, we have the following GPU.
 :::
+
+https://siili.rahtiapp.fi/s/gpmWnLY8q#
+
 ![](img/model_gpu.png){.center width=65%}
 
 # Questions?
