@@ -105,7 +105,7 @@ hipLaunchKernelGGL(kernel_name,
    * does not require a working CUDA installation
    * can also convert CUDA code, that is not syntactically correct
 - **hipify-clang**
-   * uses the Clang compiler CUDA source into an Abstract Syntax Tree (AST)
+   * translates CUDA source into an Abstract Syntax Tree (AST) using `clang`
    * generates the HIP source from the AST
    * needs to be able to compile the code
    * requires a working CUDA installation
@@ -202,3 +202,7 @@ implementations
 
 
 **Note!** Not all features have one-to-one equivalent!
+- **warp size** is 32 vs. **wave size** of 64
+- `__shfl_down_sync` &rArr; &rarr; `__shfl_down`
+- dynamic parallelism not supported
+- cooperative groups???
