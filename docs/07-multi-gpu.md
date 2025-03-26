@@ -220,7 +220,7 @@ hipError_t hipMemcpy(void* dst, void* src, size_t count, hipMemcpyKind kind)
 ```cpp
 hipError_t hipMemcpyPeer(void* dst, int  dstDev, void* src, int srcDev, size_t count)
 ```
-* falls back to a normal copy through host memory whn  direct peer to peer access is not available
+* falls back to a normal copy through host memory when direct peer to peer access is not available
 
 
 
