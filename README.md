@@ -47,6 +47,10 @@ part of the EuroCC training activities at CSC.
 
 
 Link to [slides](https://csc-training.github.io/hip-programming/)
+
+## Poll
+[Which technologies have you used?](https://strawpoll.com/w4nWWYReQnA)
+
 ## Exercises
 
 [General instructions](exercise-instructions.md)
