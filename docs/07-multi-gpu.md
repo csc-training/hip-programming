@@ -270,7 +270,7 @@ hipSetDevice(nodeRank % deviceCount);
 - there are various options to write a multi-GPU program
 - use `hipSetDevice()` to select the device, and the subsequent HIP calls
   operate on that device
-- ooften best to use one GPU per process, and let MPI handle data transfers between GPUs 
+- often best to use one GPU per process, and let MPI handle data transfers between GPUs 
 - GPU-aware MPI is required when passing device pointers to MPI
 
      * Using host pointers does not require any GPU awareness
