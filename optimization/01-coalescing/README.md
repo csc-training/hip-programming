@@ -26,7 +26,9 @@ issues to the L2 cache (TCC) and `TCC_EA` refers to how many reads L2 cache
 controller issues to the interconnect (`EA`).
 
 The options `--list-derived` and `--list-basic` will list the available derived
-and basic counters. 
+and basic counters. Note that `rocprof --list-derived` and `rocprof
+--list-basic` must be executed on a node with GPU present because it queries
+the available counters from the hardware itself.
 
 An MI250x GCD has 8 MiB of L2 memory shared across the CUs and each CU has 16
 kiB of L1 memory.
@@ -44,6 +46,6 @@ memory requests using the `rocprof` profiler.
 - How many device global memory read requests (64 B and 32 B combined) are
   issued?
 - The number of L2 read requests drop when the stride is around 4096. Why?
-    *Hint*: (WIP) Collect the values of `index` for some block in a 16x16 matrix.
-- Profile similarly matrix transpose codes in exercise `01-matrix_transpose`. (WIP)
+    *Hint*: Print out the values of `index` for some block in a 16x16 matrix.
+    Are some of those indices adjacent within a warp?
     
