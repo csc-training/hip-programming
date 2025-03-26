@@ -203,7 +203,7 @@ implementations
 
 **Note!** Not all features have one-to-one equivalent!
 
-- **warp size** is 32 vs. **wave size** of 64
+- **warp** size is 32 vs. **wavefront** size of 64
 - `__shfl_down_sync` &rArr; `__shfl_down`
 - dynamic parallelism not supported on AMD devices
 - cooperative groups not supported on AMD devices
