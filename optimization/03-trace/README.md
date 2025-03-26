@@ -1,6 +1,6 @@
 # Tracing with rocprof
 
-In this exercise your task is to trace execution of `streams.cpp` exercise
+In this exercise your task is to trace execution of `streams/02-concurrency` exercise
 solution.
 
 Rocprof can be used to trace HIP API calls, among others, with option
