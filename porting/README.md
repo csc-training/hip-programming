@@ -40,14 +40,19 @@ This command works as well on Nvidia platforms with HIP installed.
 
 2. Compile CUDA codes on AMD platorms using `hipcc` + HOP and compile HIP codes on Nvidia platforms using `nvcc` + HOP.
 
-**CUDA** &rArr; **HIP**
+First you neeed to clone the HOP repository in your working folder on scratch:
+```
+git clone https://github.com/cschpc/hop.git
+``` 
+
+**CUDA** &rArr; **HIP** on LUMI
 ```
 export HOP_ROOT=/path/to/hop
 export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/cuda -DHOP_TARGET_HIP
 CC -x hip $HOP_FLAGS hello.cu -o hello
 ./hello
 ```
-**HIP**  &rArr; **CUDA**
+**HIP**  &rArr; **CUDA** on Mahti or Puhti
 ```
 export HOP_ROOT=/path/to/hop
 export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/hip -DHOP_TARGET_CUDA
