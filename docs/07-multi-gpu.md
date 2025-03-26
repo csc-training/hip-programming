@@ -77,32 +77,32 @@ A GPU context is an execution environment that manages resources such as memory 
 
 # Device Selection and Management
 
-- Return the number of hip capable devices by `count`
+- return the number of hip capable devices by `count`
 ```cpp
 hipError_t hipGetDeviceCount(int *count)
 ```
 - GPU device numbering starting from 0
-- Set device as the current device for the calling host thread
+- set device as the current device for the calling host thread
 ```cpp
 hipError_t hipSetDevice(int device)
 ```
-- Return the current device for the calling host thread by `device`
+- return the current device for the calling host thread by `device`
 ```cpp
 hipError_t hipGetDevice(int *device)
 ```
-- Reset and destroy all current device resources
+- reset and destroy all current device resources
 ```cpp
 hipError_t hipDeviceReset(void)
 ```
 
 # Querying Device Properties
 
-* One can query the properties of different devices in the system using
+* one can query the properties of different devices in the system using
   `hipGetDeviceProperties()` function
-    * No context needed
-    * Provides e.g. name, amount of memory, warp size, support for unified
+    * no context needed
+    * provides e.g. name, amount of memory, warp size, support for unified
       virtual addressing, etc.
-    * Useful for code portability
+    * useful for code portability
 
 Return the properties of a HIP capable device by `prop`
 ```
@@ -113,12 +113,12 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
 # Multi-GPU Programming Models
 
 <div class="column">
-* One GPU per process
-    * Syncing is handled through message passing (e.g. MPI)
-* Many GPUs per process
-    * Process manages all context switching and syncing explicitly
-* One GPU per thread
-    * Syncing is handled through thread synchronization requirements
+* one GPU per process
+    * syncing is handled through message passing (e.g. MPI)
+* many GPUs per process
+    * process manages all context switching and syncing explicitly
+* one GPU per thread
+    * syncing is handled through thread synchronization requirements
 </div>
 
 <div class="column">
@@ -165,15 +165,15 @@ for(unsigned n = 0; n < num_devices; n++) {
 
 # Many GPUs per Process, One GPU per Thread
 
-* One GPU per CPU thread
-    * E.g. one OpenMP CPU thread per GPU being used
+* one GPU per CPU thread
+    * e.g. one OpenMP CPU thread per GPU being used
 * HIP is threadsafe
-    * Multiple threads can call the functions at the same time
-* Each thread can create its own context on a different GPU
+    * multiple threads can call the functions at the same time
+* each thread can create its own context on a different GPU
     * `hipSetDevice()` sets the device and create a context per thread
-    * Easy device management with no changing of device
-* From the point of view of a single thread, the implementation closer to a single-GPU case
-* Communication between threads still not trivial
+    * easy device management with no changing of device
+* from the point of view of a single thread, the implementation closer to a single-GPU case
+* communication between threads still not trivial
 
 
 # Many GPUs per Process, One GPU per Thread: Code Example
@@ -191,10 +191,10 @@ for(unsigned n = 0; n < num_devices; n++) {
 
 # Direct Peer to Peer Access
 
-* Access peer GPU memory directly from another GPU
-    * Pass a pointer to data on GPU 1 to a kernel running on GPU 0
-    * Transfer data between GPUs without going through host memory
-    * Lower latency, higher bandwidth
+* access peer GPU memory directly from another GPU
+    * pass a pointer to data on GPU 1 to a kernel running on GPU 0
+    * transfer data between GPUs without going through host memory
+    * lower latency, higher bandwidth
 
 ```cpp
 // Check peer accessibility
@@ -206,41 +206,42 @@ hipError_t hipDeviceEnablePeerAccess(int peerDevice, unsigned int flags)
 // Disable peer access
 hipError_t hipDeviceDisablePeerAccess(int peerDevice)
 ```
-* Between AMD GPUs, the peer access is always enabled (if supported)
+* between AMD GPUs, the peer access is always enabled (if supported)
 
 # Peer to Peer Communication
 
-* Devices have separate memories
-* With devices supporting unified virtual addressing, `hipMemCpy()` with
+* devices have separate memories
+* with devices supporting unified virtual addressing, `hipMemCpy()` with
   `kind=hipMemcpyDefault`, works:
 ```cpp
 hipError_t hipMemcpy(void* dst, void* src, size_t count, hipMemcpyKind kind)
 ```
-* Other option which does not require unified virtual addressing
+* other option which does not require unified virtual addressing
 ```cpp
 hipError_t hipMemcpyPeer(void* dst, int  dstDev, void* src, int srcDev, size_t count)
 ```
-* If direct peer to peer access is not available or implemented, the functions should fall back to a normal copy through host memory
+* falls back to a normal copy through host memory whn  direct peer to peer access is not available
 
 
 
 # Compiling MPI+HIP Code
 
-* Trying to compile code with any HIP calls with other than the `hipcc`
+
+* trying to compile code with any HIP calls with other than the `hipcc`
   compiler can result in errors
-* Either set MPI compiler to use `hipcc`, eg for OpenMPI:
+* either set MPI compiler to use `hipcc`, eg for OpenMPI:
 ```bash
 OMPI_CXXFLAGS='' OMPI_CXX='hipcc'
 ```
 * or separate HIP and MPI code in different compilation units compiled with
   `mpicxx` and `hipcc`
     * Link object files in a separate step using `mpicxx` or `hipcc`
-* on LUMI, `cc` and `CC` wrappers know about both MPI and HIP
+* **on LUMI, `cc` and `CC` wrappers know about both MPI and HIP**
 
 # Selecting the Correct GPU
 
-* Typically all processes on the node can access all GPUs of that node
-* The following implementation allows utilizing all GPUs using one process per GPU
+* typically all processes on the node can access all GPUs of that node
+* implementation for using 1 GPU per 1 MPI process
 
 ```cpp
 int deviceCount, nodeRank;
@@ -257,21 +258,21 @@ hipSetDevice(nodeRank % deviceCount);
 # GPU-GPU Communication through MPI
 
 * CUDA/ROCm aware MPI libraries support direct GPU-GPU transfers
-    * Can take a pointer to device buffer (avoids host/device data copies)
-* Unfortunately, currently no GPU support for custom MPI datatypes (must use a
+    * can take a pointer to device buffer (avoids host/device data copies)
+* currently no GPU support for custom MPI datatypes (must use a
   datatype representing a contiguous block of memory)
-    * Data packing/unpacking must be implemented application-side on GPU
-* On LUMI, enable on runtime by `export MPICH_GPU_SUPPORT_ENABLED=1`
-* Having a fallback for pinned host staging buffers is a good idea.
+    * data packing/unpacking must be implemented application-side on GPU
+* on LUMI, enable on runtime by `export MPICH_GPU_SUPPORT_ENABLED=1`
+* having a fallback for pinned host staging buffers is a good idea.
 
 # Summary
 
-- There are various options to write a multi-GPU program
-- Use `hipSetDevice()` to select the device, and the subsequent HIP calls
+- there are various options to write a multi-GPU program
+- use `hipSetDevice()` to select the device, and the subsequent HIP calls
   operate on that device
-- If you have an MPI program, it is often best to use one GPU per process, and
-  let MPI handle data transfers between GPUs 
+- ooften best to use one GPU per process, and let MPI handle data transfers between GPUs 
 - GPU-aware MPI is required when passing device pointers to MPI
 
      * Using host pointers does not require any GPU awareness
 
+- on LUMI binding is important
