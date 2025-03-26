@@ -18,3 +18,15 @@ Supercomputers like LUMI are shared resources, meaning multiple users are using 
 To run something on LUMI, you need to use SLURM to submit a job.
 
 Read the [LUMI documentation](https://docs.lumi-supercomputer.eu/runjobs/) on running jobs to find out more.
+
+## Motivation for the course
+
+Why do we teach GPU programming? Why should you learn to program GPUs?
+
+Because most of the Top 500 supercomputers use (and derive most of their compute cabability from) GPUs
+--> if you use any of these supercomputers, you cannot avoid using GPUs.
+
+Why are most of the Top 500 supercomputers using GPUs?
+
+1. Because GPUs are designed and optimized to solve problems commonly encountered in HPC and ML/AI: floating point operations, matrix multiplications.
+2. Because of power limitations: performance per Watt is much greater for GPUs than CPUs.
