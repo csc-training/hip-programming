@@ -122,11 +122,11 @@ void recurringAllocMallocAsync(int nSteps, int size)
   {
     int *d_A;
     // Allocate pinned device memory
-    #error allocate memory with cudaMallocAsync for d_A of size ints in stream
+    #error allocate memory with hipMallocAsync for d_A of size ints in stream
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, stream>>>(d_A, size);
     // Free allocation
-    #error free d_A allocation using cudaFreeAsync in stream
+    #error free d_A allocation using hipFreeAsync in stream
   }
   // Synchronization
   #error synchronize stream here
