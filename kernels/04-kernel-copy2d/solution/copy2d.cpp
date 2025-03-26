@@ -179,7 +179,7 @@ __global__ void copy2d(double *dst, double *src, size_t num_cols,
     // clang-format on
 }
 
-namespace index_visualisation { void output() };
+namespace index_visualisation { void output(); }
 
 int main() {
     static constexpr size_t num_cols = 600;
