@@ -65,7 +65,7 @@ void case_0(hipEvent_t *start_event, hipEvent_t *stop_event, hipStream_t *stream
 
   // Copy data to device, launch kernel, copy data back to host
   HIP_ERRCHK(hipMemcpy(d_a, a, n_total * sizeof(float), hipMemcpyHostToDevice));
-  kernel<<<gridsize, blocksize>>>(d_a, n_total);
+  kernel<<<gridsize, blocksize>>>(d_a, n_total, 0);
   HIP_ERRCHK(hipMemcpy(a, d_a, n_total * sizeof(float), hipMemcpyDeviceToHost));
 
   // Record the stop event for the total time
