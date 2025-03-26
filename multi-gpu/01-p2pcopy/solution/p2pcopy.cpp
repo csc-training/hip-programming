@@ -17,6 +17,7 @@ void copyP2P(int p2p, int gpu0, int gpu1, int* dA_0, int* dA_1, int size) {
 
     // Do a dummy copy without timing to remove the impact of the first one
     hipMemcpy(dA_0, dA_1, size, hipMemcpyDefault);
+    hipMemcpy(dA_1, dA_0, size, hipMemcpyDefault);
 
     // Do a series of timed P2P memory copies
     int N = 10;
