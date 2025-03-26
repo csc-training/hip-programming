@@ -34,7 +34,7 @@ export PATH=$ROCM_PATH/bin:$PATH
 
 The CUDA code can be converted now  using:
 ```
-hipify-clang <file>.cu --inplace --print stats  --cuda-path=/usr/local/cuda-11.4 -I /usr/local/cuda-11.4/include
+hipify-clang <file>.cu --inplace --print-stats  --cuda-path=/usr/local/cuda-11.4 -I /usr/local/cuda-11.4/include
 ```
 This command works as well on Nvidia platforms with HIP installed. 
 
