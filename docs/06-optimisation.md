@@ -288,7 +288,7 @@ if ( (tid%2) == 0) {
 ```cpp
 bool mask = (tid%2) == 0;
 c[tid] = mask*(b[tid]-a[tid]);
-c[tid] = mask*(a[tid]-b[tid]);
+c[tid] += mask*(a[tid]-b[tid]);
 ```
 "Solution"
 ```cpp
