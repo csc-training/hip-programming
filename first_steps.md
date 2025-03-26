@@ -29,4 +29,4 @@ Because most of the Top 500 supercomputers use (and derive most of their compute
 Why are most of the Top 500 supercomputers using GPUs?
 
 1. Because GPUs are designed and optimized to solve problems commonly encountered in HPC and ML/AI: floating point operations, matrix multiplications.
-2. Because of power limitations: performance per Watt is much greater for GPUs than CPUs.
+2. Because of power limitations: performance per Watt is much greater for GPUs than CPUs: https://top500.org/statistics/efficiency-power-cores/
