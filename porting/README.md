@@ -19,6 +19,7 @@ The image can be created using:
 ```
 $ singularity pull docker://nvcr.io/nvidia/cuda:11.4.3-devel-ubuntu20.04
 ```
+This is step was already done, the image's path is `/projappl/project_462000877/apps/cuda_11.4.3-devel-ubuntu20.04.sif`
 Then load all the modules necessary to compile HIP codes on LUMI. 
 ```
 module load LUMI/24.03
@@ -27,7 +28,7 @@ module load rocm
 ```
 Finally open a shell in the container which has access to the working directory and the `rocm` 
 ```
-singularity shell -B $PWD,/opt:/opt cuda_11.4.0-devel-ubuntu20.04.sif 
+singularity shell -B $PWD,/opt:/opt /projappl/project_462000877/apps/cuda_11.4.3-devel-ubuntu20.04.sif 
 export PATH=$ROCM_PATH/bin:$PATH
 ```
 
