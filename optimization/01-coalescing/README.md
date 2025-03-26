@@ -26,9 +26,11 @@ issues to the L2 cache (TCC) and `TCC_EA` refers to how many reads L2 cache
 controller issues to the interconnect (`EA`).
 
 The options `--list-derived` and `--list-basic` will list the available derived
-and basic counters. Note that `rocprof --list-derived` and `rocprof
---list-basic` must be executed on a node with GPU present because it queries
-the available counters from the hardware itself.
+and basic counters. 
+
+*that Note*: `rocprof --list-derived` and `rocprof --list-basic` must be
+executed on a node with GPU present because it queries the available counters
+from the hardware itself.
 
 An MI250x GCD has 8 MiB of L2 memory shared across the CUs and each CU has 16
 kiB of L1 memory.
