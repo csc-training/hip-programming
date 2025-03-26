@@ -275,4 +275,4 @@ hipSetDevice(nodeRank % deviceCount);
 
      * Using host pointers does not require any GPU awareness
 
-- on LUMI binding is important
+- on LUMI GPU binding is important
