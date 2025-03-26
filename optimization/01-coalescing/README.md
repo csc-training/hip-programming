@@ -1,5 +1,3 @@
-**WIP: revise and rewrite**
-
 # Performance counters and coalesced memory access
 
 ## Background and rocprof
@@ -28,7 +26,7 @@ controller issues to the interconnect (`EA`).
 The options `--list-derived` and `--list-basic` will list the available derived
 and basic counters. 
 
-*that Note*: `rocprof --list-derived` and `rocprof --list-basic` must be
+*Note*: `rocprof --list-derived` and `rocprof --list-basic` must be
 executed on a node with GPU present because it queries the available counters
 from the hardware itself.
 
@@ -50,4 +48,5 @@ memory requests using the `rocprof` profiler.
 - The number of L2 read requests drop when the stride is around 4096. Why?
     *Hint*: Print out the values of `index` for some block in a 16x16 matrix.
     Are some of those indices adjacent within a warp?
-    
+- *Hint*: load and open the `metrics.csv` file with libreoffice or some other
+  spreadsheet editor for quick manual analyses
