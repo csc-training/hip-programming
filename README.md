@@ -46,6 +46,8 @@ part of the EuroCC training activities at CSC.
 | 15:45-16:00 | Close-up | 
 
 
+## Slides
+
 Link to [slides](https://csc-training.github.io/hip-programming/)
 
 ## First steps
