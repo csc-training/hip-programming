@@ -130,7 +130,7 @@ hipcc -lgfortran "--gpu-architecture=sm_80" -I$HIPFORT_HOME/include/hipfort/nvpt
 ftn -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" \
     -L$HIPFORT_HOME/lib -lhipfort-amdgcn -c <fortran_code>.f90
 
-hipcc -c <hip_kernels>.cpp
+hipcc --offload-arch=gfx90a -c <hip_kernels>.cpp
 
 ftn  -I$HIPFORT_HOME/include/hipfort/amdgcn "-DHIPFORT_ARCH=\"amd\"" \
      -L$HIPFORT_HOME/lib -lhipfort-amdgcn <fortran_code>.o <hip_kernels>.o -o main 
