@@ -186,10 +186,10 @@ CC -x cu $HOP_FLAGS hello.cpp -o hello
 - write code in CUDA or HIP or a mix of both
 - use generic identifiers as intermediates in the translation
   	* `gpuMalloc, gpuMemcpyHostToDevice, …`
+- use `gpuLaunchKernel()` instead of `<<<...>>>()`  
 - when needed, wrapper functions can be used to write backend-specific
 implementations
 - avoid implicit header includes
-- use `gpuLaunchKernel()` instead of `<<<...>>>()`  
 
 
 # Summary
