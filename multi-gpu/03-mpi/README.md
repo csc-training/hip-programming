@@ -25,7 +25,7 @@ MPICH_GPU_SUPPORT_ENABLED=1
 For running, one should use two GPUs and two MPI processes:
 
 ```
-srun --account=XXXXXX --partition=small-g -N1 -n2 --cpus-per-task=1 --gpus-per-task=2 --time=00:15:00 ./a.out #  # The reservation is for small-g partition
+srun --account=XXXXXX --partition=small-g -N1 -n2 --cpus-per-task=1 --gpus-per-node=2 --time=00:15:00 ./a.out #  # The reservation is for small-g partition
 ```
 
 
