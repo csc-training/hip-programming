@@ -49,14 +49,14 @@ git clone https://github.com/cschpc/hop.git
 **CUDA** &rArr; **HIP** on LUMI
 ```
 export HOP_ROOT=/path/to/hop
-export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/cuda -DHOP_TARGET_HIP
+export HOP_FLAGS="-I$HOP_ROOT -I$HOP_ROOT/source/cuda -DHOP_TARGET_HIP"
 CC -x hip $HOP_FLAGS hello.cu -o hello
 ./hello
 ```
 **HIP**  &rArr; **CUDA** on Mahti or Puhti
 ```
 export HOP_ROOT=/path/to/hop
-export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/hip -DHOP_TARGET_CUDA
+export HOP_FLAGS="-I$HOP_ROOT -I$HOP_ROOT/source/hip -DHOP_TARGET_CUDA"
 CC -x cu $HOP_FLAGS hello.cpp -o hello
 ./hello
 ```
