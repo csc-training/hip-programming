@@ -77,7 +77,6 @@ lang:     en
 
 
 ```
-Slow: Write to global device memory `K` times
 :::
 :::{.column width=49%}
 ```cpp
@@ -89,7 +88,6 @@ Slow: Write to global device memory `K` times
     C[y+x*M] = tmp;
   }
 ```
-Fast: Accumulate to `tmp` variable and write to global memory once
 :::
 ::::::
 
