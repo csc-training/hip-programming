@@ -25,11 +25,11 @@ istat= hiprandCreateGenerator(gen, HIPRAND_RNG_PSEUDO_DEFAULT)
 ```
 Here, `istat` is an `integer(c_size_t)` variable and it is used to store the a value indicating if the call was succesful or failed, while `gen` is a pointer to the random number generator. In Fortran is declared as a `type(c_ptr)` variable. The generator type is set to `HIPRAND_RNG_PSEUDO_DEFAULT`, which is the default pseudorandom number generator.
 
-A GPU array is filled withuniform random using:
+A GPU array is filled with uniform distributed random numbers using:
 ```
 istat= hiprandGenerateUniform(gen, A_d, n)
 ```
-In this call the argument `A_d` is a `type(c_ptr)` variable in which the numbers are store. It is assumed that the memory for it has been previously allocated. The last argument, `n` is the amount of random numbers to generate (should be the same as the size of the array). 
+In this call the argument `A_d` is a `type(c_ptr)` variable in which the numbers are stored. It is assumed that the memory for it has been previously allocated. The last argument, `n` is the amount of random numbers to generate (should be the same as the size of the array). 
 
 In the end there is one more step, counting the points inside the circle `(x^2+y^2<1)`. For this, first the arrays `x_d` and `y_d` are transfered from GPU to CPU. This is done as well similarly as in  the [saxpy](../saxpy/hip) example.
 
@@ -53,7 +53,7 @@ __global__ void countInsideCircle(float* x_d, float* y_d, int* inside_d,  int64_
     }
 }
 ```
-The kernel checks each point in parallel and increments `inside_d` if the point lies within the circle. The `atomicAdd` function is used to avoid race conditions when updating the counter. In this code `atomicAdd` is called for each point inside circle, but an optimized version would much less calls. 
+The kernel checks each point in parallel and increments `inside_d` if the point lies within the circle. The `atomicAdd` function is used to avoid race conditions when updating the counter. In this code `atomicAdd` is called for each point inside circle, but an optimized version would have much less calls. 
 In this case there is no need for transfering the arrays with the random numbers to the CPU. Only the result of the counting needs to be transferd to CPU. 
 Note that an additional variable is needed to store the GPU result (could be `inside_d`). The actual kernel and its wrapper are found in the [hip_kernels.cpp](hip_kernels.cpp), but an interface is needed in the main fortran code to be able to call it. 
 
