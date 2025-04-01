@@ -30,7 +30,7 @@ lang:     en
 | cuSPARSE | hipSPARSE | rocSPARSE  | Sparse BLAS + SMV                                                                   |
 | cuSOLVER | hipSOLVER | rocSOLVER  | Lapack library                                                                      |
 | AMG-X    |           | rocALUTION | Sparse iterative solvers and preconditioners with Geometric and Algebraic MultiGrid |
-| Thrust   | hipThrust | rocThrust  | C++ parallel algorithms library                                                     |
+| Thrust   |           | rocThrust  | C++ parallel algorithms library                                                     |
 
 
 # Libraries (II)
