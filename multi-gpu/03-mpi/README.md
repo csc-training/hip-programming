@@ -34,7 +34,7 @@ available with:
 ```
 ml openmpi/4.1.4-cuda
 ```
-Run iwth two MPI tasks and two GPUs:
+For running, one should use two GPUs and two MPI processes:
 ```
 srun --account=XXXXXX --partition=gputest -N1 -n2 --cpus-per-task=1 --gres=gpu:v100:2 --time=00:15:00 ./a.out
 ```
