@@ -13,7 +13,7 @@ A skeleton code is provided in [vector-sum.cpp](vector-sum.cpp). Your task is to
 
 NOTE: Remember to request 2 GPUs when running this exercise. On Lumi, use
 ```
-srun --account=XXXXXX --partition=small-g -N1 -n1 --cpus-per-task=1 --gpus-per-task=2 --time=00:15:00 ./a.out  # The reservation is for small-g partition
+srun --account=XXXXXX --partition=small-g -N1 -n1 --cpus-per-task=1 --gpus-per-node=2 --time=00:15:00 ./a.out  # The reservation is for small-g partition
 ```
 and on Mahti use
 ```
