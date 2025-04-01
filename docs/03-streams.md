@@ -134,7 +134,7 @@ hipError_t hipStreamDestroy ( hipStream_t stream )
 
 ```cpp
 hipStream_t stream[3];
-for (int i = 0; i<3; ++i) {
+for (int i = 0; i<3; ++i) 
   hipStreamCreate(&stream[i]);
 
 for (int i = 0; i < 3; ++i) {
