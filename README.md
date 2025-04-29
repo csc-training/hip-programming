@@ -95,7 +95,7 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 
 ### Porting to HIP
 
-- [HIPIFY Tools](porting)
+- [Converting Tools & Portability](porting)
 
 #### Bonus
 - [Heat equation with HIP](bonus/heat-equation)
