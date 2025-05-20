@@ -80,21 +80,14 @@ The common part for all of these examples includes: `srun --reservation=HIPcours
 
 ### HIPFORT on LUMI
 
-For hipfort one can use the same modules:
+Because the default `HIPFORT` installation only supports gfortran,  we use a custom installation  prepared in the training project.  This way full compatibility  with the Cray Fortran compiler  and  as well as direct use of HIPFFORT with the Fortran Cray Compiler wrapper (ftn) is ensured.
+For compiling hipfort one can use the modules:
 
-```shell
-module load PrgEnv-cray
-module load craype-accel-amd-gfx90a
-module load rocm
-```
-or with the same effect these ones:
 ```bash
-module load LUMI/24.0.3
+module load LUMI/24.3
 module load partition/G
 module load rocm
 ```
-Because the default `HIPFORT` installation only supports gfortran,  we use a custom installation  prepared in the training project.
-This package provide Fortran modules compatible with the Cray Fortran compiler as well as direct use of HIPFFORT with the Fortran Cray Compiler wrapper (ftn).
 
 The package was installed via:
 ```bash
