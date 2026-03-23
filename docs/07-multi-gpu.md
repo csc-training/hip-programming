@@ -135,7 +135,7 @@ hipError_t hipGetDeviceProperties(struct hipDeviceProp *prop, int device)
   easier and less invasive (if MPI is used anyway)
     * apart from each process selecting a different device, the implementation
       looks much like a single-GPU program
-    * easy manage device selection using environment variables `ROC_VISIBLE_DEVICES` or `CUDA_VISIBLE_DEVICES`
+    * easy to manage device selection using environment variables `ROC_VISIBLE_DEVICES` or `CUDA_VISIBLE_DEVICES`
 
 
 # Many GPUs per Process
