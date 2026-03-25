@@ -5,53 +5,23 @@ part of the EuroCC training activities at CSC.
 
 ## Agenda
 
-
-Day 1, Monday 11.5. 2026, 9:00-16:00 (7h-1h = 6h ~ 4.5h)
-
-- How to use supercomputer (45min) (JE)
-  - LUMI/Mahti login, slurm usage, couple of git spells (git clone)
-  - What is CSC?
-- Introduction to GPUs and GPU programming (JK)
-- Basic usage, memory allocation, memory copies and kernels (JK)
-- Analyzing simple traces (JK)
-
-Day 2, Tuesday 12.5. 2026, 9:00-16:00
-
-- More advanced memory allocation/access (katso kesäkoulusta) (LS)
-  - Pinned, async, etc
-  - Unified memory (with possibly caveats)
-- Streams and events
-- More advanced synchronization
-
-Day 3, Wednesday 13.5.2026, 9:00-16:00
-
-- Kernel optimisation and libraries (JE)
-- Shared local memory
-  - Reduction
-  - Transpose (w/o bank conflict material (that in exercise maybe))
-- HOP
-- Multi-GPU programming
-
----
-
-**OLD MATERIAL BELOW***
-
 ### Day 1
 
 | Time | Topic |
 | ---- | ----- |
-| 09:00–09:30 | Welcome, LUMI access, slurm, git, web interface (JL) |
+| 09:00–09:15 | Welcome, LUMI access, slurm, git, web interface (JE) |
+| 09:15-09:30 | What is CSC? |
 | 09:30–09:45 | Break/debugging access |
-| 09:45–10:30 | Introduction to GPU programming (JL) |
+| 09:45–10:30 | Introduction to GPU's and GPU programming (JK) |
 | 10:30–10:45 | Break & Snacks |
-| 10:45-11:30 | HIP and GPU kernels (JL) |
+| 10:45-11:30 | Basic usage, memory allocation and kernels (JK) |
 | 11:30-11:45 | Break |
 | 11:45-12:15 | Exercises |
 | 12:15-13:00 | Lunch |
-| 13:00-13:45 | Streams, events, and synchronization (JK) |
+| 13:00-13:45 | Basic usage cont. (JK) |
 | 13:45-14:00 | Break |
 | 14:00-14:30 | Exercises |
-| 14:30-15:15 | Memory allocations, access and unified memory (JK) |
+| 14:30-15:15 | Analyzing simple traces (JK) |
 | 15:15-15:30 | Break |
 | 15:30-16:00 | Exercises |
 | 16:00-16:15 | Day summary |
@@ -61,19 +31,48 @@ Day 3, Wednesday 13.5.2026, 9:00-16:00
 
 | Time | Topic |
 | ---- | ----- |
-| 09:00–10:00 | Kernel optimizations (JK) |
+| 09:00–09:30 | Day 1 Recap (LS) |
+| 09:30–10:15 | More advanced memory allocation/access (LS) |
 | 10:00–10:15 | Break & Snacks |
 | 10:15–10:45 | Exercises |
-| 10:45-11:30 | Multi-GPU programming, HIP+MPI (CA) |
+| 10:45-11:30 | Streams and events (LS) |
 | 11:30-11:45 | Break |
 | 11:45-12:15 | Exercises |
 | 12:15-13:00 | Lunch |
-| 13:00-13:30 | Fortran and HIP (CA) |
-| 13:30-13:45 | Break |
-| 13:45-14:15 | Exercises  |
-| 14:15-14:45 | Porting Applications to HIP (CA) |
+| 13:00-13:45 | More advanced synchronization (LS) |
+| 13:45-14:00 | Break |
+| 14:00-14:45 | Exercises  |
+| 14:45-15:00 | Lead-up to access patterns and optimizations (LS) |
 | 14:45-15:45 | Break & Exercises |
 | 15:45-16:00 | Close-up | 
+
+### Day 3
+
+| Time | Topic |
+| ---- | ----- |
+| 09:00–10:00 | Kernel optimizations (JE) |
+| 10:00–10:15 | Break & Snacks |
+| 10:15–10:45 | Exercises |
+| 10:45-11:30 | Shared local memory (JE) |
+| 11:30-11:45 | Break |
+| 11:45-12:15 | Exercises |
+| 12:15-13:00 | Lunch |
+| 13:00-13:30 | HOP and performance portability (JE) |
+| 13:30-13:45 | Break |
+| 13:45-14:15 | Exercises  |
+| 14:15-14:45 | Multi-GPU programming (JE) |
+| 14:45-15:45 | Break & Exercises |
+| 15:45-16:00 | Close-up | 
+
+
+Day 3, Wednesday 13.5.2026, 9:00-16:00
+
+- Kernel optimisation and libraries (JE)
+- Shared local memory
+  - Reduction
+  - Transpose (w/o bank conflict material (that in exercise maybe))
+- HOP
+- Multi-GPU programming
 
 
 ## Slides
