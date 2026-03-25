@@ -5,6 +5,37 @@ part of the EuroCC training activities at CSC.
 
 ## Agenda
 
+
+Day 1, Monday 11.5. 2026, 9:00-16:00 (7h-1h = 6h ~ 4.5h)
+
+- How to use supercomputer (45min) (JE)
+  - LUMI/Mahti login, slurm usage, couple of git spells (git clone)
+  - What is CSC?
+- Introduction to GPUs and GPU programming (JK)
+- Basic usage, memory allocation, memory copies and kernels (JK)
+- Analyzing simple traces (JK)
+
+Day 2, Tuesday 12.5. 2026, 9:00-16:00
+
+- More advanced memory allocation/access (katso kesäkoulusta) (LS)
+  - Pinned, async, etc
+  - Unified memory (with possibly caveats)
+- Streams and events
+- More advanced synchronization
+
+Day 3, Wednesday 13.5.2026, 9:00-16:00
+
+- Kernel optimisation and libraries (JE)
+- Shared local memory
+  - Reduction
+  - Transpose (w/o bank conflict material (that in exercise maybe))
+- HOP
+- Multi-GPU programming
+
+---
+
+**OLD MATERIAL BELOW***
+
 ### Day 1
 
 | Time | Topic |
