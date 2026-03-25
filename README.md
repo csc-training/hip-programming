@@ -64,17 +64,6 @@ part of the EuroCC training activities at CSC.
 | 14:45-15:45 | Break & Exercises |
 | 15:45-16:00 | Close-up | 
 
-
-Day 3, Wednesday 13.5.2026, 9:00-16:00
-
-- Kernel optimisation and libraries (JE)
-- Shared local memory
-  - Reduction
-  - Transpose (w/o bank conflict material (that in exercise maybe))
-- HOP
-- Multi-GPU programming
-
-
 ## Slides
 
 Link to [slides](https://csc-training.github.io/hip-programming/)
