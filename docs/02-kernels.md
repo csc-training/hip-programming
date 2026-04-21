@@ -1,63 +1,106 @@
 ---
-title:    HIP and GPU kernels
-subtitle: GPU programming with HIP
-author:   CSC Training
-date:     2025-03
-lang:     en
+title:  HIP, CUDA and GPU kernels
+event:  Introduction to GPU programming
+lang:   en
 ---
+
+# CUDA
+
+::: incremental
+- Software stack offering tools for programming Nvidia GPUs
+- CUDA includes C++ runtime API **and** a kernel programming language
+- standard C++ syntax, `nvcc` compiler driver is used to compile code
+    - nvcc uses a CPU compiler, e.g. `g++` in the background for compiling CPU code
+:::
+
+# CUDA libraries
+
+:::::: {.columns}
+::: {.column width="40%"}
+- Nvidia offers many libraries optimized for GPU code
+- https://developer.nvidia.com/gpu-accelerated-libraries
+- not covered during this lecture
+:::
+::: {.column width="60%"}
+![](img/cuda_math_libraries.png){.center width=100%}
+:::
+::::::
+
+# ROCm
+
+::: incremental
+- Software stack offering tools for programming AMD GPUs
+- ROCm provides the tools for HIP, OpenCL and OpenMP
+    - compilers, libraries for high-level functions, debuggers, profilers and runtimes
+- ROCm is **not** a programming language
+:::
+
+# ROCm libraries
+
+:::::: {.columns}
+::: {.column width="40%"}
+- AMD offers also a wide set of optimised libraries and tools
+- https://www.amd.com/en/products/software/rocm/hpc.html
+- not covered during this lecture
+:::
+::: {.column width="60%"}
+![](img/rocm_libraries.png){.center width=100%}
+:::
+::::::
 
 # HIP
 
 ::: incremental
 - HIP = Heterogeneous-computing Interface for Portability
 - AMD effort to offer a common programming interface that works on both
-      CUDA and ROCm devices
-- HIP is a C++ runtime API **and** a kernel programming language
-    - standard C++ syntax, uses nvcc/clang++ compiler in the background
-    - almost a one-to-one clone of CUDA from the user perspective
-    - allows one to write portable GPU codes
-- AMD offers also a wide set of optimised libraries and tools
+      Nvidia and AMD devices
+- almost a one-to-one clone of CUDA from the user perspective
+- standard C++ syntax, `hipcc` wrapper for compiling
+    - uses `nvcc`/`clang++` compilers behind the scenes
+- allows one to write portable GPU code
 :::
 
-# AMD GPU terminology
-
-<small>
+# GPU terminology
 
 ::: incremental
-- Compute Unit
-    - a parallel vector processor in a GPU
+- compute unit (CU, AMD) / streaming multiprocessor (SM, Nvidia)
+    - a simple processor on a GPU
+    - contains multiple independent vector units
 - kernel
-    - parallel code executed on the GPU
+    - parallel function executed on the GPU
 - thread
-    - individual worker of a wavefront
-- wavefront (cf. CUDA warp)
-    - collection of threads that execute in lockstep and execute the same
-      instructions
-    - each wavefront has fixed number of threads (AMD: 64, NVIDIA 32)
-    - the number of threads, and thus implicitly the number of wavefronts, per workgroup is chosen at kernel launch
-- workgroup (cf. CUDA thread block)
-    - group of threads that are on the GPU at the same time and
-      are part of the same compute unit (CU)
-    - can synchronise together and communicate through memory in the CU
-</small>
+    - individual worker of a wavefront/warp (AMD/Nvidia)
 :::
 
-# HIP programming model
+# GPU terminology
+
+::: incremental
+- wavefront/warp (AMD/Nvidia)
+    - collection of threads: execute the same instruction in lockstep
+    - fixed number of threads (AMD: 64, NVIDIA 32)
+    - threads per block is chosen at kernel launch
+        - wavefronts per block = threads per block / 64
+- workgroup/block of threads (AMD/Nvidia)
+    - group of threads partitioned to wavefronts/warps
+    - execute on the same CU/SM (AMD/Nvidia)
+    - can synchronise together and communicate through memory in the CU/SM (AMD/Nvidia)
+:::
+
+# HIP/CUDA programming model
 
 ::: incremental
 - GPU accelerator is often called a *device* and CPU a *host*
-- parallel code is
-    - launched by the host using the HIP API
+- parallel code:
+    - launched by the host using the API
     - written using the kernel language
-        - from the point of view of a single thread
-        - each thread has a unique ID
+    - from the point of view of a single thread (each thread has a unique ID)
     - executed on a device by many threads
 :::
 
 # GPU programming considerations
 
 ::: incremental
-- parallel nature of GPUs requires many similar tasks that can be executed simultaneously
+- the parallel nature of GPUs requires many similar tasks that can be executed simultaneously
     - one usage is to replace iterations of loop with a GPU kernel call
 - need to adapt CPU code to run on the GPU
     - algorithmic changes to fit the parallel execution model
@@ -66,17 +109,18 @@ lang:     en
       carefully (a common bottleneck)
 :::
 
-# HIP API
+# API
 
 Code on the CPU to control the larger context and the flow of execution
 
 ::: incremental
-- device init and management: `hipSetDevice`
-- memory management: `hipMalloc`
+- device init and management: `hipSetDevice`/`cudaSetDevice`
+- memory management: `hipMalloc`/`cudaMalloc`
 - execution control: `kernel<<<blocks, threads>>>`
-- synchronisation: device, stream, events: `hipDeviceSynchronize`
-- error handling, context handling, ... : `hipGetErrorString`
-- https://rocm.docs.amd.com/projects/HIP/en/latest/reference/hip_runtime_api/modules.html#modules-reference
+- synchronisation: device, stream, events: `hipDeviceSynchronize`/`cudaDeviceSynchronize`
+- error handling, context handling, ... : `hipGetErrorString`/`cudaGetErrorString`
+
+- documentation: [HIP docs](https://rocm.docs.amd.com/projects/HIP/en/latest/reference/hip_runtime_api/modules.html#modules-reference) & [CUDA docs](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)
 :::
 
 # API example: Hello world
@@ -99,13 +143,10 @@ int main(void)
 }
 ```
 
-# HIP kernels
+# Kernels
 
 Code on the GPU from the point of view of a single thread
 
-<small>
-
-:::::: {.column width=45%}
 ::: incremental
 - kernel is a function executed by the GPU
 - kernel must be declared with the `__global__` attribute and the return type must be `void`
@@ -114,23 +155,23 @@ Code on the GPU from the point of view of a single thread
   the device
 - unique thread and block IDs can be used to distribute work
 :::
-::::::
-:::::: {.column width=45%}
+
+# Kernel language
+
+::: incremental
 - attributes: `__device__`, `__global__`, `__shared__`, ...
 - built-in variables: `threadIdx.x`, `blockIdx.y`, ...
 - vector types: `int3`, `float2`, `dim3`, ...
 - math functions: `sqrt`, `powf`, `sinh`, ...
 - atomic functions: `atomicAdd`, `atomicMin`, ...
 - intrinsic functions: `__syncthreads`, `__threadfence`, ...
-::::::
+:::
 
-</small>
+# Kernel example: $\vec{y} = \alpha \vec x + \vec y$ (axpy)
 
-# Kernel example: axpy
 
 ```cpp
-__global__ void axpy(int n, double a, double *x, double *y)
-{
+__global__ void axpy(int n, double a, double *x, double *y) {
     const int tid = threadIdx.x + blockIdx.x * blockDim.x;
 
     if (tid < n) {
@@ -138,12 +179,15 @@ __global__ void axpy(int n, double a, double *x, double *y)
     }
 }
 ```
+![](img/kernel_tid_limit.svg){.center width=70%}
 
 ::: incremental
 - global ID `tid` calculated based on the thread and block IDs
-    - only threads with `tid` smaller than `n` calculate
-    - works only if number of threads ≥ `n`
+- only threads with `tid` smaller than `n` calculate
+- works only if number of threads ≥ `n`
 :::
+
+
 
 
 # Kernel example: axpy (revisited)
@@ -159,28 +203,9 @@ __global__ void axpy(int n, double a, double *x, double *y)
     }
 }
 ```
+![](img/kernel_stride_limit.svg){.center width=70%}
 
 - handles any vector size, but grid size should still be chosen with some care
-
-# Grid: thread hierarchy
-
-<small>
-
-:::::: {.column width=40%}
-::: incremental
-- kernels are executed on a 3D *grid* of threads
-- threads are partitioned into equal-sized *blocks*
-- code is executed by the threads, the grid is a way to organise the
-  work
-- dimension of the grid are set at kernel launch
-- built-in variables to be used within a kernel: `threadIdx`, `blockIDx`, `blockDim`, `gridDim`
-:::
-::::::
-:::::: {.column width=55%}
-![](img/software_hardware_mapping.png){.center width=70%}
-::::::
-
-</small>
 
 # Launching kernels
 
@@ -188,12 +213,12 @@ __global__ void axpy(int n, double a, double *x, double *y)
 - kernels are launched with one of the two following options:
   - CUDA syntax (recommended, because it works both on CUDA and HIP):
   ```cpp
-  somekernel<<<blocks, threads, shmem, stream>>>(args)
+  axpy<<<blocks, threads, shmem, stream>>>(args)
   ```
   
   - HIP syntax:
   ```cpp
-  hipLaunchKernelGGL(somekernel, blocks, threads, shmem, stream, args)
+  hipLaunchKernelGGL(axpy, blocks, threads, shmem, stream, args)
   ```
 
 - grid dimensions are obligatory
@@ -202,144 +227,170 @@ __global__ void axpy(int n, double a, double *x, double *y)
 - kernel execution is asynchronous with the host
 :::
 
-# Simple memory management
+# Grid: thread hierarchy
 
-<small>
+Kernels are executed over a grid:
 
-::: incremental
-- GPU has it's own memory area
-    - allocate device usable memory with `hipMalloc` (cf. `cudaMalloc` and `std::malloc`)
-    - pass the pointer to the kernel
-- copy data to/from device: `hipMemcpy` (cf. `cudaMemcpy`, `std::memcpy`)
-:::
+- grid consists of equisized blocks of threads
+- grid size & dimensionality is set at kernel launch
+```cpp
+// num blocks in grid
+dim3 blocks(10, 1, 1);
 
+// num threads in block
+dim3 threads(1024, 1, 1);
+
+// 10 blocks in a grid, every block is the same size (1024).
+// In total 10 x 1024 = 10240 threads over the entire grid.
+
+// Launch 'axpy' over a grid defined by 'blocks' and 'threads'
+// with arguments 'args'
+axpy<<<blocks, threads>>>(args)
+```
+
+# Grid: thread hierarchy
+
+- threads execute the kernel, grid describes the size & dimensions
+- built-in variables in a kernel: `threadIdx`, `blockIdx`, `blockDim`, `gridDim` relate to the dim3 variables used at kernel launch
+```cpp
+__global__ void axpy(int n, double a, double *x, double *y)
+{
+    // If launched with:
+    // dim3 blocks(10, 1, 1);
+    // dim3 threads(1024, 1, 1);
+    // axpy<<<blocks, threads>>>(...);
+
+    const int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    //              ^ [0, 1023]  ^ [0, 9]      ^ 1024 
+    const int stride = blockDim.x * gridDim.x;
+    //                 ^ 1024       ^ 10
+}
+```
+
+# Memory management
+
+- GPU has its own memory area
+- allocate device usable memory with `hipMalloc`/`cudaMalloc` (cf. `std::malloc`)
+- pass the pointer to the kernel
+\ 
+\ 
 ```cpp
 const size_t num_bytes = sizeof(double) * n;
 void *dx = nullptr;
 hipMalloc(&dx, num_bytes);
+```
 
+# Memory management
+
+- copy data to/from device: `hipMemcpy`/`cudaMemcpy` (cf. `std::memcpy`)
+\ 
+\ 
+```cpp
 // Explicit copy direction with the 'kind' parameter
 hipMemcpy(dx, x, num_bytes, hipMemcpyHostToDevice);
 hipMemcpy(x, dx, num_bytes, hipMemcpyDeviceToHost);
 
 // Implicit copy direction, runtime figures it out
 // from the virtual address of the pointer.
-// Recommended, as it's simpler and less error prone.
+// Recommended: dst and src pointers that do not match
+// the hipMemcpyKind results in undefined behavior.
 hipMemcpy(dx, x, num_bytes, hipMemcpyDefault);
 hipMemcpy(x, dx, num_bytes, hipMemcpyDefault);
 ```
 
-</small>
-
 # Error checking
 
-<small>
-
-::: incremental
-- always use HIP error checking with larger codebases!
+- always use error checking with larger codebases!
   - it has low overhead, and can save a lot of debugging time!
 - some exercises of this course do not have error checking, mostly to focus on the taught topic
-:::
 
 ```cpp
 #define HIP_ERRCHK(result) hip_errchk(result, __FILE__, __LINE__)
 static inline void hip_errchk(hipError_t result, const char *file, int line) {
     if (result != hipSuccess) {
-        printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
-               line);
+        printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file, line);
         exit(EXIT_FAILURE);
     }
 }
 
- // Wrap API call with the macro
-void* alloc(size_t bytes) {
-  void *ptr = nullptr;
-  HIP_ERRCHK(hipMalloc(&ptr, bytes));
-  return ptr;
-}
+// Wrap API call with the macro
+HIP_ERRCHK(hipMalloc(&ptr, bytes));
 
 ```
-</small>
+
+# Error checking kernel launch
+
+- kernel launches may fail due to bad conf param: catch with macro!
+
+```cpp
+#define LAUNCH_KERNEL(kernel, ...) launch_kernel(#kernel, __FILE__, __LINE__, kernel, __VA_ARGS__)
+template <typename... Args>
+void launch_kernel(const char *kernel_name, const char *file, int32_t line,
+                   void (*kernel)(Args...), dim3 blocks, dim3 threads,
+                   size_t num_bytes_shared_mem, hipStream_t stream, Args... args) {
+    auto result = hipGetLastError();
+    kernel<<<blocks, threads, num_bytes_shared_mem, stream>>>(args...);
+    result = hipGetLastError();
+    if (result != hipSuccess) {
+        printf("Error with kernel \"%s\" in %s at line %d\n%s: %s\n",
+               kernel_name, file, line, hipGetErrorName(result),
+               hipGetErrorString(result));
+        exit(EXIT_FAILURE);
+    }
+}
+```
 
 # Example: fill (complete device code and launch)
 
-<small>
-<small>
-
-::: {.column width=45%}
 ```cpp
 #include <hip/hip_runtime.h>
 #include <stdio.h>
 #include <vector>
+#include <error_checking.hpp>
 
 __global__ void fill(int n, double a, double *x) {
     const int tid = threadIdx.x + blockIdx.x * blockDim.x;
     const int stride = gridDim.x * blockDim.x;
 
-    for (int i = tid; i < n; i += stride) {
+    for (int i = tid; i < n; i += stride)
         x[i] = a;
-    }
-}
-
-#define HIP_ERRCHK(result)\
-    hip_errchk(result, __FILE__, __LINE__)
-
-void hip_errchk(
-    hipError_t result,
-    const char *file,
-    int line)
-{
-    if (result != hipSuccess) {
-        printf("\n\n%s in %s at line %d\n", hipGetErrorString(result), file,
-               line);
-        exit(EXIT_FAILURE);
-    }
 }
 ```
-:::
-::: {.column width=45%}
+
+# Example: fill (complete device code and launch)
+
 ```cpp
 int main() {
     static constexpr size_t n = 10000;
     static constexpr size_t num_bytes = n * sizeof(double);
     static constexpr double a = 3.4;
 
-    // allocate device memory
-    void *d_x = nullptr;
+    double *d_x = nullptr;
     HIP_ERRCHK(hipMalloc(&d_x, num_bytes));
 
-    // launch kernel
     const int threads = 256;
     const int blocks = 32;
-    fill<<<blocks, threads>>>(n, a, static_cast<double *>(d_x));
+    LAUNCH_KERNEL(fill, blocks, threads, 0, 0, n, a, d_x));
 
-    // copy data to the host and print
     std::vector<double> x(n);
-    HIP_ERRCHK(hipMemcpy(
-        static_cast<void *>(x.data()),
-        d_x,
-        num_bytes,
-        hipMemcpyDefault));
+    HIP_ERRCHK(hipMemcpy(x.data(), d_x, num_bytes, hipMemcpyDefault));
 
-    printf("%f %f %f %f ... %f %f\n",
-            x[0], x[1], x[2], x[3], x[n-2], x[n-1]);
-
-    return 0;
+    printf("%f %f %f %f ... %f %f\n", x[0], x[1], x[2], x[3], x[n-2], x[n-1]);
 }
 ```
-:::
 
-</small>
-</small>
+---
+
+***TODO: Make a rocprof trace here and show data movement and kernel execution***
 
 # Summary
 
 ::: incremental
-- HIP supports both AMD and NVIDIA GPUs
-- HIP consists of an API and a kernel language
+- HIP supports both AMD and NVIDIA devices
+- CUDA and HIP consist of an API and a kernel language
     - API controls the larger context
     - kernel language for single thread point of view GPU code
 - kernels execute over a grid of (blocks of) threads
     - each block is executed in wavefronts of 64 (AMD) or 32 (NVIDIA) threads
-- kernels need to be declared `__global__` and `void` and are launched with special syntax
+- kernels need to be declared `__global__ void` and are launched with `kernel<<<blocks, threads>>>(arguments)`
 :::

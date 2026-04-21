@@ -1,16 +1,24 @@
 ---
-title:  Introduction to GPU programming
-subtitle: Mental model of a GPU
-author:   CSC Training
-date:     2025-03
-lang:     en
+title:  Introduction
+event:  Introduction to GPU programming
+lang:   en
 ---
 
 # Overview
 
-We are going to construct a mental model of a GPU
+- What is a GPU
+- GPU hardware
+- Programming GPUs
+- Software - hardware mapping
 
-We will start simple and slowly add accuracy and complexity
+# Learning objectives
+
+After this lecture you will know
+
+- when to use GPUs over CPUs
+- where the performance of GPUs come from
+- what the GPU hardware looks like on a high level
+- how the software maps to hardware
 
 # Part 1: What is a GPU? {.section}
 
@@ -22,21 +30,21 @@ GPU is a processor with a dedicated memory area
 
 ::: notes
 
-On the left we have the CPU with it's dedicated memory
+On the left we have the CPU with its dedicated memory
 
-On the right we have the GPU with it's dedicated memory
+On the right we have the GPU with its dedicated memory
 
 :::
 
 # How do I use the GPU?
 
 :::::: {.columns}
-::: {.column width="50%"}
+::: {.column width="40%"}
 To use it, you have to
 
 1. Copy memory from CPU to GPU
 :::
-::: {.column width="50%"}
+::: {.column width="60%"}
 ![](img/copy_h2d.png){.center width=100%}
 :::
 ::::::
@@ -44,13 +52,13 @@ To use it, you have to
 # How do I use the GPU?
 
 :::::: {.columns}
-::: {.column width="50%"}
+::: {.column width="40%"}
 To use it, you have to
 
 1. Copy memory from CPU to GPU
 2. Tell the GPU what to do with that data
 :::
-::: {.column width="50%"}
+::: {.column width="60%"}
 ![](img/do_this_computation.png){.center width=100%}
 :::
 ::::::
@@ -58,14 +66,14 @@ To use it, you have to
 # How do I use the GPU?
 
 :::::: {.columns}
-::: {.column width="50%"}
+::: {.column width="40%"}
 To use it, you have to
 
 1. Copy memory from CPU to GPU
 2. Tell the GPU what to do with that data
 3. Wait for the GPU to finish doing what you told it to do
 :::
-::: {.column width="50%"}
+::: {.column width="60%"}
 ![](img/cpu_waits_on_gpu.png){.center width=100%}
 :::
 ::::::
@@ -73,7 +81,7 @@ To use it, you have to
 # How do I use the GPU?
 
 :::::: {.columns}
-::: {.column width="50%"}
+::: {.column width="40%"}
 To use it, you have to
 
 1. Copy memory from CPU to GPU
@@ -81,7 +89,7 @@ To use it, you have to
 3. Wait for the GPU to finish doing what you told it to do
 4. Copy memory from GPU back to the CPU
 :::
-::: {.column width="50%"}
+::: {.column width="60%"}
 ![](img/copy_d2h.png){.center width=100%}
 :::
 ::::::
@@ -211,24 +219,23 @@ It takes time to
 
 So is it faster to use the CPU or the GPU?
 
-# Runtimes of Axpy
+# Runtimes of Taylor expansion, memory bound
 ::: notes
 In this graph we have a plot of problem size (horizontal axis) vs runtime (vertical axis).
 
-The legend tells us there are four different versions of the computation:
+The legend tells us there are three different versions of the computation:
 
 1. A completely serial computation
-2. OpenMP with two threads
 3. OpenMP with 64 threads
 4. GPU
 
-The serial part runs fastest, if we have less than $10^4$ elements.
+The serial part runs fastest, if we have less than $2000$ elements.
 
-Then we see the OpenMP version with 64 threads dominate, if the number of elements is between $10^4$ and $3 \times 10^7$.
+Then we see the OpenMP version with 64 threads dominate, if the number of elements is between $2000$ and $300 000$.
 
-Finally, once the problem size is larger than $3 \times 10^7$, the GPU version starts to dominate.
+Finally, once the problem size is larger than $300 000$, the GPU version starts to dominate.
 
-We can also see the GPU and OMP64 versions having a constant runtime, when the number of elements is $< 3 \times 10^7$, even if the problem size increases.
+We can also see the GPU and OMP64 versions having a roughly constant runtime, when the number of elements is $< 300 000$, even if the problem size increases.
 
 This indicates that the problem is too small to actually use all the available resources: scaling up the problem doesn't cost anything extra, because there are an abundance of free units for doing the work.
 
@@ -242,19 +249,70 @@ Now we are better equipped to understand why and when should we use a GPU and wh
 There are many more things to consider, and one should always make informed decisions by measuring the actual performance of the application instead of relying on generic guidelines. But guidelines serve as a starting point.
 :::
 
+::::::::: {.columns}
+:::::: {.column width="20%"}
+
+$$\vec{y} = e^{\vec{x}}$$
+$$\vec{y} \approx \sum_{n = 0}^{N} \frac{\vec{x}^n}{n!}$$
+
+- overhead
+- idle resources
+
+::::::
+:::::: {.column width="80%"}
+![](img/runtimes_0.png){.center width=200%}
+::::::
+:::::::::
+
+# Runtimes of Taylor expansion, compute bound
+
+::: notes
+When we have more computation per element, we start to see the serial version lose to the multithreaded one already at
+$200$ elements, while the GPU takes the lead already between $30000$ - $40000$ elements.
+:::
 
 ::::::::: {.columns}
-:::::: {.column width="60%"}
-::: incremental
-- four different versions
-- serial, OMP64, GPU dominate at different problem sizes
-- idle resources, when problem is small
-- overhead of parallellizing
-- depends heavily on the type of the problem (profile, don't assume!)
-:::
+:::::: {.column width="20%"}
+
+$$\vec{y} = e^{\vec{x}}$$
+$$\vec{y} \approx \sum_{n = 0}^{N} \frac{\vec{x}^n}{n!}$$
+
+- overhead
+- idle resources
+
 ::::::
-:::::: {.column width="40%"}
-![](img/runtimes_annotated.png){.center width=100%}
+:::::: {.column width="80%"}
+![](img/runtimes_16.png){.center width=120%}
+::::::
+:::::::::
+
+# Runtimes of Taylor expansion
+
+::: notes
+In this final plot we have three different amounts of computation for the three different implementations.
+
+One interesting thing to note is that there's no qualitative difference between any of the GPU versions,
+while there's some cache behaviour visible in the CPU versions.
+
+This highlights the difference between the CPU and the GPU:
+the GPU concentrates on hiding the memory access latency by having thousands of threads doing work at
+the same time. That's why it's impossible to infer the size of GPU caches from high level plots like these,
+while it's possible to make some educated guesses about the CPU cache sizes, due to the qualitative
+difference in the plots.
+:::
+
+::::::::: {.columns}
+:::::: {.column width="20%"}
+
+$$\vec{y} = e^{\vec{x}}$$
+$$\vec{y} \approx \sum_{n = 0}^{N} \frac{\vec{x}^n}{n!}$$
+
+- overhead
+- idle resources
+
+::::::
+:::::: {.column width="80%"}
+![](img/runtimes_all.png){.center width=120%}
 ::::::
 :::::::::
 
@@ -397,10 +455,45 @@ inline __m256 mul8(const float* p1, const float* p2)
 ::::::
 :::::::::
 
+# Who controls the vector units?
+
+::: notes
+Again, we must update our model.
+
+The GPU isn't just a bunch of independent vector units.
+:::
+
+:::::: {.columns}
+::: {.column width="50%"}
+![](img/gpu_as_vector_units.png){width=100%}
+:::
+::: {.column width="50%"}
+Is this realistic?
+:::
+::::::
+
+# Who controls the vector units?
+
+::: notes
+Again, we must update our model.
+
+The GPU isn't just a bunch of independent vector units.
+:::
+
+:::::: {.columns}
+::: {.column width="50%"}
+![](img/not_gpu_as_vector_units.png){width=100%}
+:::
+::: {.column width="50%"}
+No
+:::
+::::::
+
+
 # GPU as a collection of processors
 
 ::: notes
-An even better model of a GPU is a collection of independent and very simple processors, which contain vector units.
+Better model of a GPU is a collection of independent and very simple processors, which contain vector units.
 
 AMD calls these processors Compute Units (CU), Nvidia calls them Streaming Multiprocessors (SM) and Intel has many names for them, one of which is Execution Unit (EU).
 
@@ -414,7 +507,7 @@ MI250X from AMD, as found on LUMI and A100 from Nvidia, as found on Mahti.
 :::::: {.columns}
 ::: {.column width="50%"}
 ![](img/gpu_as_cus_sms_eus.png){width=100%}
-Tens or hundreds of simple processors
+Tens or hundreds of simple processors (this model has 8)
 :::
 ::: {.column width="50%"}
 ![](img/cu_sm_eu.png){width=100%}
@@ -428,32 +521,40 @@ Tens or hundreds of simple processors
 # MI250X
 
 ::: notes
-The small blocks with "CU" on them are, surprise surprise, the CUs.
-Most of the other stuff in the schematic is related to memory and connecting the GPU to other hardware
+- The small blocks are the compute units.
+
+- Most of the other stuff in the schematic is related to memory and connecting
+the GPU to other hardware
 
 Next take a look at the individual CU
 :::
 ::::::::: {.columns}
 :::::: {.column width="70%"}
-![](img/mi250x.png){width=100%}
+![](img/mi250x-gcd.svg){width=100%}
 ::::::
-:::::: {.column width="30%"}
-::: incremental
+:::::: {.column width="60%"}
 - CUs
 - memory
 - links to other hardware
-:::
 ::::::
 :::::::::
+
+<small>
+Image: LUMI consortium
+</small>
 
 # MI250X, Compute Unit
 
 ::: notes
-Here we have the "shader core"s, which are the vector units talked about earlier. Notice there are four sets of 16 cores.
 
-Additionally we have "other hardware" which we abstracted away previously. As mentioned, most of this stuff is unnecessary for writing correct GPU programs, but useful for writing performant programs.
 
-The most important other things for a starting programmer are the Local Data Share (LDS) and L1 Cache. These are both related to the memory hierarchy of the GPU, which we'll learn about in later lectures.
+Additionally we have "other hardware" which we abstracted away previously. As
+mentioned, most of this stuff is unnecessary for writing correct GPU programs,
+but useful for writing performant programs.
+
+The most important other things for a starting programmer are the Local Data
+Share (LDS) and L1 Cache. These are both related to the memory hierarchy of the
+GPU, which we'll learn about in later lectures.
 
 Now, the A100 from Nvidia, as found on Mahti
 :::
@@ -461,17 +562,21 @@ Now, the A100 from Nvidia, as found on Mahti
 :::::: {.column width="70%"}
  \
  \
-![](img/mi250x_cu.png){width=100%}
+![](img/mi250x-compute-unit.svg){width=100%}
 ::::::
 :::::: {.column width="30%"}
-::: incremental
 - "shader core" = a lane of vector unit
     - four sets of 16
-- LDS/L1\$
+- local data share (LDS)
+- L1 cache
+- scheduler
 - other hardware
-:::
 ::::::
 :::::::::
+
+<small>
+Image: LUMI consortium
+</small>
 
 # A100
 
@@ -483,7 +588,9 @@ We have
 - memory stuff, and
 - connections to other hardware
 
-The abbreviations GPC and TPC (Graphics Processing Cluster, Texture Processing Cluster) come, unsurprisingly, from the graphics side of GPUs and are not important for this discussion and can be safely ignored.
+The abbreviations GPC and TPC (Graphics Processing Cluster, Texture Processing
+Cluster) come, unsurprisingly, from the graphics side of GPUs and are not
+important for this discussion and can be safely ignored.
 
 Now the SM
 :::
@@ -494,12 +601,16 @@ Now the SM
 ::::::
 :::::: {.column width="30%"}
 ::: incremental
-- SMs
+- streaming multiprocessors (SM)
 - memory
 - links to other hardware
 :::
+<small>
+Image: [Krashinsky, R. et al, NVIDIA Ampere Architecture In-Depth, Nvidia developer Technical Blog, 2020](https://developer.nvidia.com/blog/nvidia-ampere-architecture-in-depth/)
+</small>
 ::::::
 :::::::::
+
 
 # A100, Streaming Multiprocessor
 
@@ -511,50 +622,68 @@ Each of these SMSPs have cores for handling INT32, FP32 and FP64 computation, as
 Again, the most important new thing here for a beginner programmer is the L1 Data Cache / Shared Memory at the bottom of the image. We'll learn about these later.
 :::
 ::::::::: {.columns}
-:::::: {.column width="30%"}
+:::::: {.column width="50%"}
 ![](img/a100_sm.png){width=100%}
 ::::::
 :::::: {.column width="70%"}
 ::: incremental
 - four SM sub-partitions (SMSP)
     - cores for INT32, FP32, FP64
-- L1D\$/Shared memory
+- L1 Cache / Shared memory
 - other hardware
 :::
+<small>
+Image: [Krashinsky, R. et al, NVIDIA Ampere Architecture In-Depth, Nvidia developer Technical Blog, 2020](https://developer.nvidia.com/blog/nvidia-ampere-architecture-in-depth/)
+</small>
 ::::::
 :::::::::
+
 
 # Recap
 
 ::: notes
 Let's do a review:
 
-GPU is a massively parallel processor with its own memory space. You copy data from the CPU memory to the GPU memory and tell the GPU to do some computation on that data. This makes sense, if you have enough data to crunch. If not, it's better to do the computation locally with the CPU.
+GPU is a massively parallel processor with its own memory space. You copy data
+from the CPU memory to the GPU memory and tell the GPU to do some computation
+on that data. This makes sense, if you have enough data to crunch. If not, it's
+better to do the computation locally with the CPU.
 
-The GPU gets it computational power from tens or hundreds of simple processors called compute units, streaming multiprocessors or execution units, depending on the hardware vendor. These simple processors have multiple vector units inside them (in addition to other hardware) and they can execute a single instruction per cycle per vector unit. The entire GPU can execute $10^3 - 10^4$ instructions per cycle. CPUs can execute $10^1 - 10^2$ instructions per cycle.
+The GPU gets it computational power from tens or hundreds of simple processors
+called compute units, streaming multiprocessors or execution units, depending
+on the hardware vendor. These simple processors have multiple vector units
+inside them (in addition to other hardware) and they can execute a single
+instruction per cycle per vector unit. The entire GPU can execute $10^3 - 10^4$
+instructions per cycle. CPUs can execute $10^1 - 10^2$ instructions per cycle.
 :::
+
+**GPU**
 
 ::: incremental
-- massively parallel processor
-- own memory space --> requires data movement
-- useful when you have a lot of data
-- consists of tens or hundreds of simple processors, with multiple vector units per processor
-- 1-2 orders of magnitude more instruction per cycle compared to CPUs
+- is a massively parallel processor
+- has its own memory space $\longrightarrow$ requires data movement
+- has $10^1 \dots 10^2$ of simple processors, multiple vector units
+  per processor
+- does $10^1\dots 10^2\times$ more instructions per cycle than CPUs
 :::
+
 # Part 3: Programming GPUs {.section}
 
 # Programming GPUs
 
 ::: notes
-Now that we've seen the hardware in (some of) its glory, let's finally discuss how one actually programs these things. As mentioned previously, the most common way of doing general purpose GPU computing is with a programming model called Single Instruction, Multiple Threads (SIMT), which was mentioned before.
+Now that we've seen the hardware in (some of) its glory, let's finally discuss
+how one actually programs these things. As mentioned previously, the most
+common way of doing general purpose GPU computing is with a programming model
+called Single Instruction, Multiple Threads (SIMT), which was mentioned before.
 
-With SIMT, the programmer writes GPU code from the point of view of a single thread, but within a larger context. Let's look at this through a more familiar lens of CPU code.
+With SIMT, the programmer writes GPU code from the point of view of a single
+thread, but within a larger context. Let's look at this through a more familiar
+lens of CPU code.
 :::
 
-::: incremental
 - SIMT =  Single Instruction, Multiple Threads
 - Write parallel code from the perspective of a single thread
-:::
 
 # Programming GPUs
 
@@ -567,7 +696,7 @@ The point of view of a single thread is "I'm going to take this single value fro
 :::
 ::::::::: {.columns}
 :::::: {.column width="40%"}
-- Context: Execute some code over the size of the arrays using a douple loop
+- Context: Execute some code over the size of the arrays using a double loop
 - Single thread point of view: Perform addition of two elements $c_{ij} = a_{ij} + b_{ij}$
 ::::::
 :::::: {.column width="60%"}
@@ -687,7 +816,6 @@ A block of threads can be 1D, 2D or 3D
 
 :::::: {.columns}
 ::: {.column width="50%"}
-<small>
 ```cpp
 // This struct is defined elsewhere by the API
 struct dim3 {
@@ -696,19 +824,13 @@ struct dim3 {
 	int32_t z;
 };
 
-// -----------------------------------------------
-// In our program we define the size of the block:
-
-// 1D block of 128 threads (128 x 1 x 1 = 128)
-dim3 block(128, 1, 1);
-
-// 2D block of 1024 threads (32 x 32 = 1024)
-dim3 block(32, 32, 1);
-
-// 3D block of 1024 threads (16 x 8 x 8 = 1024)
-dim3 block(16, 8, 8);
+// ------------------------
+// In our program we define
+// the size of the block:
+dim3 block(1024, 1, 1); // 1D
+dim3 block(128, 3, 1);  // 2D
+dim3 block(256, 2, 3);  // 3D
 ```
-</small>
 :::
 ::: {.column width="50%"}
 ![](img/oned_block.png){width=80%}
@@ -728,8 +850,7 @@ Likewise, the dimensions multiplied together tell how many blocks there are in a
 A grid of blocks can be 1D, 2D or 3D
 
 :::::: {.columns}
-::: {.column width="30%"}
-<small>
+::: {.column width="50%"}
 ```cpp
 // The same struct is used for
 // block size and grid size
@@ -742,18 +863,15 @@ struct dim3 {
 // ------------------------
 // In our program we define
 // the size of the grid:
-
-// 1D grid of 4 blocks (4 x 1 x 1 = 4)
-dim3 grid(4, 1, 1);
-
-// 2D grid of 4 blocks (2 x 2 x 1 = 4)
-dim3 grid(2, 2, 1);
+dim3 grid(4, 1, 1); // 1D
+dim3 grid(4, 2, 1); // 2D
+dim3 grid(4, 2, 4); // 3D
 ```
-</small>
 :::
-::: {.column width="70%"}
-![](img/oned_grid.png){width=40%}
-![](img/twod_grid.png){width=55%}
+::: {.column width="50%"}
+![](img/oned_grid.png){width=80%}
+![](img/twod_grid.png){width=45%}
+![](img/threed_grid.png){width=45%}
 :::
 ::::::
 
@@ -767,72 +885,88 @@ To run some code on the GPU, we give it a grid. The device performs the given co
 ::::::::: {.columns}
 :::::: {.column width="50%"}
 ```cpp
-dim3 block(8, 128, 1);
-dim3 grid(4, 1, 1);
-// Num threads = 8 x 128 x 4 = 4096
+dim3 block(128, 4, 1);
+dim3 grid(32, 32, 1);
+// Num threads = 4096 x 128 x 1 = 524288
 
 // The code in "someKernel" is run
-// with 4096 threads
+// with 524288 threads
 someKernel<<<grid, block>>>(arguments);
 // We'll cover this^ special syntax later
 ```
 ::::::
 :::::: {.column width="50%"}
 ::: incremental
+
 - threads/grid = threads/block $\times$ blocks/grid
 - device always operates over grids
+
 :::
 ::::::
 :::::::::
 
-# Grid - Device
+# Example grids 1
+
+![](img/oned_block_oned_grid.png){width=100%}
+
+# Example grids 2
+
+![](img/oned_block_twod_grid.png){width=80%}
+
+# Example grids 3
+
+![](img/twod_block_oned_grid.png){width=80%}
+
+# Part 4: Software – Hardware mapping {.section}
+
+# Grid – Device
 
 ::: notes
 So we've defined our grid and written some code. How do these software constructs (thread, block, grid) map to the hardware?
 
 The grid maps to a single device (GPU): we're telling a single device to run some code over a grid that we've defined.
 :::
+
 ![](img/grid_gpu.png){.center width=100%}
 
-# Block - SM/CU
+# Block – SM/CU
 
 ::: notes
 Each block of threads in the grid gets mapped to a single CU/SM.
 :::
-![](img/block_sm_cu.png){.center width=100%}
 
-# Blocks - SM/CU, cont.
+![](img/blocks_to_sm_cus.png){.center width=100%}
+
+# Blocks – SM/CU
 
 ::: notes
 Side note: Many blocks (from a single or multiple grids) may map to the same CU/SM.
 
 However, the reverse is not possible. One block always maps to a single CU/SM, never to multiple.
 :::
-::::::::: {.columns}
-:::::: {.column width="50%"}
-![](img/many_blocks_to_one_sm.png){.center width=80%}
-::::::
-:::::: {.column width="50%"}
-![](img/no_block_to_many_sm.png){.center width=100%}
-::::::
-:::::::::
+
+![](img/many_blocks_to_one_sm.png){.center width=100%}
+
+# Block – SM/CU
+
+::: notes
+Each block of threads in the grid gets mapped to a single CU/SM.
+:::
+
+![](img/block_sm_cu.png){.center width=100%}
 
 # Warps, wavefronts
 
-::: notes
-At the SM/CU, the blocks of threads are further broken down to warps of 32 threads (Nvidia), or wavefronts of 64 threads (AMD)
+:::::: {.columns}
+::: {.column width="50%"}
 
-Each warp/wavefront consists of consecutive 32/64 threads.
-:::
 SM/CU breaks blocks of threads to
 
 - *warps* of 32 consecutive threads (Nvidia), or
 - *wavefronts* of 64 consecutive threads (AMD)
 
-Then, the SM/CU maps each of these warps/wavefronts to a particular SMSP/SIMD unit
-
-# Warps, wavefronts, cont.
-
+:::
+::: {.column width="50%"}
 <small>
 A 1D block of 256x1 threads gets partitioned to
 
@@ -847,20 +981,35 @@ A 1D block of 256x1 threads gets partitioned to
 | w6                | 192-223            | -               |
 | w7                | 224-255            | -               |
 </small>
+:::
+::::::
 
-# Warp/Wavefront - SM/CU
+# Warps, wavefronts
+
+::: notes
+At the SM/CU, the blocks of threads are further broken down to warps of 32 threads (Nvidia), or wavefronts of 64 threads (AMD)
+
+Each warp/wavefront consists of consecutive 32/64 threads.
+:::
+
+![](img/block_to_warps.png){.center width=100%}
+
+
+# Warp/Wavefront - SMSP/SIMD
 
 ::: notes
 Then, the SM/CU maps each of these warps/wavefronts to a particular SMSP/SIMD unit
 :::
-![](img/warp_wavefron_smsp_simd.png){.center width=80%}
+
+![](img/warps_to_simds.png){.center width=100%}
 
 # Thread - lane
 
 ::: notes
 Finally, each thread of a warp/wavefront is mapped to a single lane of a SIMD unit or to a single core of the SMSP.
 :::
-![](img/thread_lane.png){.center width=80%}
+
+![](img/warp_wavefront_smsp_simd.png){.center width=100%}
 
 # Recap
 
@@ -868,14 +1017,7 @@ Finally, each thread of a warp/wavefront is mapped to a single lane of a SIMD un
 Let's do a review.
 
 The GPU is a massively parallel processor with its own memory space. The processing power of the GPU comes from tens or hundreds of simple processors (CU/SM) working independently and concurrently. These simple processors contain multiple vector units, which perform a single instruction for multiple pieces of data per cycle.
-
-To do some work on the GPU, we write some code from the perspective of a single thread and define a grid of threads using two levels of hierarchy defined by the API: a grid of blocks and a block of threads. We then ask the GPU to run our code for each thread in the grid.
-
-The device maps the grid of threads to its hardware components: all the threads run on the same GPU. The blocks of the grid are mapped to the CUs/SMs. These then break down the blocks to warps or wavefronts of 32/64 consecutive threads and map each warp/wavefront to a SIMD unit or SMSP.
-Each SIMD unit/SMSP executes a single instruction per cycle, doing this for all the lanes in the unit.
 :::
-
-<small>
 
 ::: incremental
 - massively parallel processor
@@ -883,6 +1025,20 @@ Each SIMD unit/SMSP executes a single instruction per cycle, doing this for all 
 - useful when you have a lot of data
 - consists of tens or hundreds of simple processors, with multiple vector units per processor
 - 1-2 orders of magnitude more instruction per cycle compared to CPUs
+:::
+
+# Recap
+
+::: notes
+Let's do a review.
+
+To do some work on the GPU, we write some code from the perspective of a single thread and define a grid of threads using two levels of hierarchy defined by the API: a grid of blocks and a block of threads. We then ask the GPU to run our code for each thread in the grid.
+
+The device maps the grid of threads to its hardware components: all the threads run on the same GPU. The blocks of the grid are mapped to the CUs/SMs. These then break down the blocks to warps or wavefronts of 32/64 consecutive threads and map each warp/wavefront to a SIMD unit or SMSP.
+Each SIMD unit/SMSP executes a single instruction per cycle, doing this for all the lanes in the unit.
+:::
+
+::: incremental
 - point of view of a single thread
 - a grid of (blocks of) threads
 - grid <--> device
@@ -890,18 +1046,5 @@ Each SIMD unit/SMSP executes a single instruction per cycle, doing this for all 
 - warp/wavefront <--> SMSP/SIMD
 - thread <--> lane
 :::
-</small>
-
-# What have we learned?
-
-::: notes
-Let's see if we've learned something.
-
-Say, we have the following GPU.
-:::
-
-https://siili.rahtiapp.fi/s/gpmWnLY8q#
-
-![](img/model_gpu.png){.center width=65%}
 
 # Questions?
