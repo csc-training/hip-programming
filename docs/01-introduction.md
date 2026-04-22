@@ -501,7 +501,8 @@ The "other hardware" block hides a lot of details. We don't need to understand t
 
 Let's compare this simple model to an actual schematic of two GPUs:
 
-MI250X from AMD, as found on LUMI and A100 from Nvidia, as found on Mahti.
+MI250X from AMD, as found on LUMI and H100 from Nvidia, as found on Roihu. Well
+actually, Roihu has GH200 which comprises of an Arm CPU and a H100 very fast connection.
 :::
 
 :::::: {.columns}
@@ -556,7 +557,7 @@ The most important other things for a starting programmer are the Local Data
 Share (LDS) and L1 Cache. These are both related to the memory hierarchy of the
 GPU, which we'll learn about in later lectures.
 
-Now, the A100 from Nvidia, as found on Mahti
+Now, the H100 from Nvidia, as found on Roihu
 :::
 ::::::::: {.columns}
 :::::: {.column width="70%"}
@@ -578,7 +579,7 @@ Now, the A100 from Nvidia, as found on Mahti
 Image: LUMI consortium
 </small>
 
-# A100
+# H100
 
 ::: notes
 This image has a bit more detail than the MI250X one, but the basics are the same.
@@ -597,7 +598,7 @@ Now the SM
 
 ::::::::: {.columns}
 :::::: {.column width="70%"}
-![](img/a100.png){width=100%}
+![](img/h100-layout.svg){width=100%}
 ::::::
 :::::: {.column width="30%"}
 ::: incremental
@@ -605,9 +606,6 @@ Now the SM
 - memory
 - links to other hardware
 :::
-<small>
-Image: [Krashinsky, R. et al, NVIDIA Ampere Architecture In-Depth, Nvidia developer Technical Blog, 2020](https://developer.nvidia.com/blog/nvidia-ampere-architecture-in-depth/)
-</small>
 ::::::
 :::::::::
 
