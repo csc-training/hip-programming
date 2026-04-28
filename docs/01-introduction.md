@@ -610,18 +610,23 @@ Now the SM
 :::::::::
 
 
-# A100, Streaming Multiprocessor
+# H100, Streaming Multiprocessor
 
 ::: notes
-Similar to the CU of the MI250X, we have "four vector units". As seen on the diagram, this is a heavily simplified statement, but we can see there are four sub-partitions to the SM (SMSP, Streaming Multiprocessor Sub-Partition).
+Similar to the CU of the MI250X, we have "four vector units". As seen on the
+diagram, this is a heavily simplified statement, but we can see there are four
+sub-partitions to the SM (SMSP, Streaming Multiprocessor Sub-Partition).
 
-Each of these SMSPs have cores for handling INT32, FP32 and FP64 computation, as well as "other hardware", e.g. scheduler, registers and caches.
+Each of these SMSPs have cores for handling INT32, FP32 and FP64 computation,
+as well as "other hardware", e.g. scheduler, registers and caches.
 
-Again, the most important new thing here for a beginner programmer is the L1 Data Cache / Shared Memory at the bottom of the image. We'll learn about these later.
+Again, the most important new thing here for a beginner programmer is the L1
+Data Cache / Shared Memory at the bottom of the image. We'll learn about these
+later.
 :::
 ::::::::: {.columns}
-:::::: {.column width="50%"}
-![](img/a100_sm.png){width=100%}
+:::::: {.column width="40%"}
+![](img/h100-sm-layout.svg){width=100%}
 ::::::
 :::::: {.column width="70%"}
 ::: incremental
@@ -630,9 +635,6 @@ Again, the most important new thing here for a beginner programmer is the L1 Dat
 - L1 Cache / Shared memory
 - other hardware
 :::
-<small>
-Image: [Krashinsky, R. et al, NVIDIA Ampere Architecture In-Depth, Nvidia developer Technical Blog, 2020](https://developer.nvidia.com/blog/nvidia-ampere-architecture-in-depth/)
-</small>
 ::::::
 :::::::::
 
