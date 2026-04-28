@@ -13,7 +13,7 @@ part of the EuroCC training activities at CSC.
 | 09:15-09:30 | What is CSC? |
 | 09:30–09:45 | Break/debugging access |
 | 09:45–10:30 | Introduction to GPU's and GPU programming (JK) |
-| 10:30–10:45 | Break & Snacks |
+| 10:30–10:45 | Break |
 | 10:45-11:30 | Basic usage, memory allocation and kernels (JK) |
 | 11:30-11:45 | Break |
 | 11:45-12:15 | Exercises |
@@ -33,7 +33,7 @@ part of the EuroCC training activities at CSC.
 | ---- | ----- |
 | 09:00–09:30 | Day 1 Recap (LS) |
 | 09:30–10:15 | More advanced memory allocation/access (LS) |
-| 10:00–10:15 | Break & Snacks |
+| 10:00–10:15 | Break  |
 | 10:15–10:45 | Exercises |
 | 10:45-11:30 | Streams and events (LS) |
 | 11:30-11:45 | Break |
@@ -51,7 +51,7 @@ part of the EuroCC training activities at CSC.
 | Time | Topic |
 | ---- | ----- |
 | 09:00–10:00 | Kernel optimizations (JE) |
-| 10:00–10:15 | Break & Snacks |
+| 10:00–10:15 | Break  |
 | 10:15–10:45 | Exercises |
 | 10:45-11:30 | Shared local memory (JE) |
 | 11:30-11:45 | Break |
