@@ -566,8 +566,8 @@ Now, the H100 from Nvidia, as found on Roihu
 ![](img/mi250x-compute-unit.svg){width=100%}
 ::::::
 :::::: {.column width="30%"}
-- "shader core" = a lane of vector unit
-    - four sets of 16
+- 4 "SIMD-units"
+    - four sets of 16 SIMD lanes and matrix units
 - local data share (LDS)
 - L1 cache
 - scheduler
@@ -632,8 +632,9 @@ later.
 ::: incremental
 - four SM sub-partitions (SMSP)
     - cores for INT32, FP32, FP64
+    - $\sim$ SIMD lanes
 - L1 Cache / Shared memory
-- other hardware
+- other hardware (scheduler, instruction cache etc)
 :::
 ::::::
 :::::::::
@@ -661,7 +662,7 @@ instructions per cycle. CPUs can execute $10^1 - 10^2$ instructions per cycle.
 
 ::: incremental
 - is a massively parallel processor
-- has its own memory space $\longrightarrow$ requires data movement
+- has (typically) dedicated memory space $\longrightarrow$ (typically) explicit data movement
 - has $10^1 \dots 10^2$ of simple processors, multiple vector units
   per processor
 - does $10^1\dots 10^2\times$ more instructions per cycle than CPUs
