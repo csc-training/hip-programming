@@ -42,32 +42,29 @@ srun ... rocprofv3 -r --output-format perfetto -- ./a.out
 :::
 ::::::
 
-# Analyzing programs
-## Tracing vs profiling
+:::{.incremental}
+- Why?
+- Visualize how your program interacts with GPU
+:::
 
-| Tracing | Profiling |
-|:--|:--|
-| Timeline: What happens and when.  | Aggregated: How much time in spent in which call  |
-| Overall inspection how program flow. | Find hotspots |
+# How does it work?
 
-# Analyzing programs
-## Sampling vs instrumenting
+ROCprof wraps HIP API calls with own logic:
+![](./img/rocprof-intercepts.png)
 
-| Sampling | Instrumenting |
-|:--|:--|
-| Peek at intervals what is going on in the program  | Modify code/binary to record events |
+:::{.incremental}
+- With enough API call data, a timeline of events can be reconstructed
+- Sort of **instrumentation** instead of sampling
+:::
 
-# Analyzing programs
+# What else it can do?
 
-ROC-profiler (rocprof)
-
-- A command-line tool by AMD for analyzing GPU programs.
-
-| | Sampling | Instrumenting |
-|:--:|:--:|:--:|
-| **Tracing** | ($\checkmark$) | $\checkmark$ |
-| **Profiling** | ($\checkmark$) | ($\checkmark$) |
-
-- It can do all the above when considering GPU functionality
-- We will use it to collect traces of GPU-programs through HIP/ROCm api instumentation
+- Collect performance monitoring counters, e.g.:
+  - GPU Memory ↔ L2 cache operations 
+  - Arithmetic unit utilization
+  - Cache misses
+  - etc
+- Aggregate statistics
+- Save traces in other formats (csv, otf2, perfetto, json)
+- Record markers in your code (ROCtx)
 
