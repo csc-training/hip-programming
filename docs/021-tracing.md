@@ -54,17 +54,42 @@ ROCprof wraps HIP API calls with own logic:
 
 :::{.incremental}
 - With enough API call data, a timeline of events can be reconstructed
-- Sort of **instrumentation** instead of sampling
+- **Instruments** API calls to produce a **trace**
 :::
 
-# What else it can do?
+# Profiling at large
 
-- Collect performance monitoring counters, e.g.:
+:::::::::{.incremental}
+<center> Methods for </center>
+
+----
+
+::::::{.columns}
+:::{.column}
+*collecting information*
+
+- **Sampling**: stop execution at intervals and see what's going on
+- **Instrumenting**: inject small pieces of code that record what's going on
+:::
+:::{.column}
+*visualizing information*
+
+- **Profile**: How much time is spent in certain subroutine (flame-graph)
+- **Trace**: Show when the time is spent in which subroutine (time-line)
+:::
+::::::
+:::::::::
+
+# What else can it do?
+
+:::{.incremental}
+- Collect performance monitoring counters, (`-i input.txt`) e.g.:
   - GPU Memory ↔ L2 cache operations 
   - Arithmetic unit utilization
   - Cache misses
-  - etc
-- Aggregate statistics
-- Save traces in other formats (csv, otf2, perfetto, json)
-- Record markers in your code (ROCtx)
-
+  - and much more
+  - List counters in `input.txt` 
+- Aggregate statistics (`--stats`)
+- Save traces in other formats (csv, otf2, perfetto, json) (`--output-format`)
+- Record markers in your code (ROCtx) (`--roctx-trace`)
+:::
