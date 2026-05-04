@@ -1,8 +1,7 @@
 ---
 title:    Kernel optimisation
-subtitle: GPU programming with HIP
-author:   CSC Training
-date:     2025-03
+event:    Introduction to GPU programming
+date:     May 2026
 lang:     en
 ---
 
@@ -52,6 +51,7 @@ lang:     en
 | LUMI-G MI250x | 36 GB/s | 1600 GB/s|
 | PCIE4.0 x16 | $\sim$ 32 GB/s |  |
 | A100 (Mahti) |  | 2000 GB/s |
+| GH200 (Roihu) | 900 GB/s | 4000 GB/s |
 
 ::: notes
 
@@ -237,7 +237,7 @@ double val = global_array[tid];
 
 ---
 
-## Local data share
+# Local data share
 
 - Variable defined as `__shared__` is shared within block 
 - Use cases:
