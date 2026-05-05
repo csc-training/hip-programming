@@ -74,11 +74,25 @@ ROCprof wraps HIP API calls with own logic:
 :::{.column}
 *visualizing information*
 
-- **Profile**: How much time is spent in certain subroutine (flame-graph)
-- **Trace**: Show when the time is spent in which subroutine (time-line)
+- **Timeline**
+- Flame graph
+- Hotspot analysis
+- Call graph
+- Memory profile
+- etc ...
 :::
 ::::::
 :::::::::
+
+# Profiling at large
+
+:::{.incremental}
+<center> Methods for </center>
+
+----
+
+![](./img/profile-collect-visualize.svg)
+:::
 
 # What else can it do?
 

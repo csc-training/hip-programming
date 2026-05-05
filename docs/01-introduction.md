@@ -633,7 +633,7 @@ later.
 - four SM sub-partitions (SMSP)
     - cores for INT32, FP32, FP64
     - $\sim$ SIMD lanes
-- L1 Cache / Shared memory
+- L1 Cache (max 128 kB) / Shared memory (max 228 kB)
 - other hardware (scheduler, instruction cache etc)
 :::
 ::::::
