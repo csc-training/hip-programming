@@ -84,6 +84,11 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 - [Kernel saxpy](kernels/03-kernel-saxpy)
 - [Kernel copy2d](kernels/04-kernel-copy2d)
 
+### Tracing kernels
+
+- [Using rocprofv3](tracing/01-rocprofv3)
+- [Tracing saxpy kernel](tracing/02-saxpy)
+
 ### Streams, events, and synchronization
 
 - [Understanding asynchronity using events](streams/01-event-record)

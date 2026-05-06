@@ -29,7 +29,7 @@ We get (among others) file `..._kernel_trace.csv`:
 # Collecting a trace with rocprof on LUMI
 
 ```bash
-srun ... rocprofv3 -r --output-format perfetto -- ./a.out
+srun ... rocprofv3 -r --output-format pftrace -- ./a.out
 ```
 
 ::::::{.columns}
@@ -92,18 +92,17 @@ ROCprof wraps HIP API calls with own logic:
 ----
 
 ![](./img/profile-collect-visualize.svg)
+
 :::
 
 # What else can it do?
 
 :::{.incremental}
-- Collect performance monitoring counters, (`-i input.txt`) e.g.:
+- Collect performance monitoring counters, e.g.:
   - GPU Memory ↔ L2 cache operations 
   - Arithmetic unit utilization
   - Cache misses
   - and much more
-  - List counters in `input.txt` 
-- Aggregate statistics (`--stats`)
-- Save traces in other formats (csv, otf2, perfetto, json) (`--output-format`)
-- Record markers in your code (ROCtx) (`--roctx-trace`)
+- Aggregate statistics 
+- Save traces in other formats (csv, otf2, perfetto, json) 
 :::
