@@ -1,4 +1,4 @@
-# Creating a stream and using it on the GPU
+# Creating a stream and launching a GPU kernel on it
 
 This exercise demonstrates how a HIP stream is created, and how
 memory transfers and a GPU kernel can be submitted to it.
@@ -44,7 +44,7 @@ For these, use:
 * `hipMallocAsync()`
 * `hipFreeAsync()`
 
-However, this is not strictly necessary
+However, this is not strictly necessary.
 
 ## Bonus: What does the kernel compute exactly?
 
