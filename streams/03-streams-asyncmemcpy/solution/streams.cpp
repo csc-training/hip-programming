@@ -4,7 +4,8 @@
  * Task is 
  * - to perform memory copies asynchronously
  * - validate that memory copies are non-blocking `srun ... rocprof --hip-trace ./03-asyncmemcopy`
- * - remember to synchronize manually now!
+ * - remember to synchronize!
+ * - Additionally, change host memory allocation and freeing into pinned memory calls
  */
 
 #include <stdio.h>
@@ -80,9 +81,9 @@ int main() {
   float *c; float *d_c;
 
   // Host allocations
-  a = (float*) malloc(N_bytes);
-  b = (float*) malloc(N_bytes);
-  c = (float*) malloc(N_bytes);
+  HIP_ERRCHK(hipHostMalloc((void**)&a, N_bytes));
+  HIP_ERRCHK(hipHostMalloc((void**)&b, N_bytes));
+  HIP_ERRCHK(hipHostMalloc((void**)&c, N_bytes));
 
   hipStream_t stream_a;
   hipStream_t stream_b;
@@ -139,8 +140,7 @@ int main() {
   HIP_ERRCHK(hipStreamDestroy(stream_b));
   HIP_ERRCHK(hipStreamDestroy(stream_c));
   
-  free(a);
-  free(b);
-  free(c);
-
+  HIP_ERRCHK(hipHostFree(a));
+  HIP_ERRCHK(hipHostFree(b));
+  HIP_ERRCHK(hipHostFree(c));
 }

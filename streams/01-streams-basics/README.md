@@ -33,7 +33,8 @@ The following HIP functions are needed in this exercise:
 * `hipStreamSynchronize()`
 * `hipStreamDestroy()`
 
-## Extra exercise
+<details>
+<summary><strong>Additional exercise: Async Malloc and Free</strong></summary>
 
 Two other API calls that are normally blocking, can also be submitted to the stream.
 For these, use:
@@ -41,9 +42,14 @@ For these, use:
 * `hipMallocAsync()`
 * `hipFreeAsync()`
 
-However, this is not strictly necessary.
+However, this is not strictly necessary in this exercise.
+
+</details>
 
 ## Bonus: What does the kernel compute exactly?
+
+<details>
+<summary><strong>Bonus: What does the GPU kernel in this exercise compute?</strong></summary>
 
 In the main function, we set all elements in our array `a` to zero first.
 
@@ -58,3 +64,5 @@ for each thread id, mimicking a workload for element-wise arithmetic operations.
 
 The function `max_error()` checks each array entry against the expected value `1.0f`,
 and returns the largest error.
+
+</details>

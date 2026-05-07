@@ -108,6 +108,6 @@ with:
 HIP_ERRCHK(hipHostFree(a));
 ```
 
-After making these changes, compare the profiling trace again.
+After making these changes, compiling your program and running it again, inspect the trace now again.
 
 </details>

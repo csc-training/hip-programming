@@ -36,6 +36,22 @@ The following HIP functions are needed in this exercise:
 * `hipStreamSynchronize()`
 * `hipStreamDestroy()`
 
+<details>
+<summary><strong>Additional options</strong></summary>
+
+In the exercise, you are instructed to use `hipStreamSynchronize()` to synchronize
+your streams one by one. 
+
+Another way to synchronize GPU execution is to wait for all GPU work at once using:
+
+```
+hipDeviceSynchronize()
+```
+
+Which synchronizes the entire device rather than a single stream.
+
+</details>
+
 ## Profiling kernel concurrency
 
 After completing the exercise, validate that the kernels execute concurrently.
@@ -67,23 +83,15 @@ You can open the trace in either:
 
 In the timeline view, you should observe that the three kernels execute at overlapping times on the GPU.
 
-## Extra options
-
-In the exercise, you are instructed to use `hipStreamSynchronize()` to synchronize
-your streams one by one. 
-
-Another way to synchronize GPU execution is to wait for all GPU work at once using:
-
-```
-hipDeviceSynchronize()
-```
-
-Which synchronizes the entire device rather than a single stream.
-
 ## Understanding the kernels
+
+<details>
+<summary><strong>Understanding the GPU kernels</strong></summary>
 
 The kernels in this exercise are synthetic workloads only for teaching purposes.
 
 Each GPU thread performs repeated floating-point computations using mathematical functions (e.g. `sin`, `cos`, `log`).
 
 The workloads are intentionally compute-heavy (although quite redundant) so that concurrent execution becomes visible in the profiling tools.
+
+</details>
