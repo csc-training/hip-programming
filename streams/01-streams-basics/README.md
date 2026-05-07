@@ -1,10 +1,7 @@
 # Creating a stream and launching a GPU kernel on it
 
 This exercise demonstrates how a HIP stream is created, and how
-memory transfers and a GPU kernel can be submitted to it.
-
-The CPU continues executing while GPU work is running asynchronously.
-Before the host can safely access results copied back from the GPU, the stream must be synchronized.
+memory transfers and a GPU kernel can be submitted using it.
 
 If your program executes correctly, you should get the following output:
 
