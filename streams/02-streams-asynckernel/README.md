@@ -19,7 +19,7 @@ After running the code, you will use `rocprof` and Perfetto, to validate that yo
 
 ## Instructions
 
-In this exercise, you will:
+In this exercise, you will modify the `main()` function to:
 
 - create three HIP streams
 - launch one kernel into each stream
