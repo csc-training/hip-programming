@@ -63,7 +63,7 @@ void explicitMem(int nSteps, int nx, int ny)
 
   #error Allocate pageable host memory of size `size` for the pointer A
 
-  #error Allocate pinned device memory (d_A)
+  #error Allocate device memory (d_A)
 
   // Start timer and begin stepping loop
   clock_t tStart = clock();
@@ -109,7 +109,7 @@ void explicitMemPinned(int nSteps, int nx, int ny)
 
   #error Allocate pinned host memory of size for the pointer A
 
-  #error Allocate pinned device memory (d_A)
+  #error Allocate device memory (d_A)
 
   // Start timer and begin stepping loop
   clock_t tStart = clock();

@@ -1,41 +1,22 @@
 # Memory management strategies
 
 The purpose of this exercise is to compare different GPU memory management
-strategies and their computational overhead.
+strategies and their computational overhead on the same workload.
 
-The following four functions are called at the end of the file by the `main()` function:
+Complete the missing HIP API calls in the following functions in the program:
 
-* The function `explicitMem()` represents a basic explicit memory management strategy
-* The function `explicitMemPinned()` represents an explicit memory management strategy with pinned host memory
-* The function `unifiedMem()` represents a basic unified memory management strategy
-* The function `unifiedMemPrefetch()` represents a unified memory management strategy with prefetching
+| Function | Strategy    |
+| -------- | ----------- |
+| `explicitMem()` | Explicit memory management |
+| `explicitMemPinned()` | Explicit memory management with pinned memory |
+| `unifiedMem()` | Unified memory |
+| `unifiedMemPrefetch()` | Unified memory with prefetching |
 
-The task is to fill the missing function calls in the code indicated by lines beginning with `#error`, and followed by a descriptive instruction.
+Each code executes the same workload, but your task is to implement different memory management strategies for each of them.
+
+Missing code sections are marked using: `#error`
 
 All functions and kernels should use the default stream.
-
-## Instructions
-
-In this exercise, you will:
-1. Allocate host and device memory using three different strategies
-    - Pageable (host) memory (`malloc()` / `hipMalloc()`)
-    - Pinned (host) memory (`hipHostMalloc()` / `hipMalloc()`)
-    - Unified memory (`hipMallocManaged()`)
-2. Move data to the GPU (either explicitly or implicitly)
-3. Implement prefetching in the `unifiedMemPrefetch()` function
-4. Compare the timing between the different strategies
-
-All four functions execute the same amount of steps (100) on the same amount of data
-(2000 x 8000 elements).
-
-Executed output will be a timing of the four functions:
-
-```
-The results are OK! (1.234s - ExplicitMemCopy)
-The results are OK! (5.678s - ExplicitMemPinnedCopy)
-The results are OK! (9.876s - UnifiedMemNoPrefetch)
-The results are OK! (5.432s - UnifiedMemPrefetch)
-```
 
 ## HIP functions used
 
