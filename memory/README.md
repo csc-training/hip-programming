@@ -6,11 +6,9 @@ Exercises should be completed in order.
 
 ## Exercises
 
-1. Explicit memory management
-2. Pinned host memory
-3. Unified memory
-4. Unified memory prefetching
-5. Investigating memory behavior using traces
+1. Inspecting explicit vs. implicit memory management
+2. Avoiding recurring host-device memory transfers
+3. Memory pools and async memory copies
 
 ## Building
 
