@@ -9,44 +9,21 @@ lang:   en
 ::: incremental
 - Software stack offering tools for programming Nvidia GPUs
 - CUDA includes C++ runtime API **and** a kernel programming language
-- standard C++ syntax, `nvcc` compiler driver is used to compile code
-    - nvcc uses a CPU compiler, e.g. `g++` in the background for compiling CPU code
+- Standard C++ syntax, `nvcc` compiler driver is used to compile code
+    - `nvcc` uses a CPU compiler, e.g. `g++` in the background for compiling CPU code
+- Includes libraries for numerical maths
 :::
-
-# CUDA libraries
-
-:::::: {.columns}
-::: {.column width="40%"}
-- Nvidia offers many libraries optimized for GPU code
-- https://developer.nvidia.com/gpu-accelerated-libraries
-- not covered during this lecture
-:::
-::: {.column width="60%"}
-![](img/cuda_math_libraries.png){.center width=100%}
-:::
-::::::
 
 # ROCm
 
 ::: incremental
 - Software stack offering tools for programming AMD GPUs
 - ROCm provides the tools for HIP, OpenCL and OpenMP
-    - compilers, libraries for high-level functions, debuggers, profilers and runtimes
+    - Compilers, libraries for high-level functions, debuggers, profilers and runtimes
 - ROCm is **not** a programming language
+- Includes libraries for numerical maths
 :::
 
-# ROCm libraries
-
-:::::: {.columns}
-::: {.column width="40%"}
-- AMD offers also a wide set of optimised libraries and tools
-- https://www.amd.com/en/products/software/rocm/hpc.html
-- not covered during this lecture
-:::
-::: {.column width="60%"}
-![](img/rocm_libraries.png){.center width=100%}
-:::
-::::::
 
 # HIP
 
@@ -54,58 +31,59 @@ lang:   en
 - HIP = Heterogeneous-computing Interface for Portability
 - AMD effort to offer a common programming interface that works on both
       Nvidia and AMD devices
-- almost a one-to-one clone of CUDA from the user perspective
-- standard C++ syntax, `hipcc` wrapper for compiling
-    - uses `nvcc`/`clang++` compilers behind the scenes
-- allows one to write portable GPU code
+- Almost a one-to-one clone of CUDA from the user perspective
+- Standard C++ syntax, `hipcc` wrapper for compiling
+    - Uses `nvcc`/`clang++` compilers behind the scenes
+- Allows one to write portable GPU code
 :::
 
-# GPU terminology
+# GPU terminology refresher
 
 ::: incremental
-- compute unit (CU, AMD) / streaming multiprocessor (SM, Nvidia)
-    - a simple processor on a GPU
-    - contains multiple independent vector units
-- kernel
-    - parallel function executed on the GPU
-- thread
-    - individual worker of a wavefront/warp (AMD/Nvidia)
+- Compute unit (CU, AMD) / streaming multiprocessor (SM, Nvidia)
+    - A simple processor on a GPU
+    - Contains multiple independent vector units
+- Kernel
+    - Parallel function executed on the GPU
+- Thread
+    - Individual worker of a wavefront/warp (AMD/Nvidia)
 :::
 
-# GPU terminology
+# GPU terminology refresher
 
 ::: incremental
-- wavefront/warp (AMD/Nvidia)
-    - collection of threads: execute the same instruction in lockstep
-    - fixed number of threads (AMD: 64, NVIDIA 32)
-    - threads per block is chosen at kernel launch
-        - wavefronts per block = threads per block / 64
-- workgroup/block of threads (AMD/Nvidia)
-    - group of threads partitioned to wavefronts/warps
-    - execute on the same CU/SM (AMD/Nvidia)
-    - can synchronise together and communicate through memory in the CU/SM (AMD/Nvidia)
+- Wavefront / Warp (AMD/Nvidia)
+    - Collection of threads: execute the same instruction "in lockstep"
+    - Fixed number of threads (AMD: 64, NVIDIA 32)
+    - Threads per block is chosen at kernel launch
+        - Wavefronts per block = threads per block / 64
+- workgroup / Thread block (AMD/Nvidia)
+    - Group of threads partitioned to wavefronts/warps
+    - Execute on the same CU/SM (AMD/Nvidia)
+    - Can synchronise together and communicate through memory in the CU/SM (AMD/Nvidia)
+    - Usually just **block**
 :::
 
 # HIP/CUDA programming model
 
 ::: incremental
 - GPU accelerator is often called a *device* and CPU a *host*
-- parallel code:
-    - launched by the host using the API
-    - written using the kernel language
-    - from the point of view of a single thread (each thread has a unique ID)
-    - executed on a device by many threads
+- Parallel GPU code is...
+    - ...launched by the host using the API, ...
+    - ...is written using the kernel language...
+    - ...from the point of view of a single thread, and...
+    - ...is executed on a device by many threads.
 :::
 
 # GPU programming considerations
 
 ::: incremental
-- the parallel nature of GPUs requires many similar tasks that can be executed simultaneously
-    - one usage is to replace iterations of loop with a GPU kernel call
-- need to adapt CPU code to run on the GPU
-    - algorithmic changes to fit the parallel execution model
-    - share data among hundreds of cooperating threads
-    - manage data transfers between CPU and GPU memories
+- The parallel nature of GPUs requires many similar tasks that can be executed simultaneously
+    - One usage is to replace iterations of loop with a GPU kernel call
+- Need to adapt CPU code to run on the GPU
+    - Algorithmic changes to fit the parallel execution model
+    - Share data among hundreds of cooperating threads
+    - Manage data transfers between CPU and GPU memories
       carefully (a common bottleneck)
 :::
 
@@ -114,13 +92,13 @@ lang:   en
 Code on the CPU to control the larger context and the flow of execution
 
 ::: incremental
-- device init and management: `hipSetDevice`/`cudaSetDevice`
-- memory management: `hipMalloc`/`cudaMalloc`
-- execution control: `kernel<<<blocks, threads>>>`
-- synchronisation: device, stream, events: `hipDeviceSynchronize`/`cudaDeviceSynchronize`
-- error handling, context handling, ... : `hipGetErrorString`/`cudaGetErrorString`
+- Device init and management: `hipSetDevice`/`cudaSetDevice`
+- Memory management: `hipMalloc`/`cudaMalloc`
+- Execution control: `kernel<<<blocks, threads>>>`
+- Synchronisation: device, stream, events: `hipDeviceSynchronize`/`cudaDeviceSynchronize`
+- Error handling, context handling, ... : `hipGetErrorString`/`cudaGetErrorString`
 
-- documentation: [HIP docs](https://rocm.docs.amd.com/projects/HIP/en/latest/reference/hip_runtime_api/modules.html#modules-reference) & [CUDA docs](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)
+- Documentation: [HIP docs](https://rocm.docs.amd.com/projects/HIP/en/latest/reference/hip_runtime_api/modules.html#modules-reference) & [CUDA docs](https://docs.nvidia.com/cuda/cuda-runtime-api/index.html)
 :::
 
 # API example: Hello world
@@ -378,10 +356,6 @@ int main() {
     printf("%f %f %f %f ... %f %f\n", x[0], x[1], x[2], x[3], x[n-2], x[n-1]);
 }
 ```
-
----
-
-***TODO: Make a rocprof trace here and show data movement and kernel execution***
 
 # Summary
 
