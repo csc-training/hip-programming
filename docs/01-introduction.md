@@ -210,7 +210,7 @@ It takes time to
 
 So is it faster to use the CPU or the GPU?
 
-# Runtimes of Taylor expansion, memory bound
+# Runtimes of Taylor expansion, little computation
 ::: notes
 In this graph we have a plot of problem size (horizontal axis) vs runtime (vertical axis).
 
@@ -258,7 +258,7 @@ There are many more things to consider, and one should always make informed deci
 ::::::
 :::::::::
 
-# Runtimes of Taylor expansion, compute bound
+# Runtimes of Taylor expansion, more computation
 
 ::: notes
 When we have more computation per element, we start to see the serial version lose to the multithreaded one already at
@@ -269,7 +269,7 @@ $200$ elements, while the GPU takes the lead already between $30000$ - $40000$ e
 :::::: {.column width="40%"}
 
 - $y_i \gets \sum_{n = 0}^{16} \frac{x_i^n}{n!}$
-- Less overhead 
+- Compute units are not mostly waiting for data
 
 ::::::
 :::::: {.column width="80%"}
