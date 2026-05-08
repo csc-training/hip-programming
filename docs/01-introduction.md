@@ -6,19 +6,10 @@ lang:   en
 
 # Overview
 
-- What is a GPU
-- GPU hardware
-- Programming GPUs
-- Software - hardware mapping
-
-# Learning objectives
-
-After this lecture you will know
-
-- when to use GPUs over CPUs
-- where the performance of GPUs come from
-- what the GPU hardware looks like on a high level
-- how the software maps to hardware
+## 1. What is a GPU
+## 2. GPU hardware
+## 3. Programming GPUs
+## 4. Software - hardware mapping
 
 # Part 1: What is a GPU? {.section}
 
@@ -250,13 +241,16 @@ There are many more things to consider, and one should always make informed deci
 :::
 
 ::::::::: {.columns}
-:::::: {.column width="20%"}
+:::::: {.column width="40%"}
 
-$$\vec{y} = e^{\vec{x}}$$
-$$\vec{y} \approx \sum_{n = 0}^{N} \frac{\vec{x}^n}{n!}$$
+- $y_i \gets \sum_{n = 0}^{0} \frac{x_i^n}{n!}$
+- $i = 1\dots$ vector size
+- Only 1 term ("$x^0$") but do the arithmetic
 
-- overhead
-- idle resources
+:::{.incremental}
+- Init $(x_1,\dots)$ on device (GPU)
+- Starting always on CPU memory would make CPU faster!
+:::
 
 ::::::
 :::::: {.column width="80%"}
@@ -272,13 +266,10 @@ $200$ elements, while the GPU takes the lead already between $30000$ - $40000$ e
 :::
 
 ::::::::: {.columns}
-:::::: {.column width="20%"}
+:::::: {.column width="40%"}
 
-$$\vec{y} = e^{\vec{x}}$$
-$$\vec{y} \approx \sum_{n = 0}^{N} \frac{\vec{x}^n}{n!}$$
-
-- overhead
-- idle resources
+- $y_i \gets \sum_{n = 0}^{16} \frac{x_i^n}{n!}$
+- Less overhead 
 
 ::::::
 :::::: {.column width="80%"}
@@ -286,7 +277,7 @@ $$\vec{y} \approx \sum_{n = 0}^{N} \frac{\vec{x}^n}{n!}$$
 ::::::
 :::::::::
 
-# Runtimes of Taylor expansion
+# Runtimes of Taylor expansion, $N=0,8,16$
 
 ::: notes
 In this final plot we have three different amounts of computation for the three different implementations.
@@ -301,20 +292,7 @@ while it's possible to make some educated guesses about the CPU cache sizes, due
 difference in the plots.
 :::
 
-::::::::: {.columns}
-:::::: {.column width="20%"}
-
-$$\vec{y} = e^{\vec{x}}$$
-$$\vec{y} \approx \sum_{n = 0}^{N} \frac{\vec{x}^n}{n!}$$
-
-- overhead
-- idle resources
-
-::::::
-:::::: {.column width="80%"}
-![](img/runtimes_all.png){.center width=120%}
-::::::
-:::::::::
+![](img/runtimes_all.png){.center width=75%}
 
 # Recap
 
@@ -1049,3 +1027,20 @@ Each SIMD unit/SMSP executes a single instruction per cycle, doing this for all 
 :::
 
 # Questions?
+
+# Well I have couple
+
+Assume GPU with 8 compute units, each with 4 SIMD-units of warp size 64.
+----
+
+1. What is the smallest number of blocks in a grid enough to utilize all
+   compute units? <br>
+  $(a)~ 1\quad (b)~ 32\quad (c)~ 8$
+
+
+2. Assume there are 32 blocks.
+  What is the minimum number of threads per block enough to utilize all of the
+  hardware? <br>
+  $(a)~ 64\quad (b)~ 256\quad (c)~ 32$
+
+3. What brand of GPU is it based on terminology?
