@@ -1,3 +1,12 @@
+/*
+ * Task is to modify four functions in the code:
+ * - implement explicit memory management with hipMalloc and hipMemcpy
+ * - implement pinned host memory with hipHostMalloc
+ * - implement unified memory with hipMallocManaged
+ * - implement unified memory prefetching with hipMemPrefetchAsync
+ * - compare execution times between the approaches
+ */
+
 #include <cstdio>
 #include <string>
 #include <time.h>
@@ -38,7 +47,7 @@ void checkResults(int* const A, const int nx, const int ny, const std::string st
 
   // Indicate if the results are correct
   if(errored)
-    printf("The results are incorrect!/n");
+    printf("The results are incorrect!\n");
   else
     printf("The results are OK! (%.3fs - %s)\n", timing, strategy.c_str());
 }
@@ -52,7 +61,7 @@ void explicitMem(int nSteps, int nx, int ny)
   int *A, *d_A;
   size_t size = nx * ny * sizeof(int);
 
-  #error Allocate pageable host memory of size for the pointer A
+  #error Allocate pageable host memory of size `size` for the pointer A
 
   #error Allocate pinned device memory (d_A)
 
@@ -135,46 +144,6 @@ void explicitMemPinned(int nSteps, int nx, int ny)
   #error Free host array (A)
 }
 
-/* Run using explicit memory management without recurring host/device memcopies */
-void explicitMemNoCopy(int nSteps, int nx, int ny)
-{
-  // Determine grid size
-  const int gridsize = (nx * ny - 1 + BLOCKSIZE) / BLOCKSIZE;
-
-  int *A, *d_A;
-  size_t size = nx * ny * sizeof(int);
-
-  #error Allocate pageable host memory of size for the pointer A
-
-  #error Allocate pinned device memory (d_A)
-
-  // Start timer and begin stepping loop
-  clock_t tStart = clock();
-  for(unsigned int i = 0; i < nSteps; i++)
-  {
-    /* The order of calls inside this loop represent an optimal
-     * workflow of a GPU accelerated program where all oprations
-     * are performed using device (ie, recurring memcopy is avoided):
-     * Initializing array using device, and running a GPU kernel.
-     */
-
-    #error Initialize array to 0 from device
-
-    // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
-  }
-
-  #error Copy data back to host (d_A to A)
-
-  // Check results and print timings
-  clock_t tStop = clock();
-  checkResults(A, nx, ny, "ExplicitMemNoCopy", (double)(tStop - tStart) / CLOCKS_PER_SEC);
-
-  #error Free device array (d_A)
-
-  #error Free host array (A)
-}
-
 /* Run using Unified Memory */
 void unifiedMem(int nSteps, int nx, int ny)
 {
@@ -200,7 +169,8 @@ void unifiedMem(int nSteps, int nx, int ny)
     // Initialize array from host
     memset(A, 0, size);
 
-    #error Launch GPU kernel
+    // Launch GPU kernel
+    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
 
     #error Synchronization
   }
@@ -223,7 +193,7 @@ void unifiedMemPrefetch(int nSteps, int nx, int ny)
   int *A;
   size_t size = nx * ny * sizeof(int);
 
-  #error Allocate Unified Memory of size for the pointer A
+  #error Allocate Unified Memory of size `size` for the pointer A
 
   // Start timer and begin stepping loop
   clock_t tStart = clock();
@@ -241,7 +211,8 @@ void unifiedMemPrefetch(int nSteps, int nx, int ny)
 
     #error Prefetch data from host to device (A)
 
-    #error Launch GPU kernel
+    // Launch GPU kernel
+    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
 
     #error Synchronization
   }
@@ -253,45 +224,6 @@ void unifiedMemPrefetch(int nSteps, int nx, int ny)
   // Check results and print timings
   clock_t tStop = clock();
   checkResults(A, nx, ny, "UnifiedMemPrefetch", (double)(tStop - tStart) / CLOCKS_PER_SEC);
-
-  #error Free Unified Memory array (A)
-}
-
-/* Run using Unified Memory without recurring host/device memcopies */
-void unifiedMemNoCopy(int nSteps, int nx, int ny)
-{
-  // Determine grid size
-  const int gridsize = (nx * ny - 1 + BLOCKSIZE) / BLOCKSIZE;
-
-  int device;
-  #error Get device id number for prefetching
-
-  int *A;
-  size_t size = nx * ny * sizeof(int);
-
-  #error Allocate Unified Memory of size for the pointer A
-
-  // Start timer and begin stepping loop
-  clock_t tStart = clock();
-  for(unsigned int i = 0; i < nSteps; i++)
-  {
-    /* The order of calls inside this loop represent an optimal
-     * workflow of a GPU accelerated program where all oprations
-     * are performed using device (ie, recurring memcopy is avoided):
-     * Initializing array using device, and running a GPU kernel.
-     */
-
-    #error Initialize array from device (A)
-
-    #error Launch GPU kernel
-  }
-  #error Prefetch data from device to host (A)
-
-  #error Synchronization
-
-  // Check results and print timings
-  clock_t tStop = clock();
-  checkResults(A, nx, ny, "UnifiedMemNoCopy", (double)(tStop - tStart) / CLOCKS_PER_SEC);
 
   #error Free Unified Memory array (A)
 }

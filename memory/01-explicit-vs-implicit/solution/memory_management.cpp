@@ -1,3 +1,11 @@
+/*
+ * Task is to modify four functions in the code:
+ * - implement explicit memory management with hipMalloc and hipMemcpy
+ * - implement pinned host memory with hipHostMalloc
+ * - implement unified memory with hipMallocManaged
+ * - implement unified memory prefetching with hipMemPrefetchAsync
+ * - compare execution times between the approaches
+ */
 #include <cstdio>
 #include <string>
 #include <time.h>
@@ -38,7 +46,7 @@ void checkResults(int* const A, const int nx, const int ny, const std::string st
 
   // Indicate if the results are correct
   if(errored)
-    printf("The results are incorrect!/n");
+    printf("The results are incorrect!\n");
   else
     printf("The results are OK! (%.3fs - %s)\n", timing, strategy.c_str());
 }
@@ -55,7 +63,7 @@ void explicitMem(int nSteps, int nx, int ny)
   // Allocate pageable host memory
   A = (int*)malloc(size);
 
-  // Allocate pinned device memory
+  // Allocate pageable device memory
   HIP_ERRCHK(hipMalloc((void**)&d_A, size));
 
   // Start timer and begin stepping loop
@@ -77,6 +85,7 @@ void explicitMem(int nSteps, int nx, int ny)
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
 
     // Synchronization
     HIP_ERRCHK(hipStreamSynchronize(0));
@@ -130,6 +139,7 @@ void explicitMemPinned(int nSteps, int nx, int ny)
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
 
     // Synchronization
     HIP_ERRCHK(hipStreamSynchronize(0));
@@ -147,52 +157,6 @@ void explicitMemPinned(int nSteps, int nx, int ny)
 
   // Free host array
   HIP_ERRCHK(hipHostFree(A));
-}
-
-/* Run using explicit memory management without recurring host/device memcopies */
-void explicitMemNoCopy(int nSteps, int nx, int ny)
-{
-  // Determine grid size
-  const int gridsize = (nx * ny - 1 + BLOCKSIZE) / BLOCKSIZE;
-
-  int *A, *d_A;
-  size_t size = nx * ny * sizeof(int);
-
-  // Allocate pageable host memory
-  A = (int*)malloc(size);
-
-  // Allocate pinned device memory
-  HIP_ERRCHK(hipMalloc((void**)&d_A, size));
-
-  // Start timer and begin stepping loop
-  clock_t tStart = clock();
-  for(unsigned int i = 0; i < nSteps; i++)
-  {
-    /* The order of calls inside this loop represent an optimal
-     * workflow of a GPU accelerated program where all operations
-     * are performed using device (ie, recurring memcopy is avoided):
-     * Initializing array using device, and running a GPU kernel.
-     */
-
-    // Initialize array from device
-    HIP_ERRCHK(hipMemset(d_A, 0, size));
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
-
-    // Launch GPU kernel
-  }
-
-  // Copy data back to host
-  HIP_ERRCHK(hipMemcpy(A, d_A, size, hipMemcpyDeviceToHost));
-
-  // Check results and print timings
-  clock_t tStop = clock();
-  checkResults(A, nx, ny, "ExplicitMemNoCopy", (double)(tStop - tStart) / CLOCKS_PER_SEC);
-
-  // Free device array
-  HIP_ERRCHK(hipFree(d_A));
-
-  // Free host array
-  free(A);
 }
 
 /* Run using Unified Memory */
@@ -223,6 +187,7 @@ void unifiedMem(int nSteps, int nx, int ny)
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
 
     // Synchronization
     HIP_ERRCHK(hipStreamSynchronize(0));
@@ -271,6 +236,7 @@ void unifiedMemPrefetch(int nSteps, int nx, int ny)
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
 
     // Synchronization
     HIP_ERRCHK(hipStreamSynchronize(0));
@@ -290,53 +256,6 @@ void unifiedMemPrefetch(int nSteps, int nx, int ny)
   HIP_ERRCHK(hipFree(A));
 }
 
-/* Run using Unified Memory without recurring host/device memcopies */
-void unifiedMemNoCopy(int nSteps, int nx, int ny)
-{
-  // Determine grid size
-  const int gridsize = (nx * ny - 1 + BLOCKSIZE) / BLOCKSIZE;
-
-  // Get device id number for prefetching
-  int device;
-  HIP_ERRCHK(hipGetDevice(&device));
-
-  int *A;
-  size_t size = nx * ny * sizeof(int);
-
-  // Allocate Unified Memory
-  HIP_ERRCHK(hipMallocManaged((void**)&A, size));
-
-  // Start timer and begin stepping loop
-  clock_t tStart = clock();
-  for(unsigned int i = 0; i < nSteps; i++)
-  {
-    /* The order of calls inside this loop represent an optimal
-     * workflow of a GPU accelerated program where all oprations
-     * are performed using device (ie, recurring memcopy is avoided):
-     * Initializing array using device, and running a GPU kernel.
-     */
-
-    // Initialize array from device
-    HIP_ERRCHK(hipMemset(A, 0, size));
-
-    // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
-
-  }
-  // Prefetch data from device to host
-  HIP_ERRCHK(hipMemPrefetchAsync(A, size, hipCpuDeviceId, 0));
-
-  // Synchronization
-  HIP_ERRCHK(hipStreamSynchronize(0));
-
-  // Check results and print timings
-  clock_t tStop = clock();
-  checkResults(A, nx, ny, "UnifiedMemNoCopy", (double)(tStop - tStart) / CLOCKS_PER_SEC);
-
-  // Free Unified Memory array
-  HIP_ERRCHK(hipFree(A));
-}
-
 /* The main function */
 int main(int argc, char* argv[])
 {
@@ -346,8 +265,6 @@ int main(int argc, char* argv[])
   // Run with different memory management strategies
   explicitMem(nSteps, nx, ny);
   explicitMemPinned(nSteps, nx, ny);
-  explicitMemNoCopy(nSteps, nx, ny);
   unifiedMem(nSteps, nx, ny);
   unifiedMemPrefetch(nSteps, nx, ny);
-  unifiedMemNoCopy(nSteps, nx, ny);
 }

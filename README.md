@@ -31,20 +31,20 @@ part of the EuroCC training activities at CSC.
 
 | Time | Topic |
 | ---- | ----- |
-| 09:00–09:30 | Day 1 Recap (LS) |
-| 09:30–10:15 | More advanced memory allocation/access (LS) |
-| 10:00–10:15 | Break  |
-| 10:15–10:45 | Exercises |
-| 10:45-11:30 | Streams and events (LS) |
+| 09:00–09:30 | Day 1 Recap |
+| 09:30–10:15 | [Streams and events](https://csc-training.github.io/hip-programming/html/03-streams.html) |
+| 10:00–10:15 | Break  ||
+| 10:15–11:00 | [Exercises](streams/) |
+| 11:00-11:30 | [Memory allocations, access, and unified memory](https://csc-training.github.io/hip-programming/html/04-memory.html) |
 | 11:30-11:45 | Break |
-| 11:45-12:15 | Exercises |
+| 11:45-12:15 | [Exercises](memory/) |
 | 12:15-13:00 | Lunch |
-| 13:00-13:45 | More advanced synchronization (LS) |
+| 13:00-13:45 | [Exercises cont'd](memory/) |
 | 13:45-14:00 | Break |
-| 14:00-14:45 | Exercises  |
-| 14:45-15:00 | Lead-up to access patterns and optimizations (LS) |
-| 14:45-15:45 | Break & Exercises |
-| 15:45-16:00 | Close-up | 
+| 14:00-14:30 | More advanced synchronization |
+| 14:30-15:30 | Exercises |
+| 15:30-16:00 | Close-up |
+
 
 ### Day 3
 

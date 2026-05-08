@@ -54,6 +54,7 @@ int main() {
   float *a;
   float *d_a;
 
+  // Initialize a custom stream
   hipStream_t stream;
   HIP_ERRCHK(hipStreamCreate(&stream));
 
@@ -62,11 +63,17 @@ int main() {
 
   memset(a, 0, N_bytes);
 
+  // Copy data to device
   HIP_ERRCHK(hipMemcpyAsync(d_a, a, N_bytes, hipMemcpyHostToDevice, stream));
+  
+  // Launch GPU kernel
   kernel<<<gridsize, blocksize,0,stream>>>(d_a, N);
   HIP_ERRCHK(hipGetLastError());
+
+  // Copy data back to host
   HIP_ERRCHK(hipMemcpyAsync(a, d_a, N_bytes, hipMemcpyDeviceToHost, stream));
 
+  // Synchronize before printing
   HIP_ERRCHK(hipStreamSynchronize(stream));
 
   for (int i = 0; i < 10; i++)

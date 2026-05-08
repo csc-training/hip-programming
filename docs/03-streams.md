@@ -2,7 +2,7 @@
 title:    Streams, events, and synchronization
 subtitle: GPU programming with HIP
 author:   CSC Training
-date:     2025-03
+date:     2026-05
 lang:     en
 ---
 
@@ -32,9 +32,18 @@ lang:     en
   - threads in block
 :::
 
+# Motivation
+
+- So far we have learned a "serial" way of programming for GPUs
+- Questions we want to answer:
+  - What operations are dependent?
+  - What operations could overlap?
+  - How can we overlap and synchronize concurrent computation?
+
+
 # What is a stream?
 
-* A sequence of operations that execute in order on the GPU
+* A sequence (queue) of operations that execute in order on the GPU
 * Operations in different streams may run concurrently
 
 <small>
@@ -58,9 +67,32 @@ lang:     en
 - No data dependencies. HD2 does not depent on DH1.
 :::
 
+# The default stream
+
+- When you do not specify a stream to your kernel, it is sent to the default stream
+  - `my_kernel<<<grid, block, 0, 0>>>(...)`
+
+:::{.fragment}
+![](./img/default_stream_kernels.png){width=1200px}
+:::
+
+:::{.fragment}
+- Operations are sent to the stream and executed in a FIFO manner
+:::
+
+:::{.fragment}
+![](./img/default_stream_queue_fifo.png){width=350px}
+:::
+
+# The default stream
+
+- API functions operate on the default stream: `hipMalloc, hipMemcpy, hipFree, ...`
+- All operations (Malloc, Memcpy, Kernel execution) in the same stream execute sequentially in submission order
+  - Hence, the sequential nature of what you have learnt so far
+
 # Asynchronous funtions and the default stream
 
-- API functions operate on default stream: `hipMalloc, hipMemcpy, hipFree, ...`
+- API functions operate on the default stream: `hipMalloc, hipMemcpy, hipFree, ...`
 - Append `Async` to name and add `hipStream_t` as last argument for asynchronous version: 
   - `hipMalloc(...)` ⟶ `hipMallocAsync(..., hipStream_t stream)`
 - The stream is supplied to the kernel invocation:
@@ -79,18 +111,26 @@ lang:     en
 hipError_t hipHostMalloc(void **ptr, size_t size);
 hipError_t hipHostFree(void *ptr);
 ```
+
 ::: {.notes}
 More on this in Memory lecture
 :::
 
+---
+
+## Async memory copy with regular vs page-locked memory
+
+![](./img/regular_mem_async.png)
+
+:::{.fragment}
+![](./img/pinned_mem_async.png)
+:::
 
 # Asynchronisity and kernels
 
-* Kernels are always asynchronous with host, and require explicit synchronization
-  * If no stream is specified in the kernel launch, the default stream is used
-  * The fourth kernel argument is reserved for the stream 
-* Running kernels concurrently require placing them in different streams
-  * Default stream has special synchronization rules and cannot run concurrently with other streams (applies to all API calls)
+- Kernels are always asynchronous with host, and require explicit synchronization
+- Running kernels concurrently require placing them in different streams
+  - Default stream has special synchronization rules and cannot run concurrently with other streams (applies to all API calls)
 
 <small>
 
@@ -116,7 +156,7 @@ hipStream_t stream
 hipError_t hipStreamCreate ( hipStream_t* stream ) 
 ```
 
-* Synchronize `stream`
+* Synchronize host with `stream`
 ```cpp
 hipError_t hipStreamSynchronize ( hipStream_t stream ) 
 ``` 
@@ -164,6 +204,11 @@ for(int i = 0; i<3; ++i) {
 - host-device is bidirectional
 :::
 
+# Summary before moving to events
+
+- When you do not specify a stream to your kernel, it is sent to the default stream
+- Operations in a stream execute in a FIFO manner
+- Multiple streams can execute concurrently on the same GPU
 
 # Events
 
@@ -302,10 +347,7 @@ __global__ void reverse(double *d_a) {
 
 
 ::: incremental
-* Streams provide a mechanism to evaluate tasks on the GPU concurrently and asynchronously with the host
-  * Asynchronous functions requiring a stream argument are required
-  * Kernels are always asynchronous with the host
-  * Default stream is by `0` (no stream creation required)
+* Streams provide a mechanism to compute tasks on the GPU concurrently
 * Events provide a mechanism to signal when operations have occurred
 in a stream
   * Good for inter-stream sychronization and timing events
