@@ -1,5 +1,7 @@
 # Using asynchronous memory copies for multiple streams
 
+Previously, kernels were launched concurrently in separate HIP streams, but memory copies back to the host were still blocking.
+
 This exercise builds upon the previous stream concurrency exercise,
 by adding asynchronous memory copies from device to host.
 
@@ -8,8 +10,6 @@ Start by **copying your last exercise result to this folder**:
 ```
 cp ../02-streams-asynckernel/streams.cpp .
 ```
-
-Previously, kernels were launched concurrently in separate HIP streams, but memory copies back to the host were still blocking.
 
 Expected output is still the same:
 
@@ -23,13 +23,13 @@ Expected output is still the same:
 
 In this exercise, you will:
 
-- replace blocking `hipMemcpy()` calls with `hipMemcpyAsync()`
-- associate each memory transfer with its corresponding stream
-- manually synchronize streams before accessing host memory
-- validate asynchronous execution using ROCm profiling tools
+- Replace blocking `hipMemcpy()` calls with `hipMemcpyAsync()`
+- Associate each memory transfer with its corresponding stream
+- Manually synchronize your streams with the host before accessing host memory (printing out results)
+- Inspect the execution time characteristics using ROCm profiling tools
 
 Depending on where you placed your stream synchronization in the earlier exercise,
-make sure to move the synchronization calls to be after the device-to-host memory transfers.
+make sure to move the synchronization calls to happen **after** the device-to-host memory transfers.
 
 ## HIP functions used
 
@@ -73,7 +73,7 @@ In the timeline view, you should observe that the three kernels execute at overl
 # Extra: Using pinned host memory
 
 <details>
-<summary>Optional: Using pinned host memory with hipHostMalloc()</summary>
+<summary><strong>Optional: Using pinned host memory with hipHostMalloc()</strong></summary>
 
 By default, this exercise uses ordinary pageable host memory allocated with:
 
@@ -108,6 +108,6 @@ with:
 HIP_ERRCHK(hipHostFree(a));
 ```
 
-After making these changes, compiling your program and running it again, inspect the trace now again.
+After making these changes, compile and run your program again, and inspect its trace.
 
 </details>

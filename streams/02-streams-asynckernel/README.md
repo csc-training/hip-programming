@@ -28,6 +28,13 @@ In this exercise, you will modify the `main()` function to:
 
 The GPU kernels are already implemented and do not need to be modified.
 
+<details>
+<summary><strong>Bonus exercise</strong></summary>
+
+Modify the code so that `kernel_a` executes and copies the memory back to host, before `kernel_b` and `kernel_c` execute asynchronously.
+
+</details>
+
 ## HIP functions used
 
 The following HIP functions are needed in this exercise:
@@ -42,7 +49,7 @@ The following HIP functions are needed in this exercise:
 In the exercise, you are instructed to use `hipStreamSynchronize()` to synchronize
 your streams one by one. 
 
-Another way to synchronize GPU execution is to wait for all GPU work at once using:
+Another way to synchronize the GPU with the host is to wait for all GPU work at once using:
 
 ```
 hipDeviceSynchronize()

@@ -6,9 +6,17 @@ date:     2026-05
 lang:     en
 ---
 
+# Motivation
+
+- So far we have learned a "serial" way of programming for GPUs
+- Questions we now want to answer:
+  - Which operations could overlap?
+  - Could multiple kernels execute simultaneously?
+  - Could me move data between the host and device during kernel execution?
+
 # Outline
 
-* Streams 
+* Streams
 * Events
 * Synchronization
 
@@ -31,15 +39,6 @@ lang:     en
   - stream ⇔ event
   - threads in block
 :::
-
-# Motivation
-
-- So far we have learned a "serial" way of programming for GPUs
-- Questions we want to answer:
-  - What operations are dependent?
-  - What operations could overlap?
-  - How can we overlap and synchronize concurrent computation?
-
 
 # What is a stream?
 
@@ -73,7 +72,18 @@ lang:     en
   - `my_kernel<<<grid, block, 0, 0>>>(...)`
 
 :::{.fragment}
-![](./img/default_stream_kernels.png){width=1200px}
+- API functions operate on the default stream: `hipMalloc, hipMemcpy, hipFree, ...`
+:::
+
+:::{.fragment}
+- All operations (Malloc, Memcpy, Kernel execution) in the same stream execute sequentially in submission order
+  - Hence, the sequential nature of what you have learnt so far
+:::
+
+# The order of execution in a stream
+
+:::{.fragment}
+![](./img/default_stream_kernels.png){width=1600px}
 :::
 
 :::{.fragment}
@@ -81,19 +91,47 @@ lang:     en
 :::
 
 :::{.fragment}
-![](./img/default_stream_queue_fifo.png){width=350px}
+![](./img/default_stream_queue_fifo.png){width=340px}
 :::
 
-# The default stream
+# Stream creation, synchronization, and destruction
+
+* Declare a stream variable
+```cpp
+hipStream_t stream
+```
+
+* Create `stream`
+```cpp
+hipError_t hipStreamCreate ( hipStream_t* stream )
+```
+
+* Destroy `stream`
+```cpp
+hipError_t hipStreamDestroy ( hipStream_t stream )
+```
+
+# Using multiple streams
+
+<small>
+<div class="column">
+![](./img/streams.png){width=750px}
+
+* H-to-D copy runs in a single stream, and the kernel and D-to-H copy are split into 4 streams
+
+</div>
+<div class="column">
+![](./img/streams2.png){width=800px}
+
+* H-to-D copy, kernel, and D-to-H copy are split into 4 streams
+
+</div>
+</small>
+
+# Asynchronous operations and streams
 
 - API functions operate on the default stream: `hipMalloc, hipMemcpy, hipFree, ...`
-- All operations (Malloc, Memcpy, Kernel execution) in the same stream execute sequentially in submission order
-  - Hence, the sequential nature of what you have learnt so far
-
-# Asynchronous funtions and the default stream
-
-- API functions operate on the default stream: `hipMalloc, hipMemcpy, hipFree, ...`
-- Append `Async` to name and add `hipStream_t` as last argument for asynchronous version: 
+- Append `Async` to name and add `hipStream_t` as last argument for asynchronous version:
   - `hipMalloc(...)` ⟶ `hipMallocAsync(..., hipStream_t stream)`
 - The stream is supplied to the kernel invocation:
   - `my_kernel<<<grid, block, 0, stream>>>(...)`
@@ -102,28 +140,6 @@ lang:     en
 
 ::: {.notes}
 - `hipStream_t stream` must be created as well (later)
-:::
-
-# Memory caveat: 
-
-- Host memory needs to be page-locked, otherwise memory copies are synchronous
-```cpp
-hipError_t hipHostMalloc(void **ptr, size_t size);
-hipError_t hipHostFree(void *ptr);
-```
-
-::: {.notes}
-More on this in Memory lecture
-:::
-
----
-
-## Async memory copy with regular vs page-locked memory
-
-![](./img/regular_mem_async.png)
-
-:::{.fragment}
-![](./img/pinned_mem_async.png)
 :::
 
 # Asynchronisity and kernels
@@ -144,30 +160,7 @@ hipkernel<<<grid, block, bytes, strm[i]>>>(args);
 ```
 </small>
 
-# Stream creation, synchronization, and destruction
-
-* Declare a stream variable
-```cpp
-hipStream_t stream
-```
-
-* Create `stream`
-```cpp
-hipError_t hipStreamCreate ( hipStream_t* stream ) 
-```
-
-* Synchronize host with `stream`
-```cpp
-hipError_t hipStreamSynchronize ( hipStream_t stream ) 
-``` 
-
-* Destroy `stream`
-```cpp
-hipError_t hipStreamDestroy ( hipStream_t stream ) 
-```
-
 # Stream example
-
 
 ::::::{.columns}
 :::{.column width="50%"}
@@ -202,6 +195,28 @@ for(int i = 0; i<3; ++i) {
 
 :::{.notes}
 - host-device is bidirectional
+:::
+
+# Memory caveat: 
+
+- Host memory needs to be page-locked, otherwise memory copies are synchronous
+```cpp
+hipError_t hipHostMalloc(void **ptr, size_t size);
+hipError_t hipHostFree(void *ptr);
+```
+
+::: {.notes}
+More on this in Memory lecture
+:::
+
+---
+
+## Async memory copy with regular vs page-locked memory
+
+![](./img/regular_mem_async.png)
+
+:::{.fragment}
+![](./img/pinned_mem_async.png)
 :::
 
 # Summary before moving to events
@@ -270,7 +285,6 @@ Measure duration of tasks on GPU:
 
 ::: {.notes}
 - Note that with events the event is complete when the last hipMemcpy is complete
-- 
 :::
 
 # Events: Central API calls
@@ -290,26 +304,44 @@ Measure duration of tasks on GPU:
 
 </small>
 
-# Central synchronization API calls 
+# Lastly, synchronization
+
+- GPU operations are asynchronous with respect to the host
+  - The CPU may continue executing while kernels are still running
+  - Memory copies and kernels may overlap
+
+:::{.fragment}
+- Synchronization is needed when:
+  - The host (CPU) needs results produced by the GPU
+  - One operation depends on another operation completing
+:::
+
+:::{.fragment}
+- Without synchronization:
+  - The CPU may access incomplete data
+  - Operations may execute in the wrong order
+:::
+
+# Central synchronization API calls
 
 <small>
 
-* Synchronize the host with a specific stream
+* Synchronize the host with a specific **stream**
 ```cpp
-​hipError_t hipStreamSynchronize ( hipStream_t stream ) 
+​hipError_t hipStreamSynchronize ( hipStream_t stream )
 ``` 
 
-* Synchronize the host with a specific event
+* Synchronize the host with a specific **event**
 ```cpp
 ​hipError_t hipEventSynchronize ( hipEvent_t event )
 ``` 
 
 * Synchronize a specific stream with a specific event (the event can be in another stream) 
 ```cpp
-​hipError_t hipStreamWaitEvent ( hipStream_t stream, hipEvent_t event, unsigned int  flags = 0 ) 
+​hipError_t hipStreamWaitEvent ( hipStream_t stream, hipEvent_t event, unsigned int  flags = 0 )
 ``` 
 
-* Synchronize the host with the whole device (wait until all device tasks are finished)
+* Synchronize the host with the whole **device** (wait until all device tasks are finished)
 ```cpp
 hipError_t hipDeviceSynchronize ( void ) 
 ``` 
