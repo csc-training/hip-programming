@@ -29,21 +29,23 @@ void checkTiming(const std::string strategy, const double timing)
   printf("%.3f ms - %s\n", timing * 1e3, strategy.c_str());
 }
 
-/* Run without timing */
-void ignoreTiming(int nSteps, int size)
+/* Run without timing as a warmup */
+void warmupRun(int nSteps, int size)
 {
   // Determine grid and block size
   const int blocksize = BLOCKSIZE;
   const int gridsize = (size - 1 + blocksize) / blocksize;
 
+  size_t bytes = size * sizeof(int);
+
   int *d_A;
   // Allocate pinned device memory
-  HIP_ERRCHK(hipMalloc((void**)&d_A, sizeof(int) * size));
+  HIP_ERRCHK(hipMalloc((void**)&d_A, bytes));
 
   // Start timer and begin stepping loop
   clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
-  {    
+  {
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
     // Synchronization
@@ -60,14 +62,16 @@ void noRecurringAlloc(int nSteps, int size)
   const int blocksize = BLOCKSIZE;
   const int gridsize = (size - 1 + blocksize) / blocksize;
 
+  size_t bytes = size * sizeof(int);
+
   int *d_A;
-  // Allocate pinned device memory
-  HIP_ERRCHK(hipMalloc((void**)&d_A, sizeof(int) * size));
+  // Allocate device memory
+  HIP_ERRCHK(hipMalloc((void**)&d_A, bytes));
 
   // Start timer and begin stepping loop
   clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
-  {    
+  {
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
   }
@@ -87,13 +91,15 @@ void recurringAllocNoMemPools(int nSteps, int size)
   const int blocksize = BLOCKSIZE;
   const int gridsize = (size - 1 + blocksize) / blocksize;
 
+  size_t bytes = size * sizeof(int);
+
   // Start timer and begin stepping loop
   clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
   {
     int *d_A;
-    // Allocate pinned device memory
-    HIP_ERRCHK(hipMalloc((void**)&d_A, sizeof(int) * size));
+    // Allocate device memory
+    HIP_ERRCHK(hipMalloc((void**)&d_A, bytes));
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
     // Free allocation
@@ -116,13 +122,15 @@ void recurringAllocMallocAsync(int nSteps, int size)
   const int blocksize = BLOCKSIZE;
   const int gridsize = (size - 1 + blocksize) / blocksize;
 
+  size_t bytes = size * sizeof(int);
+
   // Start timer and begin stepping loop
   clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
   {
     int *d_A;
-    // Allocate pinned device memory
-    HIP_ERRCHK(hipMallocAsync((void**)&d_A, sizeof(int) * size, stream));
+    // Allocate device memory
+    HIP_ERRCHK(hipMallocAsync((void**)&d_A, bytes, stream));
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, stream>>>(d_A, size);
     // Free allocation
@@ -142,9 +150,9 @@ int main(int argc, char* argv[])
 {
   // Set the number of steps and 1D grid dimensions
   int nSteps = 1e4, size = 1e6;
-  
-  // Ignore first run, first kernel is slower
-  ignoreTiming(nSteps, size);
+
+  // Ignore first run, first kernel is slower (warmup)
+  warmupRun(nSteps, size);
 
   // Run with different memory allocatins strategies
   noRecurringAlloc(nSteps, size);

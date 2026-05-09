@@ -55,17 +55,25 @@ Refer to your trace output in Perfetto to check that the timings make sense.
 ## Background
 
 <details>
-<summary>About HIP events</summary>
+<summary><strong>About HIP events</strong></summary>
+
+### HIP Events
 
 HIP events are essentially markers inserted into a stream.
 
 Events can be used to:
 - measure GPU execution time
-- track progress in a stream
+- track progress in a stream from the host
 - synchronize e.g. across different streams
 
 A typical timing workflow looks like:
 ```
+hipEvent_t start
+hipEvent_t end
+
+hipEventCreate(&start);
+hipEventCreate(&end);
+
 hipEventRecord(start, stream);
 
 kernel<<<..., stream>>>();
@@ -73,6 +81,9 @@ kernel<<<..., stream>>>();
 hipEventRecord(end, stream);
 
 hipEventElapsedTime(&time_ms, start, end);
+
+hipEventDestroy(*start);
+hipEventDestroy(*end);
 ```
 
 Synchronizing across streams:

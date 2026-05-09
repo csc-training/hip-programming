@@ -1,5 +1,5 @@
 ---
-title:  Memory allocations, access, and unified memory
+title:  Memory management and transfers with HIP
 subtitle: GPU programming with HIP
 author:   CSC Training
 date:     2026-05
@@ -65,6 +65,8 @@ Extra:
 - This lecture: host ⇄ global device memory
 :::
 
+# Section 1: Memory management strategies {.section}
+
 # Memory management strategies
 
 Memory management can be *Explicit* or *Implicit*.
@@ -73,7 +75,6 @@ Memory management can be *Explicit* or *Implicit*.
 - *Explicit*: User manually manages data movement between host and device. Host memory can be allocated with GPU-unaware allocators (`malloc`/`free` etc)
 - *Implicit*: The runtime manages data movement between host and device. Host memory needs to be allocated with special allocators.
   - **Managed memory** (unified shared memory): Page faults will initiate data movement
-  - **Page-locked** (pinned) host allocations: Data moves to device with kernel invocations and is not stored there
 :::
 
 * [HIP API documentation on memory](https://rocm.docs.amd.com/projects/HIP/en/docs-6.3.3/doxygen/html/group___memory_m.html)
@@ -123,20 +124,6 @@ int main() {
 ```
 :::
 
-:::{.fragment}
-Host-pinned, automatic copy
-```cpp
-int main() {
-  int *A;
-  hipHostMalloc((void**) &A, N*sizeof(int));
-  kernel<<<...>>>(A)
-  hipStreamSynchronize(0);
-  // result is in A
-  hipHostFree(A);
-}
-```
-:::
-
 </small>
 
 :::
@@ -153,7 +140,6 @@ int main() {
 - Incremental development
 - Increased developer productivity
   - Especially on large codebases with complex data structures
-- Allows oversubscribing GPU memory on some architectures
 - Data transfer can be optimized later
   - With prefetches and hints
 :::
@@ -169,7 +155,7 @@ int main() {
 :::
 ::::::
 
-# Unified memory: What prefetching does
+# Unified memory: Prefetching
 
 - Unified memory automatically migrates memory pages between CPU and GPU
 - Without prefetching:
@@ -179,51 +165,6 @@ int main() {
   ```cpp
   hipError_t hipMemPrefetchAsync(void *dev_ptr, size_t size, int device, hipStream_t stream);
   ```
-
-# Page-locked (or pinned) memory
-
-:::{.fragment}
-- Normal `malloc` allows swapping, page migration and page faults
-- `hipHostMalloc` page-locks the allocation to a physical memory location
-  - Deallocate with `hipFreeHost()`
-
-Benefits of page-locking:
-:::
-
-:::{.incremental}
-
-1. ***Allow actually asynchronous memory copies***
-2. (possibly) Higher transfer speeds between host and device via direct memory access (DMA)
-3. Access host memory from GPU without explicit `hipMemCpy`. Useful in sporadic access pattern, *very slow*
-
-:::
-
-:::{.notes}
-- having too much page-locked allocs is almost never a problem
-:::
-
-# Async memory copy with regular vs page-locked memory
-
-![](./img/regular_mem_async.png)
-
-:::{.fragment}
-![](./img/pinned_mem_async.png)
-:::
-
-# Asynchronous memcopies
-
-- Normal `hipMemcpy()` calls are blocking (ie, synchronizing)
-    - The execution of host code is blocked until copying is finished
-- To overlap copying and program execution, use asynchronous functions
-    - Such functions have Async suffix, eg, `hipMemcpyAsync()`
-- User has to synchronize the program execution
-- Concurrency with memory copy and computation requires page-locked host allocations
-
-# Summary about unified vs. page-locked memory
-
-- Memory management can be *Explicit* or *Implicit*
-- Asynchronous memory copies require pinned (host) memory
-- Any questions before we move on to the API?
 
 # Explicit memory API calls
 
@@ -244,21 +185,6 @@ Benefits of page-locking:
   hipError_t hipFree(void *devPtr)
   ```
 
-# Explicit memory API calls
-
-Page-locked host memory
-
-- Allocate/free page-locked host memory
-  ```cpp 
-    hipHostMalloc(void **ptr, size_t size);
-    hipHostFree(void *ptr);
-  ```
-- Memory copy functions are the same as with normally allocated memory
-
-:::{.notes}
-- the speedup is not very big usually
-:::
-
 # Unified memory API calls
 
 Also known as [*Managed memory*](https://rocm.docs.amd.com/projects/HIP/en/docs-6.3.3/doxygen/html/group___memory_m.html)
@@ -275,10 +201,89 @@ Also known as [*Managed memory*](https://rocm.docs.amd.com/projects/HIP/en/docs-
   ```cpp
   hipError_t hipMemPrefetchAsync( void *dev_ptr, size_t size, int device, hipStream_t stream)
   ```
-- Advise about memory access (more in [HIP API Documentation](https://rocm.docs.amd.com/projects/HIP/en/docs-6.0.2/doxygen/html/group___global_defs.html#ga2757323c1ac94b1d71f699fcbd5bdc2f))
+- Advise about memory access (more in [HIP API Documentation](https://rocm.docs.amd.com/projects/HIP/en/docs-6.3.3/doxygen/html/group___global_defs.html#ga2757323c1ac94b1d71f699fcbd5bdc2f))
   ```cpp
   hipError_t hipMemAdvise(void *dev_ptr, size_t size, hipMemoryAdvise advise, int device)
   ```
+
+# Summary about memory management
+
+- Memory management can be *Explicit* or *Implicit*
+- Unified memory handles memory management between host and device "automatically"
+- Any questions about explicit vs. implicit memory management?
+
+# Section 2: Efficient memory transfers with pinned host memory {.section}
+
+# Pageable vs. page-locked memory?
+
+::::::{.columns}
+:::{.column width=90%}
+- Modern operating systems utilize virtual memory
+    - Memory pages can reside on swap area on the disk
+- GPU DMA transfers require memory pages to remain resident during the transfer
+- Page-locked ("pinned") memory prevents the OS from swapping these pages out
+:::
+
+:::{.column}
+![](img/virtual_memory_addressing.png){width=60%}
+:::
+::::::
+
+# Page-locked (or pinned) memory
+
+:::{.fragment}
+- Normal `malloc` allows swapping, page migration and page faults
+- `hipHostMalloc` page-locks the allocation to a physical memory location
+  - Deallocate with `hipFreeHost()`
+
+Benefits of page-locking:
+:::
+
+:::{.incremental}
+
+1. ***Allow actually asynchronous memory copies***
+2. (possibly) Higher transfer speeds between host and device via direct memory access (DMA)
+3. Can access host memory from GPU without explicit hipMemcpy (**very slow**)
+
+:::
+
+:::{.notes}
+- having too much page-locked allocs is almost never a problem
+:::
+
+# Asynchronous memcopies
+
+- Normal `hipMemcpy()` calls are blocking (ie, synchronizing)
+    - The execution of host code is blocked until copying is finished
+- To overlap copying and program execution, use asynchronous functions
+    - Such functions have Async suffix, eg, `hipMemcpyAsync()`
+- User has to synchronize the program execution
+- Concurrency with memory copy and computation requires page-locked host allocations
+
+# Async memory copy with regular vs page-locked memory
+
+![](./img/regular_mem_async.png)
+
+:::{.fragment}
+![](./img/pinned_mem_async.png)
+:::
+
+# Explicit memory API calls
+
+Page-locked host memory
+
+- Allocate/free page-locked host memory
+  ```cpp 
+    hipHostMalloc(void **ptr, size_t size);
+    hipHostFree(void *ptr);
+  ```
+- Memory copy functions are the same as with normally allocated memory
+
+:::{.notes}
+- the speedup is not very big usually
+:::
+
+# Section 3: Asynchronous memory allocation {.section}
 
 # Asynchronous allocation: The stream-ordered memory allocator and memory pools 
 
@@ -349,6 +354,6 @@ hipStreamSynchronize(stream);
 - Host and device have separate physical memories
   - The data copies between CPU and GPU should be minimized
 - Explicit or implicit memory management
-  - Page-locked host allocation: DMA and kernel access to host memory
   - Unified Memory: improve productivity and cleaner implementation
+- Page-locked host allocation: DMA and kernel access to host memory
 - Asynchronous allocation and deallocation: memory pools

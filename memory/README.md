@@ -1,6 +1,6 @@
 # HIP Memory Management
 
-This folder contains exercises for the lecture on "Memory allocations, access, and unified memory".
+This folder contains exercises for the lecture on "Memory management and transfers with HIP".
 
 Exercises should be completed in order.
 
