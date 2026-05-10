@@ -52,22 +52,18 @@ CC -xhip -lroctx64 overlapping_work.cpp -o overlapping_work
 Run the program with ROCm profiling **and** `roctx` enabled:
 
 ```bash
-run_tue rocprof --hip-trace --roctx-trace ./<your-executable>
+run_tue rocprofv3 --hip-trace --kernel-trace --marker-trace --output-format pftrace -- ./<yourapp>
 ```
 
-This generates a file called:
-
-```text
-results.json
-```
+This generates a file with a suffix: `.pftrace`
 
 Copy the file to your local machine:
 
 ```bash
-scp <your_username>@lumi.csc.fi:/scratch/project_462001376/<your_username>/hip-programming/streams/0X-bonus-cpu-gpu-overlap/results.json .
+scp <your_username>@lumi.csc.fi:/scratch/project_462001376/<your_username>/hip-programming/streams/0X-bonus-cpu-gpu-overlap/<path-to-your-file>.pftrace .
 ```
 
-Replace the `<your_username>` and `<exercise-folder>` sections in the above.  
+Replace the `<your_username>` and `<path-to-your-file>` sections in the above.  
 The `.` at the end means that the file will be copied to the current directory.
 
 You can open the trace in either:

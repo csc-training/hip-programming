@@ -45,22 +45,18 @@ run_tue ./<yourapp>
 To inspect a trace, run the program with ROCm profiling enabled:
 
 ```bash
-run_tue rocprof --hip-trace ./<yourapp>
+run_tue rocprofv3 --hip-trace --kernel-trace --output-format pftrace -- ./<yourapp>
 ```
 
-This generates a file called:
-
-```
-results.json
-```
+This generates a file with a suffix: `.pftrace`
 
 Copy the file to your local machine:
 
 ```bash
-scp <your_username>@lumi.csc.fi:/scratch/project_462001376/<your_username>/hip-programming/streams/<exercise>/results.json .
+scp <your_username>@lumi.csc.fi:/scratch/project_462001376/<your_username>/hip-programming/streams/<exercise>/<path-to-your-file>/<file>.pftrace .
 ```
 
-Replace the `<your_username>` and <exercise> sections in the above. 
+Replace the `<your_username>`, `<exercise>` and `<path-to-your-file>` sections in the above. 
 The `.` at the end means that the file will be copied to the current directory.
 
 You can open the `.json` trace file in either:

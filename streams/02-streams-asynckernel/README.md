@@ -68,25 +68,19 @@ Which synchronizes the entire device rather than a single stream.
 
 After completing the exercise, validate that the kernels execute concurrently.
 
-Run the program with ROCm profiling enabled:
-
 ```bash
-run_tue rocprof --hip-trace ./<your-executable>
+run_tue rocprofv3 --hip-trace --kernel-trace --output-format pftrace -- ./<yourapp>
 ```
 
-This generates a file called:
-
-```
-results.json
-```
+This generates a file with a suffix: `.pftrace`
 
 Copy the file to your local machine:
 
 ```bash
-scp <your_username>@lumi.csc.fi:/scratch/project_462001376/<your_username>/hip-programming/streams/02-streams-asynckernel/results.json .
+scp <your_username>@lumi.csc.fi:/scratch/project_462001376/<your_username>/hip-programming/streams/02-streams-asynckernel/<path-to-your-file>.pftrace .
 ```
 
-Replace the `<your_username>` sections in the above.
+Replace the `<your_username>` and `<path-to-your-file>` sections in the above.
 The `.` at the end means that the file will be copied to the current directory.
 
 You can open the trace in either:
