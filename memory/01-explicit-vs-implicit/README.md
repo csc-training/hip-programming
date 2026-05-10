@@ -18,11 +18,12 @@ The memory management strategies are:
 1. Managing host and device memory explicitly
 2. Managing host and device memory explicitly, but using pinned host memory
 3. Using unified (managed) memory to handle memory management
+4. Calling the provided GPU kernel `hipKernel`
 4. Using unified memory with explicit prefetching
 
 The program will print out timing information for each, for comparing their performance.
 
-Missing code sections are marked using: `#error`
+Missing code sections are marked using: `#error` with a description.
 
 All functions and kernels should use the default stream in this exercise.
 
@@ -42,6 +43,8 @@ And pinned host memory with:
 
 - `hipHostMalloc()` and `hipHostFree()`
 
+Lastly, you should define kernels call to execute `hipKernel` on the GPU in each function.
+
 ## Hints
 
 `int device;`
@@ -55,6 +58,10 @@ And pinned host memory with:
 
 * prefetch to host: use device `hipCpuDeviceId`
 `hipMemPrefetchAsync(A, size, hipCpuDeviceId, 0);`
+
+* `__global__ void hipKernel(int* const A, const int nx, const int ny)`
+    - Pay attention what memory you're passing to `hipKernel`
+    - `nx` and `ny` are defined in the program
 
 ## Background
 

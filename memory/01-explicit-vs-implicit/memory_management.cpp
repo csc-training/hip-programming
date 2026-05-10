@@ -109,8 +109,8 @@ void explicitMem(int nSteps, int nx, int ny)
 
     #error Copy data to device (A to d_A)
 
-    // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    #error Launch GPU kernel hipKernel
+
     HIP_ERRCHK(hipGetLastError());
 
     #error Synchronization
@@ -157,9 +157,7 @@ void explicitMemPinned(int nSteps, int nx, int ny)
 
     #error Copy data to device (A to d_A)
 
-    // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
-    HIP_ERRCHK(hipGetLastError());
+    #error Launch GPU kernel hipKernel
 
     #error Synchronization
   }
@@ -201,9 +199,7 @@ void unifiedMem(int nSteps, int nx, int ny)
     // Initialize array from host
     memset(A, 0, size);
 
-    // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
-    HIP_ERRCHK(hipGetLastError());
+    #error Launch GPU kernel hipKernel
 
     #error Synchronization
   }
@@ -246,9 +242,7 @@ void unifiedMemPrefetch(int nSteps, int nx, int ny)
 
     #error Prefetch data from host to device (A)
 
-    // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
-    HIP_ERRCHK(hipGetLastError());
+    #error Launch GPU kernel hipKernel
 
     #error Synchronization
   }
