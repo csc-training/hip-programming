@@ -1,5 +1,5 @@
 #include <cstdio>
-#include <string>
+#include <cstring>
 #include <time.h>
 #include <hip/hip_runtime.h>
 
@@ -64,8 +64,8 @@ void explicitMemNoCopy(int nSteps, int nx, int ny)
   {
     /* The order of calls inside this loop represent an optimal
      * workflow of a GPU accelerated program where all operations
-     * are performed using device (ie, recurring memcopy is avoided):
-     * Initializing array using device, and running a GPU kernel.
+     * are performed using device (i.e., recurring memcopy is avoided):
+     * Initializing the array directly on the GPU and running a GPU kernel.
      */
 
     // Initialize array from device
@@ -73,6 +73,7 @@ void explicitMemNoCopy(int nSteps, int nx, int ny)
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
   }
 
   // Copy data back to host
@@ -111,8 +112,8 @@ void unifiedMemNoCopy(int nSteps, int nx, int ny)
   {
     /* The order of calls inside this loop represent an optimal
      * workflow of a GPU accelerated program where all operations
-     * are performed using device (ie, recurring memcopy is avoided):
-     * Initializing array using device, and running a GPU kernel.
+     * are performed using device (i.e., recurring memcopy is avoided):
+     * Initializing the array directly on the GPU and running a GPU kernel.
      */
 
     // Initialize array from device
@@ -120,6 +121,7 @@ void unifiedMemNoCopy(int nSteps, int nx, int ny)
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
 
   }
   // Prefetch data from device to host

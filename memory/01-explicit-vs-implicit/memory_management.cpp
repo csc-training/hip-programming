@@ -8,7 +8,7 @@
  */
 
 #include <cstdio>
-#include <string>
+#include <cstring>
 #include <time.h>
 #include <hip/hip_runtime.h>
 
@@ -155,7 +155,7 @@ void unifiedMem(int nSteps, int nx, int ny)
   int *A;
   size_t size = nx * ny * sizeof(int);
 
-  #error Allocate Unified Memory of size for the pointer A
+  #error Allocate Unified Memory of size `size` for the pointer A
 
   // Start timer and begin stepping loop
   clock_t tStart = clock();
@@ -172,7 +172,7 @@ void unifiedMem(int nSteps, int nx, int ny)
     memset(A, 0, size);
 
     // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
     HIP_ERRCHK(hipGetLastError());
 
     #error Synchronization
@@ -182,7 +182,7 @@ void unifiedMem(int nSteps, int nx, int ny)
   clock_t tStop = clock();
   checkResults(A, nx, ny, "UnifiedMemNoPrefetch", (double)(tStop - tStart) / CLOCKS_PER_SEC);
 
-  #error Free the array (A) that's in unified memory
+  #error Free Unified Memory array (A)
 }
 
 /* Run using Unified Memory and prefetching */

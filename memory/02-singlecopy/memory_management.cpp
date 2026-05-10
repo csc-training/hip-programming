@@ -1,5 +1,5 @@
 /*
- * Task is to modify two functions in the code based on the previous exercise:
+ * Task is to optimize two functions in the code based on the previous exercise:
  * - avoid recurring host-to-device memory transfers
  * - keep data resident on the GPU during the iterative loop
  * - initialize memory directly on the device using hipMemset()
@@ -7,7 +7,7 @@
  */
 
 #include <cstdio>
-#include <string>
+#include <cstring>
 #include <time.h>
 #include <hip/hip_runtime.h>
 
@@ -70,14 +70,15 @@ void explicitMemNoCopy(int nSteps, int nx, int ny)
   {
     /* The order of calls inside this loop represent an optimal
      * workflow of a GPU accelerated program where all operations
-     * are performed using device (ie, recurring memcopy is avoided):
-     * Initializing array using device, and running a GPU kernel.
+     * are performed using device (i.e., recurring memcopy is avoided):
+     * Initializing the array directly on the GPU and running a GPU kernel.
      */
 
-    #error Initialize array from device (A)
+    #error Initialize array A to zeros on the device using hipMemset
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
   }
 
   #error Copy data back to host (d_A to A)
@@ -111,14 +112,15 @@ void unifiedMemNoCopy(int nSteps, int nx, int ny)
   {
     /* The order of calls inside this loop represent an optimal
      * workflow of a GPU accelerated program where all operations
-     * are performed using device (ie, recurring memcopy is avoided):
-     * Initializing array using device, and running a GPU kernel.
+     * are performed using device (i.e., recurring memcopy is avoided):
+     * Initializing the array directly on the GPU and running a GPU kernel.
      */
 
-    #error Initialize array (A) from device
+    #error Initialize array A to zeros on the device using hipMemset
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
   }
   #error Prefetch data (A) from device to host
 

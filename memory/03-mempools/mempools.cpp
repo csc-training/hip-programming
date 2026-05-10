@@ -1,14 +1,18 @@
 /*
- * This code in its current form uses the default stream
+ * This code compares different GPU memory allocation strategies.
+ *
  * Task is to:
- *   - create a stream
- *   - copy memory to/from device with that stream
- *   - launch the readymade kernel using that stream
- *   - copy data back to the host using the stream
- *   - destroy the stream
+ *   - allocate device memory using hipMalloc()
+ *   - perform recurring allocations using hipMalloc()/hipFree()
+ *   - perform recurring allocations using hipMallocAsync()/hipFreeAsync()
+ *   - create and synchronize a HIP stream for async allocations
+ *   - compare the timing between the approaches
+ *
+ * Observe how stream-ordered memory allocation can reduce
+ * recurring allocation overhead through memory pooling.
  */
 #include <cstdio>
-#include <string>
+#include <cstring>
 #include <time.h>
 #include <hip/hip_runtime.h>
 
@@ -64,7 +68,7 @@ void warmupRun(int nSteps, int size)
   HIP_ERRCHK(hipFree(d_A));
 }
 
-/* Run without recurring allocation */
+/* Run using a single device allocation outside of the loop */
 void noRecurringAlloc(int nSteps, int size)
 {
   // Determine grid and block size
@@ -85,7 +89,7 @@ void noRecurringAlloc(int nSteps, int size)
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
   }
   // Synchronization
-  #error synchronize the default stream here
+  #error synchronize the default stream here before stopping the timer
   // Check results and print timings
   checkTiming("noRecurringAlloc", (double)(clock() - tStart) / CLOCKS_PER_SEC);
 
@@ -111,12 +115,13 @@ void recurringAllocNoMemPools(int nSteps, int size)
     #error allocate memory with hipMalloc for d_A of size `bytes`
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
+    HIP_ERRCHK(hipGetLastError());
     // Free allocation
     #error free d_A allocation using hipFree
   }
   // Synchronization
   // Ensure all queued allocations and kernels complete before stopping timing
-  #error synchronize the default stream here
+  #error synchronize the default stream here before stopping the timer
   // Check results and print timings
   checkTiming("recurringAllocNoMemPools", (double)(clock() - tStart) / CLOCKS_PER_SEC);
 }
@@ -143,6 +148,7 @@ void recurringAllocMallocAsync(int nSteps, int size)
     #error allocate memory with hipMallocAsync for d_A of size `bytes` in stream
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, stream>>>(d_A, size);
+    HIP_ERRCHK(hipGetLastError());
     // Free allocation
     #error free d_A allocation using hipFreeAsync in stream
   }
@@ -164,7 +170,7 @@ int main(int argc, char* argv[])
   // Ignore first run, first kernel is slower (warmup)
   warmupRun(nSteps, size);
 
-  // Run with different memory allocatins strategies
+  // Run with different memory allocation strategies
   noRecurringAlloc(nSteps, size);
   recurringAllocNoMemPools(nSteps, size);
   recurringAllocMallocAsync(nSteps, size);

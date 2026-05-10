@@ -12,7 +12,7 @@
  * recurring allocation overhead through memory pooling.
  */
 #include <cstdio>
-#include <string>
+#include <cstring>
 #include <time.h>
 #include <hip/hip_runtime.h>
 
@@ -52,15 +52,15 @@ void warmupRun(int nSteps, int size)
   size_t bytes = size * sizeof(int);
 
   int *d_A;
-  // Allocate pinned device memory
+  // Allocate device memory
   HIP_ERRCHK(hipMalloc((void**)&d_A, bytes));
 
-  // Start timer and begin stepping loop
-  clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
   {
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
+    HIP_ERRCHK(hipGetLastError());
+
     // Synchronization
     HIP_ERRCHK(hipStreamSynchronize(0));
   }
@@ -68,7 +68,7 @@ void warmupRun(int nSteps, int size)
   HIP_ERRCHK(hipFree(d_A));
 }
 
-/* Run without recurring allocation */
+/* Run using a single device allocation outside of the loop */
 void noRecurringAlloc(int nSteps, int size)
 {
   // Determine grid and block size
@@ -87,6 +87,7 @@ void noRecurringAlloc(int nSteps, int size)
   {
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
+    HIP_ERRCHK(hipGetLastError());
   }
   // Synchronization
   HIP_ERRCHK(hipStreamSynchronize(0));
@@ -115,6 +116,7 @@ void recurringAllocNoMemPools(int nSteps, int size)
     HIP_ERRCHK(hipMalloc((void**)&d_A, bytes));
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, 0>>>(d_A, size);
+    HIP_ERRCHK(hipGetLastError());
     // Free allocation
     HIP_ERRCHK(hipFree(d_A));
   }
@@ -146,6 +148,7 @@ void recurringAllocMallocAsync(int nSteps, int size)
     HIP_ERRCHK(hipMallocAsync((void**)&d_A, bytes, stream));
     // Launch GPU kernel
     hipKernel<<<gridsize, blocksize, 0, stream>>>(d_A, size);
+    HIP_ERRCHK(hipGetLastError());
     // Free allocation
     HIP_ERRCHK(hipFreeAsync(d_A, stream));
   }
@@ -168,7 +171,7 @@ int main(int argc, char* argv[])
   // Ignore first run, first kernel is slower (warmup)
   warmupRun(nSteps, size);
 
-  // Run with different memory allocatins strategies
+  // Run with different memory allocation strategies
   noRecurringAlloc(nSteps, size);
   recurringAllocNoMemPools(nSteps, size);
   recurringAllocMallocAsync(nSteps, size);

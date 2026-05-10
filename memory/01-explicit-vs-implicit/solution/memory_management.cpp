@@ -7,7 +7,7 @@
  * - compare execution times between the approaches
  */
 #include <cstdio>
-#include <string>
+#include <cstring>
 #include <time.h>
 #include <hip/hip_runtime.h>
 
@@ -197,7 +197,7 @@ void unifiedMem(int nSteps, int nx, int ny)
   clock_t tStop = clock();
   checkResults(A, nx, ny, "UnifiedMemNoPrefetch", (double)(tStop - tStart) / CLOCKS_PER_SEC);
 
-  // Free the array (A) that's in unified memory
+  // Free Unified Memory array (A)
   HIP_ERRCHK(hipFree(A));
 }
 
