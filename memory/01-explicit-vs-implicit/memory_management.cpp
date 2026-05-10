@@ -83,6 +83,7 @@ void explicitMem(int nSteps, int nx, int ny)
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
 
     #error Synchronization
   }
@@ -107,7 +108,7 @@ void explicitMemPinned(int nSteps, int nx, int ny)
   int *A, *d_A;
   size_t size = nx * ny * sizeof(int);
 
-  #error Allocate pinned host memory of size for the pointer A
+  #error Allocate pinned host memory of size `size` for the pointer A
 
   #error Allocate device memory (d_A)
 
@@ -129,6 +130,7 @@ void explicitMemPinned(int nSteps, int nx, int ny)
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
 
     #error Synchronization
   }
@@ -171,6 +173,7 @@ void unifiedMem(int nSteps, int nx, int ny)
 
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
 
     #error Synchronization
   }
@@ -179,7 +182,7 @@ void unifiedMem(int nSteps, int nx, int ny)
   clock_t tStop = clock();
   checkResults(A, nx, ny, "UnifiedMemNoPrefetch", (double)(tStop - tStart) / CLOCKS_PER_SEC);
 
-  #error Free Unified Memory array (A)
+  #error Free the array (A) that's in unified memory
 }
 
 /* Run using Unified Memory and prefetching */
@@ -190,6 +193,7 @@ void unifiedMemPrefetch(int nSteps, int nx, int ny)
 
   int device;
   #error Get device id number for prefetching
+  
   int *A;
   size_t size = nx * ny * sizeof(int);
 
@@ -212,7 +216,8 @@ void unifiedMemPrefetch(int nSteps, int nx, int ny)
     #error Prefetch data from host to device (A)
 
     // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
+    HIP_ERRCHK(hipGetLastError());
 
     #error Synchronization
   }
@@ -237,8 +242,6 @@ int main(int argc, char* argv[])
   // Run with different memory management strategies
   explicitMem(nSteps, nx, ny);
   explicitMemPinned(nSteps, nx, ny);
-  explicitMemNoCopy(nSteps, nx, ny);
   unifiedMem(nSteps, nx, ny);
   unifiedMemPrefetch(nSteps, nx, ny);
-  unifiedMemNoCopy(nSteps, nx, ny);
 }

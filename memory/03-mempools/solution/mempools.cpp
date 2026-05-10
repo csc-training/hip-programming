@@ -1,3 +1,16 @@
+/*
+ * This code compares different GPU memory allocation strategies.
+ *
+ * Task is to:
+ *   - allocate device memory outside of a loop using hipMalloc()
+ *   - perform recurring allocations in a loop using hipMalloc()/hipFree()
+ *   - perform recurring allocations in a loop using hipMallocAsync()/hipFreeAsync()
+ *   - create and synchronize a HIP stream for async allocations
+ *   - compare the timing between the approaches
+ *
+ * Observe how stream-ordered memory allocation can reduce
+ * recurring allocation overhead through memory pooling.
+ */
 #include <cstdio>
 #include <string>
 #include <time.h>
@@ -137,6 +150,7 @@ void recurringAllocMallocAsync(int nSteps, int size)
     HIP_ERRCHK(hipFreeAsync(d_A, stream));
   }
   // Synchronization
+  // Ensure all queued allocations and kernels complete before stopping timing
   HIP_ERRCHK(hipStreamSynchronize(stream));
   // Check results and print timings
   checkTiming("recurringAllocMallocAsync", (double)(clock() - tStart) / CLOCKS_PER_SEC);

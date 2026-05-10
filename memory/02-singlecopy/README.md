@@ -30,6 +30,7 @@ In this exercise, you will:
 2. Initialize memory directly on the GPU using:
     - `hipMemset()`
 3. Avoid recurring host-to-device memory copies inside the iteration loop
+4. Launch a kernel `hipKernel` on the device
 4. Copy or prefetch data back to the CPU only after all GPU work has completed
 5. Compare the timing between the two approaches
 

@@ -1,3 +1,12 @@
+/*
+ * This code in its current form uses the default stream
+ * Task is to:
+ *   - create a stream
+ *   - copy memory to/from device with that stream
+ *   - launch the readymade kernel using that stream
+ *   - copy data back to the host using the stream
+ *   - destroy the stream
+ */
 #include <cstdio>
 #include <string>
 #include <time.h>
@@ -39,7 +48,7 @@ void warmupRun(int nSteps, int size)
   size_t bytes = size * sizeof(int);
   
   int *d_A;
-  // Allocate pinned device memory
+  // Allocate device memory
   HIP_ERRCHK(hipMalloc((void**)&d_A, bytes));
 
   // Start timer and begin stepping loop
@@ -106,6 +115,7 @@ void recurringAllocNoMemPools(int nSteps, int size)
     #error free d_A allocation using hipFree
   }
   // Synchronization
+  // Ensure all queued allocations and kernels complete before stopping timing
   #error synchronize the default stream here
   // Check results and print timings
   checkTiming("recurringAllocNoMemPools", (double)(clock() - tStart) / CLOCKS_PER_SEC);
@@ -118,11 +128,11 @@ void recurringAllocMallocAsync(int nSteps, int size)
   hipStream_t stream;
   HIP_ERRCHK(hipStreamCreate(&stream));
 
-  size_t bytes = size * sizeof(int);
-
   // Determine grid and block size
   const int blocksize = BLOCKSIZE;
   const int gridsize = (size - 1 + blocksize) / blocksize;
+
+  size_t bytes = size * sizeof(int);
 
   // Start timer and begin stepping loop
   clock_t tStart = clock();

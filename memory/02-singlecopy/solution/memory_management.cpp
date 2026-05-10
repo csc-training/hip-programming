@@ -110,7 +110,7 @@ void unifiedMemNoCopy(int nSteps, int nx, int ny)
   for(unsigned int i = 0; i < nSteps; i++)
   {
     /* The order of calls inside this loop represent an optimal
-     * workflow of a GPU accelerated program where all oprations
+     * workflow of a GPU accelerated program where all operations
      * are performed using device (ie, recurring memcopy is avoided):
      * Initializing array using device, and running a GPU kernel.
      */

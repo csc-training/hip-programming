@@ -63,7 +63,7 @@ void explicitMem(int nSteps, int nx, int ny)
   // Allocate pageable host memory
   A = (int*)malloc(size);
 
-  // Allocate pageable device memory
+  // Allocate device memory
   HIP_ERRCHK(hipMalloc((void**)&d_A, size));
 
   // Start timer and begin stepping loop
@@ -117,7 +117,7 @@ void explicitMemPinned(int nSteps, int nx, int ny)
   // Allocate pinned host memory
   HIP_ERRCHK(hipHostMalloc((void**)&A, size));
 
-  // Allocate pinned device memory
+  // Allocate device memory
   HIP_ERRCHK(hipMalloc((void**)&d_A, size));
 
   // Start timer and begin stepping loop
@@ -197,7 +197,7 @@ void unifiedMem(int nSteps, int nx, int ny)
   clock_t tStop = clock();
   checkResults(A, nx, ny, "UnifiedMemNoPrefetch", (double)(tStop - tStart) / CLOCKS_PER_SEC);
 
-  // Free Unified Memory array
+  // Free the array (A) that's in unified memory
   HIP_ERRCHK(hipFree(A));
 }
 

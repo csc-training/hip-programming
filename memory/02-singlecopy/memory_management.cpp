@@ -69,7 +69,7 @@ void explicitMemNoCopy(int nSteps, int nx, int ny)
   for(unsigned int i = 0; i < nSteps; i++)
   {
     /* The order of calls inside this loop represent an optimal
-     * workflow of a GPU accelerated program where all oprations
+     * workflow of a GPU accelerated program where all operations
      * are performed using device (ie, recurring memcopy is avoided):
      * Initializing array using device, and running a GPU kernel.
      */
@@ -110,7 +110,7 @@ void unifiedMemNoCopy(int nSteps, int nx, int ny)
   for(unsigned int i = 0; i < nSteps; i++)
   {
     /* The order of calls inside this loop represent an optimal
-     * workflow of a GPU accelerated program where all oprations
+     * workflow of a GPU accelerated program where all operations
      * are performed using device (ie, recurring memcopy is avoided):
      * Initializing array using device, and running a GPU kernel.
      */
@@ -118,7 +118,7 @@ void unifiedMemNoCopy(int nSteps, int nx, int ny)
     #error Initialize array (A) from device
 
     // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
+    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
   }
   #error Prefetch data (A) from device to host
 
