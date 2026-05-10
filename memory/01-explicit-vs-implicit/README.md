@@ -11,7 +11,16 @@ Complete the missing HIP API calls in the following functions in the program:
 | `unifiedMem()` | Unified memory |
 | `unifiedMemPrefetch()` | Unified memory with prefetching |
 
-Each code executes the same workload, but your task is to implement different memory management strategies for each of them.
+Each code executes the same kernel and the same amount of repeated memory transfers between the host and device, but your task is to implement different memory management strategies for each of them.
+
+The memory management strategies are:
+
+1. Managing host and device memory explicitly
+2. Managing host and device memory explicitly, but using pinned host memory
+3. Using unified (managed) memory to handle memory management
+4. Using unified memory with explicit prefetching
+
+The program will print out timing information for each, for comparing their performance.
 
 Missing code sections are marked using: `#error`
 
@@ -113,7 +122,7 @@ Unified memory pages migrate on-demand between the CPU and GPU.
 Prefetching allows the programmer to move pages to the GPU before kernel execution:
 
 ```cpp
-hipMemPrefetchAsync(A, N * sizeof(int), deviceId);
+hipMemPrefetchAsync(A, N * sizeof(int), deviceId, stream);
 
 kernel<<<...>>>(A);
 ```
@@ -121,7 +130,7 @@ kernel<<<...>>>(A);
 This may:
 - reduce page faults
 - improve memory locality
-- improve performance for predictable access patterns
+- improve performance for unpredictable access patterns
 
 But in this exercise it actually significantly hurts performance, as
 it adds significant overhead to an already optimized transfer pattern.

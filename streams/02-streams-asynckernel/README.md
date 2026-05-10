@@ -34,7 +34,9 @@ The GPU kernels are already implemented and do not need to be modified.
 <details>
 <summary><strong>Bonus exercise</strong></summary>
 
-Modify the code so that `kernel_a` executes and copies the memory back to host, before `kernel_b` and `kernel_c` execute asynchronously.
+Start by having all kernels executing concurrently.
+
+After this, modify the code so that `kernel_a` executes first and copies the memory back to host and have `kernel_b` and `kernel_c` execute asynchronously after this.
 
 </details>
 
@@ -96,13 +98,13 @@ In the timeline view, you should observe that the three kernels execute at overl
 ## Understanding the kernels
 
 <details>
-<summary><strong>Understanding the GPU kernels</strong></summary>
+<summary><strong>Understanding the GPU kernels in this exercise</strong></summary>
 
 The kernels in this exercise are synthetic workloads only for teaching purposes.
 
 Each GPU thread performs repeated floating-point computations using mathematical functions (e.g. `sin`, `cos`, `log`).
 
-The workloads copy large amounts of data (~256MB) and are quite heavy computationally (although quite redundant)
-so that concurrent execution becomes visible in the profiling tools, as well as data transfers.
+The workloads copy and operate on large arrays (~256 MB per array) and are quite heavy computationally (although quite redundant)
+so that concurrent execution, as well as data transfers, become visible in the profiling tools.
 
 </details>
