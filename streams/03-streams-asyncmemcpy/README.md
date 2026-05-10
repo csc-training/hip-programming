@@ -2,8 +2,7 @@
 
 Previously, kernels were launched concurrently in separate HIP streams, but memory copies back to the host were still blocking.
 
-This exercise builds upon the previous stream concurrency exercise,
-by adding asynchronous memory copies from device to host.
+This exercise extends the previous example by performing device-to-host memory transfers asynchronously in each stream.
 
 Start by **copying your last exercise result to this folder**:
 
@@ -23,10 +22,10 @@ Expected output is still the same:
 
 In this exercise, you will:
 
-- Replace blocking `hipMemcpy()` calls with `hipMemcpyAsync()`
+- Replace blocking `hipMemcpy()` D2H calls with `hipMemcpyAsync()`
 - Associate each memory transfer with its corresponding stream
-- Manually synchronize your streams with the host before accessing host memory (printing out results)
-- Inspect the execution time characteristics using ROCm profiling tools
+- Manually synchronize your streams with the host before accessing host memory
+- Inspect kernel and memory transfer overlap using ROCm profiling tools
 
 Depending on where you placed your stream synchronization in the earlier exercise,
 make sure to move the synchronization calls to happen **after** the device-to-host memory transfers.
@@ -65,10 +64,13 @@ Replace the `<your_username>` sections in the above.
 The `.` at the end means that the file will be copied to the current directory.
 
 You can open the trace in either:
-- `chrome://tracing` (in chromium)
+- `chrome://tracing` (in Chromium)
 - https://ui.perfetto.dev
 
-In the timeline view, you should observe that the three kernels execute at overlapping times on the GPU.
+In the timeline view, you should observe that the three kernels execute at overlapping times on the GPU and memory copies to host
+can happen in each stream while computation in other kernels is ongoing.
+
+For this small example, performance differences may be minimal, but the execution timeline behavior becomes visible in the profiler.
 
 # Extra: Using pinned host memory
 
@@ -81,10 +83,10 @@ By default, this exercise uses ordinary pageable host memory allocated with:
 malloc()
 ```
 
-To actually be able to do asynchronous memory transfers, it will require
-pinned (page-locked) host memory.
+To achieve true asynchronous memory transfers and overlap between transfers and computation,
+pinned (page-locked) host memory is typically required.
 
-Try replacing:
+Try replacing your host memory allocations (for `a`, `b` and `c`):
 
 ```cpp
 a = (float*) malloc(N_bytes);

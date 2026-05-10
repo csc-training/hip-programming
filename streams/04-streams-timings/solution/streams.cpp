@@ -1,9 +1,9 @@
 /*
- * This code in its current form uses the default stream
- * This code is built upon a solution for the prior exercise 03-streams-asyncmemcpy
+ * This exercise builds upon the solution of
+ * 03-streams-asyncmemcpy.
  * Task is 
  * - Initialize six events
- *  - start_a, start_b, start_C
+ *  - start_a, start_b, start_c
  *  - end_a, end_b, end_c
  * - Record execution start and end of each kernel in the program
  * - Print out the results
@@ -31,7 +31,7 @@ __global__ void kernel_a(float *a, int n)
   if (tid < n) {
     float x = tid;
 
-    for (int i = 0; i < 20000; ++i) {
+    for (int i = 0; i < 30; ++i) {
       x = sinf(x) + cosf(x);
     }
 
@@ -46,7 +46,7 @@ __global__ void kernel_b(float *a, int n)
   if (tid < n) {
     float x = tid;
 
-    for (int i = 0; i < 20000; ++i) {
+    for (int i = 0; i < 30; ++i) {
       x = sqrtf(x + 1.0f);
     }
 
@@ -61,7 +61,7 @@ __global__ void kernel_c(float *a, int n)
   if (tid < n) {
     float x = tid;
 
-    for (int i = 0; i < 20000; ++i) {
+    for (int i = 0; i < 30; ++i) {
       x = logf(x + 1.0f);
     }
 
@@ -70,7 +70,7 @@ __global__ void kernel_c(float *a, int n)
 }
 
 int main() {
-  constexpr size_t N = 1<<10; // 1024 items
+  constexpr size_t N = 1<<26; // ~68 million items
 
   constexpr int blocksize = 256;
   constexpr int gridsize =(N-1+blocksize)/blocksize;
@@ -117,7 +117,7 @@ int main() {
   HIP_ERRCHK(hipMemcpy(a, d_a, N_bytes/100, hipMemcpyDefault));
   HIP_ERRCHK(hipDeviceSynchronize());
 
-  // Execute kernels in sequence
+  // Record timing events around each kernel launch
   HIP_ERRCHK(hipEventRecord(start_a, stream_a));
   kernel_a<<<gridsize, blocksize,0,stream_a>>>(d_a, N);
   HIP_ERRCHK(hipGetLastError());
@@ -152,14 +152,14 @@ int main() {
 
   // Save elapsed time in &t_kernel_a_ms
   HIP_ERRCHK(hipEventElapsedTime(&t_kernel_a_ms, start_a, end_a));
-  // Print in microseconds
-  printf("kernel_a time: %f us\n", 1000*t_kernel_a_ms);
+  // Print in milliseconds
+  printf("kernel_a time: %f ms\n", t_kernel_a_ms);
 
   HIP_ERRCHK(hipEventElapsedTime(&t_kernel_b_ms, start_b, end_b));
-  printf("kernel_b time: %f us\n", 1000*t_kernel_b_ms);
+  printf("kernel_b time: %f ms\n", t_kernel_b_ms);
 
   HIP_ERRCHK(hipEventElapsedTime(&t_kernel_c_ms, start_c, end_c));
-  printf("kernel_c time: %f us\n", 1000*t_kernel_c_ms);
+  printf("kernel_c time: %f ms\n", t_kernel_c_ms);
 
   // Free device and host memory allocations
   HIP_ERRCHK(hipFree(d_a));

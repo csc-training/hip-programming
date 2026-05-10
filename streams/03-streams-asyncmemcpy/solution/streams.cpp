@@ -1,11 +1,11 @@
 /*
- * This code in its current form uses the default stream
- This code is built on upon solution of 02-asynchkernel.cpp
- * Task is 
- * - to perform memory copies asynchronously
- * - validate that memory copies are non-blocking `srun ... rocprof --hip-trace ./03-asyncmemcopy`
- * - remember to synchronize!
- * - Additionally, change host memory allocation and freeing into pinned memory calls
+ * This code builds upon the solution of 02-streams-asynckernel.
+ *
+ * Task is:
+ * - to perform memory copies (D2H) asynchronously
+ * - synchronizing with the host before accessing the memory
+ * - validate that memory copies are non-blocking by profiling: `srun ... rocprof --hip-trace ./03-asyncmemcopy`
+ * - additionally, change host memory allocation and freeing into pinned memory calls
  */
 
 #include <stdio.h>
@@ -30,7 +30,7 @@ __global__ void kernel_a(float *a, int n)
   if (tid < n) {
     float x = tid;
 
-    for (int i = 0; i < 20000; ++i) {
+    for (int i = 0; i < 30; ++i) {
       x = sinf(x) + cosf(x);
     }
 
@@ -45,7 +45,7 @@ __global__ void kernel_b(float *a, int n)
   if (tid < n) {
     float x = tid;
 
-    for (int i = 0; i < 20000; ++i) {
+    for (int i = 0; i < 30; ++i) {
       x = sqrtf(x + 1.0f);
     }
 
@@ -60,7 +60,7 @@ __global__ void kernel_c(float *a, int n)
   if (tid < n) {
     float x = tid;
 
-    for (int i = 0; i < 20000; ++i) {
+    for (int i = 0; i < 30; ++i) {
       x = logf(x + 1.0f);
     }
 
@@ -69,7 +69,7 @@ __global__ void kernel_c(float *a, int n)
 }
 
 int main() {
-  constexpr size_t N = 1<<10; // 1024 items
+  constexpr size_t N = 1<<26; // ~68 million items
 
   constexpr int blocksize = 256;
   constexpr int gridsize =(N-1+blocksize)/blocksize;
@@ -102,8 +102,9 @@ int main() {
   kernel_c<<<gridsize, blocksize>>>(d_a, N);
   HIP_ERRCHK(hipMemcpy(a, d_a, N_bytes/100, hipMemcpyDefault));
   HIP_ERRCHK(hipDeviceSynchronize());
+  // warmup ends
 
-  // Execute kernels in sequence
+  // Launch each kernel in a different stream
   kernel_a<<<gridsize, blocksize,0,stream_a>>>(d_a, N);
   HIP_ERRCHK(hipGetLastError());
 
@@ -139,7 +140,7 @@ int main() {
   HIP_ERRCHK(hipStreamDestroy(stream_a));
   HIP_ERRCHK(hipStreamDestroy(stream_b));
   HIP_ERRCHK(hipStreamDestroy(stream_c));
-  
+
   HIP_ERRCHK(hipHostFree(a));
   HIP_ERRCHK(hipHostFree(b));
   HIP_ERRCHK(hipHostFree(c));

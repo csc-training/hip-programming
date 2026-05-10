@@ -17,6 +17,9 @@ Printing the 10 first values in each kernel output array.
 
 After running the code, you will use `rocprof` and Perfetto, to validate that your kernels are executing concurrently on the GPU.
 
+Note that we do not execute any host to device memory copies in this
+program, and all kernel data is generated directly on the GPU.
+
 ## Instructions
 
 In this exercise, you will modify the `main()` function to:
@@ -81,7 +84,7 @@ Copy the file to your local machine:
 scp <your_username>@lumi.csc.fi:/scratch/project_462001376/<your_username>/hip-programming/streams/02-streams-asynckernel/results.json .
 ```
 
-Replace the `<your_username>` sections in the above.  
+Replace the `<your_username>` sections in the above.
 The `.` at the end means that the file will be copied to the current directory.
 
 You can open the trace in either:
@@ -99,6 +102,7 @@ The kernels in this exercise are synthetic workloads only for teaching purposes.
 
 Each GPU thread performs repeated floating-point computations using mathematical functions (e.g. `sin`, `cos`, `log`).
 
-The workloads are intentionally compute-heavy (although quite redundant) so that concurrent execution becomes visible in the profiling tools.
+The workloads copy large amounts of data (~256MB) and are quite heavy computationally (although quite redundant)
+so that concurrent execution becomes visible in the profiling tools, as well as data transfers.
 
 </details>

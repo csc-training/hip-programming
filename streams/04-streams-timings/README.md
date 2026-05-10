@@ -36,7 +36,7 @@ Starting from your previous solution:
     for each stream (e.g. `start_a`, `start_b`, etc.)
 2. Record start and end events around each kernel launch using:
     - `hipEventRecord()`
-3. Measure the elapsed time between two events with:
+3. Measure the elapsed time (milliseconds) between two events with:
     - `hipEventElapsedTime()`
 4. Print the measured kernel execution times
 5. Destroy all created events before exiting the program
@@ -50,7 +50,21 @@ Refer to your trace output in Perfetto to check that the timings make sense.
 - `hipEventCreate()`
 - `hipEventRecord()`
 - `hipEventElapsedTime()`
+    - Returns milliseconds by default
 - `hipEventDestroy()`
+
+## Bonus exercise:
+
+<details>
+<summary><strong>Profiling the execution</strong></summary>
+
+Profile your program with rocprof. Do you see the same numbers
+reported by the profiler as you do with events?
+You might see some discrepancy, why?
+
+Try to identify when the events are created on the host.
+
+</details>
 
 ## Background
 

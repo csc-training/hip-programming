@@ -1,9 +1,8 @@
 /*
- * This code in its current form uses the default stream
- * Task:
- * - Place kernel_{a,b,c} in separate streams and execute them asynchronously
+ * This solution executes three kernels concurrently
+ * using separate HIP streams.
  * - Validate that kernels are executing concurrently with `run_tue ... rocprof --hip-trace ./<your-executable>`
- *   - Open chromium url chrome://tracing or https://ui.perfetto.dev, open file "results.json"
+ *   - Open chrome://tracing in Chromium or https://ui.perfetto.dev, open the generated "results.json" file
  */
 
 #include <stdio.h>
@@ -28,7 +27,7 @@ __global__ void kernel_a(float *a, int n)
   if (tid < n) {
     float x = tid;
 
-    for (int i = 0; i < 20000; ++i) {
+    for (int i = 0; i < 30; ++i) {
       x = sinf(x) + cosf(x);
     }
 
@@ -43,7 +42,7 @@ __global__ void kernel_b(float *a, int n)
   if (tid < n) {
     float x = tid;
 
-    for (int i = 0; i < 20000; ++i) {
+    for (int i = 0; i < 30; ++i) {
       x = sqrtf(x + 1.0f);
     }
 
@@ -58,7 +57,7 @@ __global__ void kernel_c(float *a, int n)
   if (tid < n) {
     float x = tid;
 
-    for (int i = 0; i < 20000; ++i) {
+    for (int i = 0; i < 30; ++i) {
       x = logf(x + 1.0f);
     }
 
@@ -67,7 +66,7 @@ __global__ void kernel_c(float *a, int n)
 }
 
 int main() {
-  constexpr size_t N = 1<<10; // 1024 items
+  constexpr size_t N = 1<<26; // ~68 million items
 
   constexpr int blocksize = 256;
   constexpr int gridsize =(N-1+blocksize)/blocksize;
@@ -100,8 +99,9 @@ int main() {
   kernel_c<<<gridsize, blocksize>>>(d_a, N);
   HIP_ERRCHK(hipMemcpy(a, d_a, N_bytes/100, hipMemcpyDefault));
   HIP_ERRCHK(hipDeviceSynchronize());
+  // warmup ends
 
-  // Execute kernels in sequence
+  // Launch each kernel in a different stream
   kernel_a<<<gridsize, blocksize,0,stream_a>>>(d_a, N);
   HIP_ERRCHK(hipGetLastError());
 
@@ -111,7 +111,7 @@ int main() {
   kernel_c<<<gridsize, blocksize,0,stream_c>>>(d_c, N);
   HIP_ERRCHK(hipGetLastError());
 
-  // Copy results back
+  // Synchronize streams and copy results back
   HIP_ERRCHK(hipStreamSynchronize(stream_a));
   HIP_ERRCHK(hipMemcpy(a, d_a, N_bytes, hipMemcpyDefault));
 

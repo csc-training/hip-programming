@@ -3,7 +3,7 @@
  * Task is to:
  *   - create a stream
  *   - copy memory to/from device with that stream
- *   - launch the readymade kernel using that stream
+ *   - launch the provided kernel using that stream
  *   - copy data back to the host using the stream
  *   - destroy the stream
  */
@@ -59,7 +59,7 @@ int main() {
   HIP_ERRCHK(hipStreamCreate(&stream));
 
   a = (float*) malloc(N_bytes);
-  HIP_ERRCHK(hipMallocAsync((void**)&d_a, N_bytes, stream));
+  HIP_ERRCHK(hipMalloc((void**)&d_a, N_bytes));
 
   memset(a, 0, N_bytes);
 
@@ -83,7 +83,7 @@ int main() {
 
   printf("error: %f\n", max_error(a, N));
 
-  HIP_ERRCHK(hipFreeAsync(d_a, stream));
+  HIP_ERRCHK(hipFree(d_a));
   free(a);
   HIP_ERRCHK(hipStreamDestroy(stream));
 
