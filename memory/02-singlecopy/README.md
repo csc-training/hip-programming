@@ -31,10 +31,32 @@ In this exercise, you will:
     - `hipMemset()`
 3. Avoid recurring host-to-device memory copies inside the iteration loop
 4. Launch a kernel `hipKernel` on the device
-4. Copy or prefetch data back to the CPU only after all GPU work has completed
-5. Compare the timing between the two approaches
+5. Copy or prefetch data back to the CPU only after all GPU work has completed
+6. Compare the timing between the two approaches
 
 Modify each of the lines marked with `#error`.
+
+<details>
+<summary><strong>Bonus exercise: Prefetching this time</strong></summary>
+
+- In the instructed workflow, the Unified Memory allocation is first accessed by GPU operations inside the loop
+- Without prefetching, the first device-side access may cause managed-memory pages to migrate to the GPU during execution.
+- Try modifying the Unified Memory version by prefetching the allocation to the GPU once before the loop:
+
+
+```cpp
+int device;
+HIP_ERRCHK(hipGetDevice(&device));
+
+HIP_ERRCHK(hipMemPrefetchAsync(A, size, device, 0));
+HIP_ERRCHK(hipStreamSynchronize(0));
+```
+
+Then run the program again and compare the execution time of the Unified Memory version.
+
+This case is different from the previous exercise: here the data is intended to stay resident on the GPU during the iterative loop, so prefetching once before the loop may improve performance.
+
+</details>
 
 ## HIP functions used
 

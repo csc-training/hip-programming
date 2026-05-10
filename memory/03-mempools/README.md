@@ -22,7 +22,6 @@ In this exercise you will:
 - Allocate device memory asynchronously in a HIP stream using `hipMallocAsync()` and `hipFreeAsync()`
     - Memory is allocated, freed, and reused repeatedly inside a loop
 - Compare the execution times between the different allocation strategies
-- Profile the execution with `rocprof` and inspect the behavior between the different approaches
 
 Notice that we do not allocate any host memory, or do any data transfers between the host and device in this exercise.
 
@@ -39,33 +38,6 @@ The following HIP functions are needed in this exercise:
 - `hipStreamCreate()`
 - `hipStreamSynchronize()`
 - `hipStreamDestroy()`
-
-## Profiling
-
-<details> <summary>Profiling instructions</summary>
-
-Run the program with ROCm profiling enabled:
-
-```bash
-run_tue rocprof --hip-trace ./<your-executable>
-```
-
-Copy the `results.json` to your local machine:
-
-```bash
-scp <your_username>@lumi.csc.fi:/scratch/project_462001376/<your_username>/hip-programming/memory/03-mempools/results.json .
-```
-
-Replace the `<your_username>` sections in the above.  
-The `.` at the end means that the file will be copied to the current directory.
-
-You can open the trace in either:
-- `chrome://tracing` (in chromium)
-- https://ui.perfetto.dev
-
-In the timeline view, you should observe that the three kernels execute at overlapping times on the GPU.
-
-</details>
 
 ## Background
 

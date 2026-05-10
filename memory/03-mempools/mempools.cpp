@@ -2,9 +2,9 @@
  * This code compares different GPU memory allocation strategies.
  *
  * Task is to:
- *   - allocate device memory using hipMalloc()
- *   - perform recurring allocations using hipMalloc()/hipFree()
- *   - perform recurring allocations using hipMallocAsync()/hipFreeAsync()
+ *   - allocate device memory outside of a loop using hipMalloc()
+ *   - perform recurring allocations in a loop using hipMalloc()/hipFree()
+ *   - perform recurring allocations in a loop using hipMallocAsync()/hipFreeAsync()
  *   - create and synchronize a HIP stream for async allocations
  *   - compare the timing between the approaches
  *
@@ -13,7 +13,7 @@
  */
 #include <cstdio>
 #include <cstring>
-#include <time.h>
+#include <chrono>
 #include <hip/hip_runtime.h>
 
 #define HIP_ERRCHK(result) (hip_errchk(result, __FILE__, __LINE__))
@@ -37,9 +37,9 @@ __global__ void hipKernel(int* const A, const int size)
 }
 
 /* Auxiliary function to check the results */
-void checkTiming(const std::string strategy, const double timing)
+void checkTiming(const std::string strategy, const float timing_ms)
 {
-  printf("%.3f ms - %s\n", timing * 1e3, strategy.c_str());
+  printf("%.3f ms - %s\n", timing_ms, strategy.c_str());
 }
 
 /* Run without timing as a warmup */
@@ -55,8 +55,6 @@ void warmupRun(int nSteps, int size)
   // Allocate device memory
   HIP_ERRCHK(hipMalloc((void**)&d_A, bytes));
 
-  // Start timer and begin stepping loop
-  clock_t tStart = clock();
   for(unsigned int i = 0; i < nSteps; i++)
   {    
     // Launch GPU kernel
@@ -82,7 +80,7 @@ void noRecurringAlloc(int nSteps, int size)
   #error allocate memory with hipMalloc for d_A of size `bytes`
 
   // Start timer and begin stepping loop
-  clock_t tStart = clock();
+  auto tStart = std::chrono::steady_clock::now();
   for(unsigned int i = 0; i < nSteps; i++)
   {    
     // Launch GPU kernel
@@ -90,8 +88,11 @@ void noRecurringAlloc(int nSteps, int size)
   }
   // Synchronization
   #error synchronize the default stream here before stopping the timer
+
   // Check results and print timings
-  checkTiming("noRecurringAlloc", (double)(clock() - tStart) / CLOCKS_PER_SEC);
+  auto tStop = std::chrono::steady_clock::now();
+  float timing = std::chrono::duration<float, std::milli>(tStop - tStart).count();
+  checkTiming("noRecurringAlloc", timing);
 
   // Free allocation
   #error free d_A allocation using hipFree
@@ -107,7 +108,7 @@ void recurringAllocNoMemPools(int nSteps, int size)
   size_t bytes = size * sizeof(int);
 
   // Start timer and begin stepping loop
-  clock_t tStart = clock();
+  auto tStart = std::chrono::steady_clock::now();
   for(unsigned int i = 0; i < nSteps; i++)
   {
     int *d_A;
@@ -122,8 +123,11 @@ void recurringAllocNoMemPools(int nSteps, int size)
   // Synchronization
   // Ensure all queued allocations and kernels complete before stopping timing
   #error synchronize the default stream here before stopping the timer
+
   // Check results and print timings
-  checkTiming("recurringAllocNoMemPools", (double)(clock() - tStart) / CLOCKS_PER_SEC);
+  auto tStop = std::chrono::steady_clock::now();
+  float timing = std::chrono::duration<float, std::milli>(tStop - tStart).count();
+  checkTiming("recurringAllocNoMemPools", timing);
 }
 
 /* Do recurring allocation with memory pooling */
@@ -140,7 +144,7 @@ void recurringAllocMallocAsync(int nSteps, int size)
   size_t bytes = size * sizeof(int);
 
   // Start timer and begin stepping loop
-  clock_t tStart = clock();
+  auto tStart = std::chrono::steady_clock::now();
   for(unsigned int i = 0; i < nSteps; i++)
   {
     int *d_A;
@@ -154,8 +158,11 @@ void recurringAllocMallocAsync(int nSteps, int size)
   }
   // Synchronization
   #error synchronize stream here
+
   // Check results and print timings
-  checkTiming("recurringAllocMallocAsync", (double)(clock() - tStart) / CLOCKS_PER_SEC);
+  auto tStop = std::chrono::steady_clock::now();
+  float timing = std::chrono::duration<float, std::milli>(tStop - tStart).count();
+  checkTiming("recurringAllocMallocAsync", timing);
 
   // Destroy the stream
   HIP_ERRCHK(hipStreamDestroy(stream));
@@ -168,7 +175,7 @@ int main(int argc, char* argv[])
   int nSteps = 1e4, size = 1e6;
   
   // Ignore first run, first kernel is slower (warmup)
-  warmupRun(nSteps, size);
+  warmupRun(10, size);
 
   // Run with different memory allocation strategies
   noRecurringAlloc(nSteps, size);

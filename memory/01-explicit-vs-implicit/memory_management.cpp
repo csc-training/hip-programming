@@ -71,10 +71,11 @@ void warmupRun(int nSteps, int nx, int ny)
     // Launch GPU kernel
     hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
     HIP_ERRCHK(hipGetLastError());
-
-    // Synchronization
-    HIP_ERRCHK(hipStreamSynchronize(0));
   }
+
+  // Synchronization
+  HIP_ERRCHK(hipStreamSynchronize(0));
+
   // Free allocation
   HIP_ERRCHK(hipFree(d_A));
 }
