@@ -41,9 +41,9 @@ part of the EuroCC training activities at CSC.
 | 12:15-13:00 | Lunch |
 | 13:00-13:45 | [Exercises cont'd](memory/) |
 | 13:45-14:00 | Break |
-| 14:00-14:30 | More advanced synchronization |
-| 14:30-15:30 | Exercises |
-| 15:30-16:00 | Close-up |
+| 14:00-14:30 | Inspecting exercise traces, rocprof |
+| 14:30-15:00 | Bonus exercise |
+| 15:00-16:00 | Close-up |
 
 
 ### Day 3
@@ -91,14 +91,17 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 
 ### Streams, events, and synchronization
 
-- [Understanding asynchronity using events](streams/01-event-record)
-- [Investigating streams and events](streams/02-concurrency)
+- [Implementing and using a stream](streams/01-streams-basics/)
+- [Running concurrent GPU kernels](streams/02-streams-asynckernel/)
+- [Asynchronous data transfers between CPU and GPU](streams/03-streams-asyncmemcpy/)
+- [Recording and timing GPU kernels with HIP events](streams/04-streams-timings/)
+- [Overlapping CPU and GPU computation](streams/0X-bonus-cpu-gpu-overlap/)
 
 ### Memory allocations, access, and unified memory
 
-- [Memory management strategies](memory/01-prefetch)
-- [The stream-ordered memory allocator and memory pools](memory/02-mempools)
-- [Unified memory and structs](memory/03-struct)
+- [Explicit and implicit memory management](memory/01-explicit-vs-implicit/)
+- [Avoiding CPU-GPU data transfers](memory/02-singlecopy/)
+- [The stream-ordered memory allocator and memory pools](memory/03-mempools/s)
 
 ### Fortran and HIP
 
