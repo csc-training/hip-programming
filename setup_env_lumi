@@ -8,6 +8,6 @@ export CXX=CC
 export CXXFLAGS='-xhip -O3'
 
 # Aliases for easy running
-alias run_mon='srun --reservation=gpu-course-day1 --account=project_462001376 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1'
-alias run_tue='srun --reservation=gpu-course-day2 --account=project_462001376 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1'
-alias run_wed='srun --reservation=gpu-course-day3 --account=project_462001376 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-task=1'
+alias run_mon='srun --reservation=gpu-course-day1 --account=project_462001376 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-node=1'
+alias run_tue='srun --reservation=gpu-course-day2 --account=project_462001376 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-node=1'
+alias run_wed='srun --reservation=gpu-course-day3 --account=project_462001376 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-node=1'
