@@ -27,8 +27,7 @@ In this exercise, you will:
 - Manually synchronize your streams with the host before accessing host memory
 - Inspect kernel and memory transfer overlap using ROCm profiling tools
 
-Depending on where you placed your stream synchronization in the earlier exercise,
-make sure to move the synchronization calls to happen **after** the device-to-host memory transfers.
+Make sure to synchronize **after** the device-to-host memory transfers.
 
 ## HIP functions used
 

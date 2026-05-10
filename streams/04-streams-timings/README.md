@@ -21,19 +21,19 @@ Expected output is still the same:
 In addition, your program should print timing information for the kernels, for example:
 
 ```
-kernel_a time: 1234.567 us
-kernel_b time: 2345.678 us
-kernel_c time: 3456.789 us
+kernel_a time: 234.567 ms
+kernel_b time: 345.678 ms
+kernel_c time: 456.789 ms
 ```
 
 ## Instructions
 
 Starting from your previous solution:
 
-1. Create HIP events for:
+1. Create HIP events for each:
     - kernel start
     - kernel end
-    for each stream (e.g. `start_a`, `start_b`, etc.)
+    - for each stream (e.g. `start_a`, `start_b`, `end_a` etc.)
 2. Record start and end events around each kernel launch using:
     - `hipEventRecord()`
 3. Measure the elapsed time (milliseconds) between two events with:
@@ -43,7 +43,7 @@ Starting from your previous solution:
 
 Ensure that you're placing your events in the correct stream.
 
-Refer to your trace output in Perfetto to check that the timings make sense.
+Refer to your trace output in Perfetto to check that the timings are sensible.
 
 ## HIP functions used
 
@@ -60,9 +60,10 @@ Refer to your trace output in Perfetto to check that the timings make sense.
 
 Profile your program with rocprof. Do you see the same numbers
 reported by the profiler as you do with events?
+
 You might see some discrepancy, why?
 
-Try to identify when the events are created on the host.
+Try to identify the points when the events are created on the host.
 
 </details>
 
@@ -81,7 +82,7 @@ Events can be used to:
 - synchronize e.g. across different streams
 
 A typical timing workflow looks like:
-```
+```cpp
 hipEvent_t start
 hipEvent_t end
 
@@ -102,7 +103,7 @@ hipEventDestroy(*end);
 
 Synchronizing across streams:
 
-```
+```cpp
 hipEvent_t event_a_done;
 
 hipEventCreate(&event_a_done);
@@ -112,16 +113,13 @@ kernel_a<<<..., stream_a>>>();
 
 hipEventRecord(event_a_done, stream_a);
 
-// stream B waits for stream A
+// stream B waits for the event, before continuing
 hipStreamWaitEvent(stream_b, event_a_done, 0);
 
 kernel_b<<<..., stream_b>>>();
-
-// independent work
-kernel_c<<<..., stream_c>>>();
 ```
 
 Here, `kernel_b` will only begin after execution in `stream_a`
-has reached `event_a_done`.
+has reached `event_a_done`, after finishing its execution of `kernel_a`.
 
 </details>
