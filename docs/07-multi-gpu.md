@@ -36,8 +36,14 @@ lang:     en
 - Multiple subtasks are processed simultaneously using multiple GPUs
     - standard HIP/CUDA programming for each GPU
 
-<!-- Copyright CSC -->
- ![](img/compp.svg){.center width=40%}
+<!--
+Copyright CSC
+SPDX-FileCopyrightText: 2026 CSC - IT Center for Science Ltd. <www.csc.fi>
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
+![](img/compp.svg){.center width=40%}
 
 # Processes and threads
 
@@ -163,6 +169,35 @@ MPI_Recv(dB, ...)
 gpu_kernel<<<gridsize, blocksize>>> (dB, N);
 ```
 
+# Overlapping communication and computation
+
+- Non-blocking MPI operations make it possible to start and complete communication in separate steps
+    - A CPU may still be needed for the message progress $\Rightarrow$ overlapping
+      CPU computation with communication not necessarily possible
+- GPU is capable of concurrent computation and memory copies
+- Host CPU is available for message progress $\Rightarrow$ more potential for 
+  overlapping
+
+# Overlapping communication and computation
+
+<div class="column">
+![](img/g2g-trace-no-overlap.png){width=80%}
+</div>
+<div class="column">
+![](img/g2g-trace-overlap.png){width=80%}
+</div>
+
+<br>
+
+```cpp
+MPI_Isend(boundary_data, ...)
+MPI_Irecv(boundary_data, ...)
+compute_interior<<<gridsize, blocksize>>> (interior_data, ...);
+MPI_Waitall(...)
+compute_boundaries<<<gridsize, blocksize>>> (boundary_data, ...);
+```
+
+
 # Summary
 
 - there are various options to write a multi-GPU program
@@ -171,3 +206,4 @@ gpu_kernel<<<gridsize, blocksize>>> (dB, N);
 - often best to use one GPU per process, and let MPI handle data transfers between GPUs 
 - GPU-aware MPI is required when passing device pointers to MPI
      - Using host pointers does not require any GPU awareness
+- GPU-aware MPI provides possibility for overlapping communication and computation
