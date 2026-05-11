@@ -85,7 +85,7 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 
 ### Introduction and GPU kernels
 
-- Three questions at end of lecture
+- [Three questions at end of lecture](https://csc-training.github.io/hip-programming/html/01-introduction.html#/well-i-have-couple)
 - [Hello world](kernels/01-hello-world)
 - [Error checking](kernels/02-error-checking)
 - [Kernel saxpy](kernels/03-kernel-saxpy)
