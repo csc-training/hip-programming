@@ -1,209 +1,209 @@
 ---
-title:  Porting Applications to HIP 
-subtitle: GPU programming with HIP
-author:   CSC Training
-date:     2025-03
+title:    GPU performance portability
+event:    Introduction to GPU programming
+date:     May 2026
 lang:     en
 ---
 
-# Heterogeneous-Compute Interface for Portability
+# (Performance) portability in the GPU age
 
-- code to run on both **AMD ROCm** and **NVIDIA CUDA** platforms with minimal changes
-- the `hipcc` compiler driver calls different compilers depending on the architecture: on **NVIDIA** platforms calls `nvcc` 
-- (very) similar to **CUDA**, but designed for cross-platform compatibility
-- supports a strong subset of the **CUDA** runtime functionality
-- enables fast translation of **CUDA API** calls: most calls can be converted in place by simply replacing `cuda` with `hip`
+- CPUs are relatively easy, GPUs quite a bit harder
+- How to support different GPU architectures?
+<div style="border:3px solid var(--csc-blue); border-radius: 15px; margin-top:1ex">
+  1. use accelerated GPU libraries: cublas, rocsolver, ...
+  2. use a high-level abstraction layer
+     - directive based methods: OpenMP, OpenACC
+     - programming models: SYCL, Kokkos, Raja, ...
+  3. use native GPU programming
+     - CUDA, HIP
+</div>
+  - most approaches require support for multiple backends in a code
+    (CUDA+HIP, cublas+hipblas, ...)
 
-::: notes
-HIP (Heterogeneous-Compute Interface for Portability) is a C++ runtime API and programming model designed by AMD to enable seamless portability between CUDA and ROCm-based GPU architectures. It provides an interface similar to CUDA, allowing developers to write GPU-accelerated code that can run on both NVIDIA and AMD GPUs with minimal changes. The HIP API includes equivalents for CUDA runtime functions, memory management, and kernel launches, as well as a HIPified version of libraries like cuBLAS (hipBLAS) and cuDNN (hipDNN). Developers can use hipify tools to automatically translate CUDA code to HIP, making it easier to migrate applications across different hardware platforms while maintaining high performance.
-:::
-# CUDA vs. HIP
+# Porting a CUDA code to HIP
 
-<div class="column" width=45%>>
-```cpp
-// CUDA
+- Manual code conversion (search/replace or incremental)
+- HIPIFY tools (automated translation tools)
+    - `hipify-perl` : Perl script for `cuda`->`hip` search-and-replace for API calls
+    - `hipify-clang` : Generation of HIP code via clang 
+        - requires working CUDA installation
+- Might require maintaining two code bases for NVIDIA and AMD
+
+# HOP: Header Only Porting
+
+- Header Only Porting (HOP) is a light-weight, header-only library that
+  enables <span class=text-blue>*automatic, bidirectional translation between
+  CUDA and HIP*</span> at compile
+  time
+  - for C and C++ codes (also Fortran with ISO C bindings)
+  - no code modifications needed
+  - just add a few extra flags at compile time to hop from CUDA to HIP or
+    back
+
+- Leverages the almost one-to-one mapping between CUDA and HIP
+  - catches include statements
+  - redefines identifiers
+- Generic IDs (`gpuMalloc` etc.) offer a way to write vendor-agnostic code
+  that is trivially translated to CUDA or HIP at compile time (cf. GPAW)
+
+
+# HOP: how does it work?
+
+- Redefines identifiers using preprocessor directives<br>
+  <span style="padding-left:1.5em">`cudaMalloc ⇔ hipMalloc`</span>
+  <span style="font-size:0.8em; padding-left:1.5em">etc.</span>
+- Catches include statements by providing alternative header files that
+  take precedence over the original ones
+  - source identifiers are redefined to target identifiers
+  - target GPU backend needs to be defined (CUDA or HIP)
+  - e.g. `"#include <hip/hip_runtime.h>"` will actually load a HOP header file
+    that does a translation from HIP identifiers to CUDA identifiers
+
+
+# Example: redefine identifiers
+
+<div class="column" style="width:55%">
+<div style="font-size:0.9em">
+<span style="font-size:0.9em">translate from source (HIP):</span>
+```c
+#define hipMalloc                 gpuMalloc
+#define hipMallocAsync            gpuMallocAsync
+#define hipHostMalloc             gpuHostMalloc
+#define hipHostMallocPortable     gpuHostMallocPortable
+#define hipMemcpy                 gpuMemcpy
+```
+
+<span style="font-size:0.9em">translate to target (CUDA):</span>
+```c
+#include <cuda_runtime_api.h>
+
+#define gpuMalloc                 cudaMalloc
+#define gpuMallocAsync            cudaMallocAsync
+#define gpuHostMalloc             cudaHostAlloc
+#define gpuHostMallocPortable     cudaHostAllocPortable
+#define gpuMemcpy                 cudaMemcpy
 ```
 </div>
-
-<div class="column" width=45%>>
-```cpp
-// HIP
-```
 </div>
 
-<small>
- <div class="column" width=45%>>
-```cpp
-cudaMalloc(&d_x,N*sizeof(double));
-  
-cudaMemcpy(d_x,x,N*sizeof(double),
-              cudaMemcpyHostToDevice);
-              
-cudaDeviceSynchronize();
-
-cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, N, N, N, 
-                &alpha, d_A, N, d_B, N, &beta, d_C, N);
-
-kernel_name<<<gridsize, blocksize, 
-              shared_mem_size, 
-              stream>>>
-              (arg0,arg1, ...);
-
-
-
-
-
-              
-``` 
+<div class="column" style="width:40%; text-align:center">
+<br>
+<br>
+<br>
+<code>hipMalloc</code>
+<br>
+⇓
+<br>
+<code>cudaMalloc</code>
 </div>
 
-<div class="column" width=45%>
-```cpp
-hipMalloc(&d_x,N*sizeof(double));
 
-hipMemcpy(d_x,x,N*sizeof(double),
-              hipMemcpyHostToDevice);
+# HOP: compile flags
 
-hipDeviceSynchronize();
+`-I$HOP_ROOT`
+  : include HOP headers
 
-hipblasSgemm(handle, HIPBLAS_OP_N, HIPBLAS_OP_N, N, N, N, 
-                 &alpha, d_A, N, d_B, N, &beta, d_C, N);
+`-I$HOP_ROOT/source/cuda &nbsp;&nbsp;OR&nbsp;&nbsp; -I$HOP_ROOT/source/hip`
+  : catch source code header includes
 
-kernel_name<<<gridsize, blocksize, 
-              shared_mem_size, 
-              stream>>>
-              (arg0,arg1, ...);
+`-DHOP_TARGET_HIP` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="font-weight:normal">&nbsp;&nbsp;OR&nbsp;&nbsp;</span> `-DHOP_TARGET_CUDA`<span style="font-weight:normal">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(optional)</span>
+  : define target for translation
 
-hipLaunchKernelGGL(kernel_name,
-                    gridsize, 
-                    blocksize, 
-                    shared_mem_size, 
-                    stream,arg0,arg1, ...);
-```
-</div>
-
-</small>
+<br>
+where **`$HOP_ROOT`** points to the installation path of HOP:<br>
+&nbsp;&nbsp;`export HOP_ROOT=/path/to/hop`
 
 
-# Porting a CUDA Project: Migrating Workflow
+# Example: compile and run
 
-- start on a CUDA platform
-- get a fully working HIP version
-- compile the HIP code on an AMD machine
-- handle platform-specific features through conditional compilation (or by adding them to the open-source HIP infrastructure)
+## CUDA ⇒ HIP
 
-# Porting a CUDA Project: Conversion Methods
-
-- **Manual Code Conversion** (search/replace or incremental)
-- **HIPIFY Tools** (automated translation tools)
-- **Header Porting** (on the fly translation)
-
-# Automated Translation Tools
-- collection of tools that automatically translate CUDA to HIP code
-- **hipify-perl**
-   * translates to HIP using pattern matching
-   * does not require a working CUDA installation
-   * can also convert CUDA code, that is not syntactically correct
-- **hipify-clang**
-   * translates CUDA source into an Abstract Syntax Tree (AST) using `clang`
-   * generates the HIP source from the AST
-   * needs to be able to compile the code
-   * requires a working CUDA installation
-   * CUDA code needs to be correct
-
-::: notes
-hipify-perl is the simplest tool for converting CUDA code to HIP. It works by scanning a directory and performing basic string replacements, such as converting cudaMemcpy to hipMemcpy. However, since it relies on straightforward text substitution (sed -e 's/cuda/hip/g'), some manual post-processing may be required. It is best suited for quick scans of projects, but it does not handle unrecognized CUDA calls and will report them instead of translating them.
-
-hipify-clang, on the other hand, provides a more robust and accurate translation. It processes the code at a deeper level, generating warnings and offering assistance for further analysis. This tool is particularly useful for high-quality translations, especially when working with projects that involve complex build systems like Make.
-
-Hipify tools are not running your application, or checking correctness. Code relying on specific Nvidia hardware aspects (e.g., warp size == 32) may need attention after conversion. Certain functions may not have a correspondent hip version (e.g., __shfl_down_sync –-> _shfl_down instead). Hipifying can’t handle inline PTX assembly. Can either use inline GCN ISA, or convert it to HIP. Hipify-perl and hipify-clang can both convert library calls. None of the tools convert your build system script such as CMAKE or whatever else you use. The user is responsible to find the appropriate flags and paths to build the new converted HIP code.
-::: 
-
-# HIPIFY Tools Usage
-
-- `hipify-perl/clang --examine <file>.cu` or `hipexamine/-perl.sh <file>.cu`
-     * basic statistics and number of replacements
-     * no replacements
-- `hipify-perl/clang <file>.cu`
-     * translation a file to standard output
-- `hipify-perl/clang --inplace <file>.cu` or `hipconvertinplace/-perl.sh <file>.cu`
-     * modifies the input file inplace, saves the input file in .prehip file 
-     * works with folders:recursively do folders
-- `--print-stats` return a report for each file
-
-
-# Hipify-perl Example
-![](img/cublas_cuda_hip.png){ .center width=100% }
-
-# Hipify-perl Example (cont.)
-![](img/kernel_cuda_hip.png){ .center width=100% }
-
-# Header Porting
-
-- one can create header files with macro definitions
-- code can run on different backends with single header
-```
-#define cudaFree hipFree
-#define cudaMalloc hipMalloc
-#define cudaMallocManaged hipMallocManaged
-#define cudaMemcpy hipMemcpy
-```
-- it is possible to build unified wrappers
-
-```
-#ifdef _CUDA_ENABLED
-	using deviceStream_t = cudaStream_t;
-#elif _HIP_ENABLED
-	using deviceStream_t = hipStream_t;
-#endif
-```
-
-- only works when there is no difference between API calls
-
-# HOP: [https://github.com/cschpc/hop](https://github.com/cschpc/hop)
-
-- light-weight header-only library for GPU porting between CUDA and HIP
-  	* no code modifications needed
-  	* only some extra flags at compile time to hop from CUDA to HIP or back
-  
-**CUDA** &rArr; **HIP**
 ```
 export HOP_ROOT=/path/to/hop
-export HOP_FLAGS="-I$HOP_ROOT -I$HOP_ROOT/source/cuda -DHOP_TARGET_HIP"
+export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/cuda -DHOP_TARGET_HIP
 CC -x hip $HOP_FLAGS hello.cu -o hello
 ./hello
 ```
-**HIP**  &rArr; **CUDA**
+<br>
+
+## HIP ⇒ CUDA
+
 ```
 export HOP_ROOT=/path/to/hop
-export HOP_FLAGS="-I$HOP_ROOT -I$HOP_ROOT/source/hip -DHOP_TARGET_CUDA"
+export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/hip -DHOP_TARGET_CUDA
 CC -x cu $HOP_FLAGS hello.cpp -o hello
 ./hello
 ```
 
-# Code Development with HOP
 
-- write code in CUDA or HIP or a mix of both
-- use generic identifiers as intermediates in the translation
-  	* `gpuMalloc, gpuMemcpyHostToDevice, …`
-- use `gpuLaunchKernel()` instead of `<<<...>>>()`  
-- when needed, wrapper functions can be used to write backend-specific
-implementations
-- avoid implicit header includes
+# HOP in code development
+
+- HOP uses generic identifiers as intermediates in the translation
+  - `gpuMalloc`, `gpuMemcpyHostToDevice`, ...
+- One can use these generic identifiers directly in code
+  - no CUDA/HIP identifiers, just generic identifiers that are then mapped to
+    the correct target identifiers
+- HOP headers are named and organised similar to HIP headers
+  - if code uses only generic identifiers and includes the appropriate HOP
+    headers, no need for `-I$HOP_ROOT/source/..`
+- HOP headers may also be embedded in end-user code
+  - MIT license
+
+
+# Header Only Porting as a general approach
+
+- Use generic identifiers (`gpuMalloc` ...)
+  - easy to swap between GPU backends (single header change)
+  - allows one to also implement more complex wrapper functions if and when
+    needed
+- Strong preference for features that are supported by both CUDA and HIP
+  - if needed, wrapper functions can be used to write backend-specific
+    implementations
+- Use standard compliant C/C++
+  - avoid implicit header includes (`nvcc`, we are looking at you!)
+  - kernel launch with `<<<...>>>()` works, but better to use
+    `gpuLaunchKernel()` that can be mapped to whatever is needed
+    by the target GPU backend
+
+
+# HOP: benefits and drawbacks
+
+<div class="column" style="width:60%">
+## Pros:
+
+- Easy porting between CUDA and HIP
+  - no code modifications
+  - works also from HIP to CUDA!
+- No code duplication
+  - one can use generic identifiers, HIP, or CUDA
+- Flexible and simple
+  - transparent one-to-one mappings
+  - trivial to add hardware specific implementations if and when needed
+</div>
+
+<div class="column" style="width:38%">
+## Cons:
+- Mapping limited to features supported by both HIP and CUDA
+- Not aimed at other GPU backends
+</div>
+
+
+# HOP: how to get started?
+
+- Code available at: &nbsp; [https://github.com/cschpc/hop](https://github.com/cschpc/hop)
+  - working proof of concept implementation
+  - most runtime identifiers included
+  - rudimentary support for BLAS, FFT, RAND, and SPARSE libraries
+  - no automatic testing at the moment, only commonly used IDs tested
+- Future outlook:
+  - fix open issues (IDs with mismatching arguments, C++ overloading, ...)
+  - add testing
+  - add support for other libraries
+  - better documentation :)
 
 
 # Summary
 
-- various ways to port code from CUDA to HIP
+- Various ways to port code from CUDA to HIP
 - HIPIFY tools can automatically convert code to HIP
-- header porting enables both ways conversion, **CUDA** &hArr; **HIP**
-  	* HOP is good start
-  
-
-
-**Note!** Not all features have one-to-one equivalent!
-
-- **warp** size is 32 vs. **wavefront** size of 64
-- `__shfl_down_sync` &rArr; `__shfl_down`
-- dynamic parallelism not supported on AMD devices
-- cooperative groups not supported on AMD devices
+- Header Only Porting (HOP)  bidirectional translation between CUDA and HIP at compile time
