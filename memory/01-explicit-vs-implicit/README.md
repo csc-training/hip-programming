@@ -18,7 +18,6 @@ The memory management strategies are:
 1. Managing host and device memory explicitly
 2. Managing host and device memory explicitly, but using pinned host memory
 3. Using unified (managed) memory to handle memory management
-4. Calling the provided GPU kernel `hipKernel`
 4. Using unified memory with explicit prefetching
 
 The program will print out timing information for each, for comparing their performance.

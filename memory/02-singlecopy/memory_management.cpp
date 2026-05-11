@@ -67,8 +67,7 @@ void warmupRun(int nSteps, int nx, int ny)
   {
     HIP_ERRCHK(hipMemset(d_A, 0, bytes));
     // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(d_A, nx, ny);
-    HIP_ERRCHK(hipGetLastError());
+    #error Launch GPU kernel hipKernel
   }
 
   // Synchronization
@@ -143,8 +142,7 @@ void unifiedMemNoCopy(int nSteps, int nx, int ny)
     #error Initialize array A to zeros on the device using hipMemset
 
     // Launch GPU kernel
-    hipKernel<<<gridsize, BLOCKSIZE, 0, 0>>>(A, nx, ny);
-    HIP_ERRCHK(hipGetLastError());
+    #error Launch GPU kernel hipKernel
   }
   #error Prefetch data (A) from device to host
 

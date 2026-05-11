@@ -111,8 +111,6 @@ void explicitMem(int nSteps, int nx, int ny)
 
     #error Launch GPU kernel hipKernel
 
-    HIP_ERRCHK(hipGetLastError());
-
     #error Synchronization
   }
 
