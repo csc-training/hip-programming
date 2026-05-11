@@ -582,10 +582,11 @@ if(tid%2 == 0) {
 
 - 4$\times$SIMD units, 16 threads per SIMD unit
   - 64 kiB *vector register* (**VGPR**) storage per SIMD unit $\Rightarrow$ 256 kiB register storage on CU
-  - 512 4-byte registers per thread (2 kiB). 
+  - max 256 4-byte registers per thread (2 kiB). 
 
 
 ::: notes
+- <https://www.amd.com/system/files/TechDocs/instinct-mi200-cdna2-instruction-set-architecture.pdf>
 - Simplification
 - Ballpark sizes for registers, LDS and cache
 - MI250x GCD has 110 compute units
@@ -593,6 +594,7 @@ if(tid%2 == 0) {
   - CPU: 32 kiB L1 cache per core
 - Lot of register storage
 - MI250x has also matrix units but they are tricker. Need intrinsics.
+  - 256 kiB additional storage for matrix accumulation VGPRs
 - `hipcc -Rpass-analysis=kernel-resource-usage`!
 :::
 
