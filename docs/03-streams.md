@@ -133,10 +133,6 @@ hipError_t hipStreamDestroy ( hipStream_t stream )
 - API functions operate on the default stream: `hipMalloc, hipMemcpy, hipFree, ...`
 - Append `Async` to name and add `hipStream_t` as last argument for asynchronous version:
   - `hipMalloc(...)` ⟶ `hipMallocAsync(..., hipStream_t stream)`
-- The stream is supplied to the kernel invocation:
-  - `my_kernel<<<grid, block, 0, stream>>>(...)`
-  - `hipLaunchKernelGGL(my_kernel, grid, block, 0, stream, ...)`
-  - Default stream: `my_kernel<<<grid, block, 0, 0>>>(...)`
 
 ::: {.notes}
 - `hipStream_t stream` must be created as well (later)
@@ -144,9 +140,13 @@ hipError_t hipStreamDestroy ( hipStream_t stream )
 
 # Asynchronisity and kernels
 
-- Kernels are always asynchronous with host, and require explicit synchronization
 - Running kernels concurrently require placing them in different streams
   - Default stream has special synchronization rules and cannot run concurrently with other streams (applies to all API calls)
+- The stream is supplied to the kernel invocation:
+  - `my_kernel<<<grid, block, 0, stream>>>(...)`
+  - `hipLaunchKernelGGL(my_kernel, grid, block, 0, stream, ...)`
+  - Default stream: `my_kernel<<<grid, block, 0, 0>>>(...)`
+
 
 <small>
 
@@ -351,28 +351,6 @@ hipError_t hipDeviceSynchronize ( void )
 __syncthreads()
 ```
 
-</small>
-
-# Synchronization in a kernel
-
-* The device function `__syncthreads()` synchronizes threads within a block inside a kernel
-* Often used with shared memory (keyword `__shared__`) which is memory shared between each thread in a block 
-
-<small>
-
-```cpp
-#define BLOCKSIZE 256
-__global__ void reverse(double *d_a) {
-    __shared__ double s_a[BLOCKSIZE]; /* array of doubles, shared in this block */
-    int tid = threadIdx.x;
-    s_a[tid] = d_a[tid];              /* each thread fills one entry */
-    __syncthreads();                  /* all threads in a block must reach this point before 
-                                         any thread in that block is allowed to continue. */
-    d_a[tid] = s_a[BLOCKSIZE-tid-1];    /* safe to write out array in reverse order */
-}
-```
-
-* A simple kernel example for reversing the order of the entries of a block-sized array
 </small>
 
 # Summary

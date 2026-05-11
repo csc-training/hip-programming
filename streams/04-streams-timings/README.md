@@ -5,7 +5,7 @@ This exercise builds upon the previous asynchronous memory copy exercise by intr
 Start by **copying your previous exercise solution into this folder**:
 
 ```
-cp ../03-asyncmemcopy/streams.cpp .
+cp ../03-streams-asyncmemcpy/streams.cpp .
 ```
 
 In this exercise, we will measure our GPU kernel execution time using HIP events.

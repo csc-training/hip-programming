@@ -39,7 +39,7 @@ Siili document for additional info during the course: https://siili.rahtiapp.fi/
 | Time | Topic |
 | ---- | ----- |
 | 09:00–09:30 | Day 1 Recap |
-| 09:30–10:15 | [Streams and events](https://csc-training.github.io/hip-programming/html/03-streams.html) |
+| 09:30–10:00 | [Streams and events](https://csc-training.github.io/hip-programming/html/03-streams.html) |
 | 10:00–10:15 | Break  ||
 | 10:15–11:00 | [Exercises](streams/) |
 | 11:00-11:30 | [Memory allocations, access, and unified memory](https://csc-training.github.io/hip-programming/html/04-memory.html) |
