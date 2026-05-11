@@ -24,11 +24,28 @@ For the duration of the course, we provide you with access to the LUMI system wi
 
 To get started, log in to LUMI:
 ```shell
-ssh -i identity_file username@lumi.csc.fi
+ssh username@lumi.csc.fi
 ```
 
 The username is the CSC account you created before the training.
 For more information, refer to the [LUMI documentation](https://docs.lumi-supercomputer.eu/firststeps/).
+
+### Disk areas
+
+All the exercises should be carried out in the scratch disk area.
+This scratch area is shared between all the project members, so create a personal working directory there:
+
+    mkdir -p /scratch/project_462001376/$USER
+    cd /scratch/project_462001376/$USER
+
+and clone the course git repository there:
+
+    git clone https://github.com/csc-training/hip-programming.git /scratch/project_462001376/$USER/hip-programming
+
+Now, `/scratch/project_462001376/$USER/hip-programming` is your own clone of the course repository on LUMI
+and you can modify files there without causing conflicts with other course participants.
+
+
 
 ### Compiling
 
@@ -73,11 +90,8 @@ For a multi-gpu application more cards can be requested.
 
 The common part for all of these examples includes: `srun --account=project_462001376 --partition=small-g --time=00:05:00`
 
-- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-node=1`
-- 1 MPI process(es), 3 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-node=3`
-- 3 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=3 --cpus-per-task=1 --gpus-per-node=1`
-- 3 MPI process(es), 1 GPU(s) per process, 7 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=3 --cpus-per-task=7 --gpus-per-node=1`
-- 2 MPI process(es), 3 GPU(s) per process, 7 OpenMP thread(s) per process: `--nodes=1 --ntasks-per-node=2 --cpus-per-task=7 --gpus-per-nodes=3`
+- 1 MPI process(es), 1 GPU(s) per node: `--nodes=1 --ntasks-per-node=1 --gpus-per-node=1`
+- 2 MPI process(es), 2 GPU(s) per node: `--nodes=1 --ntasks-per-node=2 --gpus-per-nodes=2`
 
 See the page for example Slurm scripts on LUMI: https://docs.lumi-supercomputer.eu/runjobs/scheduled-jobs/lumig-job/
 
@@ -88,11 +102,26 @@ In case LUMI is inaccessible during the training, we can use Mahti as a backup.
 
 To get started, log in to Mahti:
 ```shell
-ssh -i identity_file username@mahti.csc.fi
+ssh username@mahti.csc.fi
 ```
 
 The username is the CSC account you created before the training.
 For more information, refer to the [CSC documentation](https://docs.csc.fi/computing/#accessing-puhti-and-mahti).
+
+### Disk areas
+
+All the exercises should be carried out in the scratch disk area.
+This scratch area is shared between all the project members, so create a personal working directory there:
+
+    mkdir -p /scratch/project_2018588/$USER
+    cd /scratch/project_2018588/$USER
+
+and clone the course git repository there:
+
+    git clone https://github.com/csc-training/hip-programming.git /scratch/project_2018588/$USER/hip-programming
+
+Now, `/scratch/project_2018588/$USER/hip-programming` is your own clone of the course repository on LUMI
+and you can modify files there without causing conflicts with other course participants.
 
 ### Compiling
 
@@ -123,12 +152,9 @@ For a multi-gpu application more cards can be requested.
 
 #### Examples
 
-The common part for all of these examples includes: `srun --reservation=HIPcourse --account=project_2013645 --time=00:05:00`
+The common part for all of these examples includes: `srun --reservation=gpu-course-day1 --account=project_2018588 --time=00:05:00`
 
-- 1 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1`
-- 1 MPI process(es), 3 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:3`
-- 3 MPI process(es), 1 GPU(s) per process, 1 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=3 --cpus-per-task=1 --gres=gpu:a100:3`
-- 3 MPI process(es), 1 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpusmall --nodes=1 --ntasks-per-node=3 --cpus-per-task=7 --gres=gpu:a100:3`
-- 2 MPI process(es), 4 GPU(s) per process, 7 OpenMP thread(s) per process: `--partition=gpumedium --nodes=2 --ntasks-per-node=1 --cpus-per-task=7 --gres=gpu:a100:8`
+- 1 MPI process(es), 1 GPU(s) per node: `--partition=gpusmall --nodes=1 --ntasks-per-node=1 --gres=gpu:a100:1`
+- 2 MPI process(es), 2 GPU(s) per node: `--partition=gpusmall --nodes=1 --ntasks-per-node=1 --gres=gpu:a100:2`
 
 More information about the number of GPUs and reserving them can be found in the [CSC documentation](https://docs.csc.fi/computing/running/creating-job-scripts-mahti/#gpu-batch-jobs).
