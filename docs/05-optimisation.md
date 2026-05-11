@@ -1,9 +1,3 @@
-<!--
-SPDX-FileCopyrightText: 2021 CSC - IT Center for Science Ltd. <www.csc.fi>
-
-SPDX-License-Identifier: CC-BY-4.0
--->
-
 ---
 title:    GPU performance optimisation
 event:    Introduction to GPU programming
@@ -560,23 +554,12 @@ if(tid%2 == 0) {
 - Occupancy is the ratio of active wavefronts/warps to the maximum CU/SM can support
 - High occupancy helps to hide latencies
     - However, high occupancy does not automatically mean good performance 
-- Occupancy is determined by per block resources
+    - Compute bound kernels may perform better with lower occupancy
+- Occupancy is determined by
     - register per thread
     - threads per block
     - shared memory per block
     - hardware limits
-
- 
-
-# Minimise number of active local variables 
-
-- Local variables are stored in registers
-  - MI250x 128 kiB per SIMD-unit
-- What happens if there is not enough registers? 
-  - Variables are "spilled" to local memory on slow global device memory
-- Might happen if the kernel is very complicated
-  - Reducing occupancy may improve performance
-
 
 # MI250x Compute Units (CU)
 ::::::{.columns}
@@ -598,7 +581,7 @@ if(tid%2 == 0) {
 ::::::
 
 - 4$\times$SIMD units, 16 threads per SIMD unit
-  - 128 kiB *vector register* (**VGPR**) storage per SIMD unit $\Rightarrow$ 512 kiB register storage on CU
+  - 64 kiB *vector register* (**VGPR**) storage per SIMD unit $\Rightarrow$ 256 kiB register storage on CU
   - 512 4-byte registers per thread (2 kiB). 
 
 
@@ -613,6 +596,31 @@ if(tid%2 == 0) {
 - `hipcc -Rpass-analysis=kernel-resource-usage`!
 :::
 
+# Calculating (theoretical) occupancy
+
+- Kernel uses 81 vector registers (VGPRs) 
+    - a wavefront uses 5184 VGPRs 
+    - CU can accommodate 65536 / 5184 = 12 wavefronts
+    - occupancy 12 / 32 = 38 %
+- Block uses 16 kiB shared memory
+    - maximum of 4 blocks 
+    - with 256 threads per block max. 16 wavefronts
+    - occupancy 16 / 32 = 50 %
+- `hipcc` can report occupancy with `-Rpass-analysis=kernel-resource-usage`
+
+::: notes
+32 bit numbers assumed for registers
+::: 
+
+
+# Minimise register spilling 
+
+- Local variables are stored in registers
+  - MI250x 128 kiB per SIMD-unit
+- What happens if there is not enough registers? 
+  - Variables are "spilled" to local memory on slow global device memory
+- Might happen if the kernel is very complicated
+  - Reducing occupancy may improve performance
 
 
 # Optimizing kernel launch latency
