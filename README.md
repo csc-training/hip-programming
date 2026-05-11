@@ -1,7 +1,8 @@
-# GPU programming with HIP
+# Introduction to GPU programming
 
-Course material for the CSC course "GPU programming with HIP". The course is
-part of the EuroCC training activities at CSC.
+Course material for the CSC course "Introduction to GPU programming". 
+
+Siili document for additional info during the course: https://siili.rahtiapp.fi/9lXWbh-ETaiCuzMuWYmMRw
 
 ## Agenda
 
@@ -9,19 +10,19 @@ part of the EuroCC training activities at CSC.
 
 | Time | Topic |
 | ---- | ----- |
-| 09:00–09:15 | Welcome, LUMI access, slurm, git, web interface (JE) |
+| 09:00–09:15 | Welcome, LUMI access, slurm, git, web interface |
 | 09:15-09:30 | What is CSC? |
 | 09:30–09:45 | Break/debugging access |
-| 09:45–10:30 | Introduction to GPU's and GPU programming (JK) |
+| 09:45–10:30 | Introduction to GPU's and GPU programming |
 | 10:30–10:45 | Break |
-| 10:45-11:30 | Basic usage, memory allocation and kernels (JK) |
+| 10:45-11:30 | Basic usage, memory allocation and kernels |
 | 11:30-11:45 | Break |
 | 11:45-12:15 | Exercises |
 | 12:15-13:00 | Lunch |
-| 13:00-13:45 | Basic usage cont. (JK) |
+| 13:00-13:45 | Basic usage cont. |
 | 13:45-14:00 | Break |
 | 14:00-14:30 | Exercises |
-| 14:30-15:15 | Analyzing simple traces (JK) |
+| 14:30-15:15 | Analyzing simple traces |
 | 15:15-15:30 | Break |
 | 15:30-16:00 | Exercises |
 | 16:00-16:15 | Day summary |
@@ -50,17 +51,17 @@ part of the EuroCC training activities at CSC.
 
 | Time | Topic |
 | ---- | ----- |
-| 09:00–10:00 | Kernel optimizations (JE) |
+| 09:00–10:00 | Performance optimization (I) |
 | 10:00–10:15 | Break  |
 | 10:15–10:45 | Exercises |
-| 10:45-11:30 | Shared local memory (JE) |
+| 10:45-11:30 | Performance optimization (II) |
 | 11:30-11:45 | Break |
 | 11:45-12:15 | Exercises |
 | 12:15-13:00 | Lunch |
-| 13:00-13:30 | HOP and performance portability (JE) |
+| 13:00-13:30 | HOP and performance portability |
 | 13:30-13:45 | Break |
 | 13:45-14:15 | Exercises  |
-| 14:15-14:45 | Multi-GPU programming (JE) |
+| 14:15-14:45 | Multi-GPU programming |
 | 14:45-15:45 | Break & Exercises |
 | 15:45-16:00 | Close-up | 
 
