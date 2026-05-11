@@ -51,7 +51,6 @@ Now, `/scratch/project_462001376/$USER/hip-programming` is your own clone of the
 and you can modify files there without causing conflicts with other course participants.
 
 
-
 ### Compiling
 
 ```shell
@@ -81,13 +80,13 @@ LUMI uses SLURM for batch jobs. Please see [LUMI documentation](https://docs.lum
 for more details. If you are using CSC training accounts, you should use the following project as your account: `--account=project_462001376`.
 
 We have also reserved some GPU nodes for the course.
-In order to use these dedicated nodes, you need to run your job with the option `--reservation=gpu-course-day1`, such as
+In order to use these dedicated nodes, you need to run your job with the option `--reservation=gpu-course-day2` (Tuesday), such as
 
 ```shell
-srun --reservation=gpu-course-day1 --account=project_462001376 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-node=1 ./executable
+srun --reservation=gpu-course-day2 --account=project_462001376 --partition=small-g --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gpus-per-node=1 ./executable
 ```
 
-On Monday, and using the reservation `gpu-course-day2` on Tuesday and `gpu-course-day3` on Wednesday.
+On Tuesday, and `gpu-course-day3` on Wednesday.
 
 For a multi-gpu application more cards can be requested.
 
@@ -144,20 +143,20 @@ More information on compiling can be found in the [CSC documentation](https://do
 ### Running
 
 Mahti uses SLURM for batch jobs. Please see [CSC documentation](https://docs.csc.fi/computing/running/getting-started/)
-for more details. If you are using CSC training accounts, you should use the following project as your account: `--account=project_2013645`.
+for more details. If you are using CSC training accounts, you should use the following project as your account: `--account=project_2018588`.
 
 We have also reserved some GPU nodes for the course.
-In order to use these dedicated nodes, you need to run your job with the option `--reservation=gpu-course-day1`, such as
+In order to use these dedicated nodes, you need to run your job with the option `--reservation=gpu-course-day2`, such as
 
 ```shell
-srun --reservation=gpu-course-day1 --account=project_2018588 --partition=gpusmall --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1 ./executable
+srun --reservation=gpu-course-day2 --account=project_2018588 --partition=gpusmall --time=00:05:00 --nodes=1 --ntasks-per-node=1 --cpus-per-task=1 --gres=gpu:a100:1 ./executable
 ```
 
 For a multi-gpu application more cards can be requested.
 
 #### Examples
 
-The common part for all of these examples includes: `srun --reservation=gpu-course-day1 --account=project_2018588 --time=00:05:00`
+The common part for all of these examples includes: `srun --reservation=gpu-course-day2 --account=project_2018588 --time=00:05:00`
 
 - 1 MPI process(es), 1 GPU(s) per node: `--partition=gpusmall --nodes=1 --ntasks-per-node=1 --gres=gpu:a100:1`
 - 2 MPI process(es), 2 GPU(s) per node: `--partition=gpusmall --nodes=1 --ntasks-per-node=1 --gres=gpu:a100:2`
