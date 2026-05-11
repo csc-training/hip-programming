@@ -1,20 +1,179 @@
+<!--
+SPDX-FileCopyrightText: 2021 CSC - IT Center for Science Ltd. <www.csc.fi>
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 ---
-title:    Kernel optimisation
+title:    GPU performance optimisation
 event:    Introduction to GPU programming
 date:     May 2026
 lang:     en
 ---
 
-# Kernel optimisation strategies
+# Overview
 
-1. Use existing libraries
-2. Minimise host-device data transfers
-3. Minimise device memory-compute unit data transfers
-4. Optimise for coalesced memory access
-5. Avoid branching within warp
-6. Minimise number of active local variables 
+- General optimisation strategies
+- Optimizing memory access
+- Other GPU kernel optimisations
 
-# 1. Libraries (I)
+# Measuring performance
+
+- Before starting any performance optimisation one needs to find out the current bottlenecks and where they occur
+- Typical bottlenecks
+    - host-device data transfers
+    - too little parallelism for GPUs
+    - unoptimal memory access
+    - unoptimal kernel code
+
+# Performance analysis tools
+
+- Applications own timing information
+    - can be useful for big picture
+    - GPU execution is asynchronous, remember to synchronize or use events
+- Performance analysis tools
+    - provide detailed information about the application
+    - find hot-spots (functions and loops)
+    - identify causes of less-than-ideal performance
+    - information about low-level hardware via performance counters
+- ROCProfiler and ROCm Compute Profiler, Nsight Systems and Nsight Compute
+- ScoreP, TAU, ...
+
+
+# Timers in application
+
+- As GPU kernels are run asynchronously, timers in application need to use events or explicit 
+  synchronization in measurements
+
+<div class="column">
+```cpp
+hipEventRecord(start);
+
+kernel<<<grid, block>>>(...);
+
+hipEventRecord(stop);
+
+hipEventSynchronize(stop);
+
+float ms = 0.0f;
+hipEventElapsedTime(&ms, start, stop);
+```
+- Measures only the time spent on GPU
+</div>
+<div class="column">
+```cpp
+auto start = clock();
+
+kernel<<<grid, block>>>(...);
+hipDeviceSynchronize();
+
+auto stop = clock();
+
+
+
+float ms = (stop - start) * 1e3;
+```
+- Measures also kernel launch latency
+</div>
+
+# Example: rocprof
+
+<small>
+```
+$ rocprofv3 ... --summary
+ROCPROFV3 SUMMARY:
+
+|         NAME                    |     DOMAIN      |  CALLS  | DURATION (nsec) | AVERAGE (nsec)  | PERCENT (INC) |
+|---------------------------------|-----------------|---------|-----------------|-----------------|---------------|
+| hipDeviceSynchronize            | HIP_API         |     500 |      7090308646 |       1.418e+07 |     32.114109 |
+| evolve_interior_kernel          | KERNEL_DISPATCH |     500 |      7078549847 |       1.416e+07 |     32.060850 |
+| hipHostMalloc                   | HIP_API         |       4 |      4611150006 |       1.153e+09 |     20.885265 |
+| hipHostFree                     | HIP_API         |     506 |       954823088 |       1.887e+06 |      4.324677 |
+| hipMemcpy                       | HIP_API         |       4 |       669220623 |       1.673e+08 |      3.031099 |
+| evolve_z_edges_kernel           | KERNEL_DISPATCH |     500 |       359599504 |       7.192e+05 |      1.628733 |
+| evolve_y_edges_kernel           | KERNEL_DISPATCH |     500 |       351679420 |       7.034e+05 |      1.592860 |
+| MEMORY_COPY_DEVICE_TO_HOST      | MEMORY_COPY     |       2 |       327768938 |       1.639e+08 |      1.484563 |
+| MEMORY_COPY_HOST_TO_DEVICE      | MEMORY_COPY     |       2 |       323637352 |       1.618e+08 |      1.465849 |
+| hipStreamCreateWithFlags        | HIP_API         |       3 |       269246481 |       8.975e+07 |      1.219497 |
+| evolve_x_edges_kernel           | KERNEL_DISPATCH |     500 |        21772863 |       4.355e+04 |      0.098616 |
+| hipLaunchKernel                 | HIP_API         |    2000 |        13302271 |       6.651e+03 |      0.060250 |
+```
+</small>
+
+# Optimisation strategies
+
+1. Minimise host-device data transfers
+2. Use existing libraries
+3. Optimise for coalesced memory access
+4. Other kernel optimisations
+
+# Host-device data transfers
+
+## Peak theoretical bandwidth
+
+| Link | Host-device | Device memory | 
+|------|------------:|--------------:|
+| MI250x (LUMI) | 36 GB/s | 1600 GB/s|
+| A100 (Mahti) | 32 GB/s | 2000 GB/s |
+| GH200 (Roihu) | 900 GB/s | 4000 GB/s |
+
+- Matrix multiplication $C = A \times B$ with 10000 x 10000 matrices in LUMI:
+    - Host-to-device memory copies: 0.07 s
+    - Computation: 0.04 s
+
+::: notes
+
+Theoretical performance:
+
+- memcopies: `3 * 10000**2 * 8 / 36e9`
+- compute: `2 * 10000***3 / 47e12`
+
+:::
+
+# Using libraries
+
+- Optimized libraries can provide several orders of more performance
+
+<small>
+<div class="column">
+Naive matrix multiplication
+```cpp
+__global__ void matmul_kernel(int order, float *A, float *B, float *C)
+{
+  auto i = blockIdx.x * blockDim.x + threadIdx.x;
+  auto j = blockIdx.y * blockDim.y + threadIdx.y;
+
+  if ((i < order) && (j < order)) {
+    for(int k = 0; k < order; ++k) {
+      C[i+j*order] += A[i + k*order] * B[k + j*order];
+    }
+  }
+}
+
+matmul_kernel<<<dimGrid, dimBlock>>>(order, d_a, d_b, d_c);
+```
+- 2.8 s (LUMI, order=10 000)
+</div>
+<div class="column">
+Matrix multiplication with hipBLAS
+```cpp
+  hipblasHandle_t h;
+  hipblasCreate(&h);
+
+
+
+  hipblasDgemm(h, 
+               HIPBLAS_OP_N, HIPBLAS_OP_N,
+               order, order, order,
+               &alpha,            
+               d_a, order,          
+               d_b, order,
+               &beta, 
+               d_c, order);
+```
+- 0.05 s (LUMI, order=10 000)
+</div>
+</small>
 
 ::: notes
 
@@ -22,85 +181,145 @@ lang:     en
 
 :::
 
+# Common libraries (I)
+
 | NVIDIA   | HIP       | ROCm       | Description                                                                         |
 | -------- | --------- | ---------- | ----------------------------------------------------------------------------------- |
 | cuBLAS   | hipBLAS   | rocBLAS    | Basic Linear Algebra Subroutines                                                    |
-| cuFFT    | hipFFT    | rocfft     | Fast fourier Transform Library                                                      |
+| cuFFT    | hipFFT    | rocfft     | Fast Fourier Transforms                                                             |
+| cuRAND   | hipRAND   | rocRAND    | Random number generation                                                            |
+| cuSOLVER | hipSOLVER | rocSOLVER  | Dense and sparse linear algebra (LAPACK)                                            |
+| Thrust   |           | rocThrust  | Parallel algorithms (C++ STL-like)                                                  |
+| CUB      | hipCUB    | rocPRIM    | Low level parallel primitives                                                       |
+
+
+# Common libraries (II)
+
+| NVIDIA   | HIP       | ROCm       | Description                                                                         |
+| -------- | --------- | ---------- | ----------------------------------------------------------------------------------- |
 | cuSPARSE | hipSPARSE | rocSPARSE  | Sparse BLAS + SMV                                                                   |
-| cuSOLVER | hipSOLVER | rocSOLVER  | Lapack library                                                                      |
 | AMG-X    |           | rocALUTION | Sparse iterative solvers and preconditioners with Geometric and Algebraic MultiGrid |
-| Thrust   |           | rocThrust  | C++ parallel algorithms library                                                     |
+| EIGEN    | EIGEN     | EIGEN      | Linear algebra 
+| cuDNN    |           | MIOpen     | Deep neural network primitives
+| NCCL     |           | RCCL       | multi-GPU communication                                                             |
+
+# Optimizing memory access {.section}
+
+# Recap: warp / wavefront
+
+- Threads are grouped into
+    - *warps* of 32 consecutive threads (Nvidia), or
+    - *wavefronts* of 64 consecutive threads (AMD)
+- The whole warp/wavefront executes the same instruction in lockstep
+- Memory loads/stores are also executed in lockstep
+    - warp stalls until all memory accesses of its threads are resolved
 
 
-# Libraries (II)
+# Optimising for coalesced memory access
 
-| NVIDIA | HIP     | ROCm    | Description                                                                   |
-| ------ | ------- | ------- | ----------------------------------------------------------------------------- |
-| CUB    | hipCUB  | rocPRIM | Low level Optimized Parallel Primitives                                        |
-| cuDNN  |         | MIOpen  | Deep learning solver library                                                  |
-| cuRAND | hipRAND | rocRAND | Random number generator library                                               |
-| EIGEN  | EIGEN   | EIGEN   | C++ template library for linear algebra: matrices, vectors, numerical solvers |
-| NCCL   |         | RCCL    | Communications Primitives Library based on the MPI equivalents                |
+- Device main memory is accessed in batches of 64 or 128 bytes (cache line)
+- If warp requests consecutive elements, hardware can combine (**coalesce**) the requests into 
+  fewer transactions
 
-# 2. Host-device data transfers
+  |  |  |  |
+  |--|--|--|
+  | stride-1 | "`double val = global_mem[tid]`" | ***fast*** 🐇 |
+  | stride-64 |"`double val = global_mem[tid*8]`" | ***slow*** 🐢 |
 
-### Peak theoretical bandwidth
+- Non-linear access is fine as long as the warp as a whole accesses consecutive elements in global memory
 
-| Link | Host-device | Device memory | 
-|------|------------:|--------------:|
-| LUMI-G MI250x | 36 GB/s | 1600 GB/s|
-| PCIE4.0 x16 | $\sim$ 32 GB/s |  |
-| A100 (Mahti) |  | 2000 GB/s |
-| GH200 (Roihu) | 900 GB/s | 4000 GB/s |
+---
 
-::: notes
-
-- Don't be afraid of host-device memory copies
-- But be aware of the 2-order of magnitude BW difference
-
-:::
-
-# 3. Device global memory access
-
-- Matrix multiplication: temporary variable avoids K-1 global memory accesses
-- Fuse kernels if applicable
+# Uncoalesced memory access
 
 ::::::{.columns}
-:::{.column width=49%}
-```cpp
-  if (x < M && y < N) {
-    for(int i = 0; i < K; ++i) {
-      C[y+x*M] += A[x + i*M]*B[i + y*K];
-    }
-  }
-
-
-
-```
+:::{.column width="50%"}
+![](img/uncoalesced.svg){width="100%"}
+<div align=right>
+![](img/global-mem-arrow.svg){width="3cm"}
+</div>
 :::
-:::{.column width=49%}
+:::{.column}
+
+* 6 read operations for 6 elements
 ```cpp
-  if (x < M && y < N) {
-    float tmp(0); 
-    for(int i = 0; i < K; ++i) {
-      tmp += A[x + i*M]*B[i + y*K];
-    }
-    C[y+x*M] = tmp;
-  }
+double val = global_array[8*tid];
 ```
 :::
 ::::::
 
-# 3. Device global memory access
 
-**Device memory hierarchy**<br>
+---
+
+# Coalesced memory access
+
+::::::{.columns}
+:::{.column width="50%"}
+![](./img/coalesced.svg){width="100%"} 
+<div align=right>
+![](img/global-mem-arrow.svg){width="3cm"}
+</div>
+:::
+:::{.column}
+* 2 read operations for 16 elements
+```cpp
+double val = global_array[tid];
+```
+:::
+
+::::::
+
+
+---
+
+# Coalesced access with multidimensional thread blocks and grids
+
+- Multidimensional thread blocks and grids have `threadIdx.[x|y|z]`, `blockIdx.[x|y|z]` *etc.*
+  indices
+- The first index `x` varies fastest contrary to C/C++ multidimensional array ordering
+    
+<small>
+<div class="column">
+**Uncoalesced access**
+```cpp
+__global__ void copy(int width, int height, float *A, float *B)
+{
+  auto x = blockIdx.x * blockDim.x + threadIdx.x;
+  auto y = blockIdx.y * blockDim.y + threadIdx.y;
+
+  auto index = x * height + y;
+
+  B[index] = A[index]
+}
+
+```
+</div>
+<div class="column">
+**Coalesced access**
+```cpp
+__global__ void copy(int width, int height, float *A, float *B)
+{
+  auto x = blockIdx.x * blockDim.x + threadIdx.x;
+  auto y = blockIdx.y * blockDim.y + threadIdx.y;
+
+  auto index = y * width + x;
+
+  B[index] = A[index]
+}
+
+```
+</div>
+</small>
+   
+# Device memory hierarchy
+
 **Fastest first**
 
 ::::::{.columns}
 :::{.column width=60%}
 - Registers (per-thread-access)
 - Shared memory (per-block-access)
-- Local scratch memory (per-thread-access)
+- Local memory (per-thread-access)
 - Global memory (global access)
 :::
 :::{.column}
@@ -108,10 +327,7 @@ lang:     en
 :::
 ::::::
 
-
-# 3. Device global memory access
-
-## Device memory hierarchy
+# Device memory hierarchy
 
 <div class="column">
 ::: {.fragment}
@@ -145,154 +361,145 @@ lang:     en
 
 ---
 
-## MI250x Compute Units (CU)
-::::::{.columns}
+# Using shared memory
 
-:::{.column width=40%}
-
-- 64 kiB of **local data share** (LDS) memory
-- 800 *scalar registers* (**SGPR**, 12.6 kiB)
-  - up to 102 per warp
-- 16 kiB of L1 cache
-:::
-
-:::{.column width=59%}
-![](img/coarse_CU.svg){.center width=120%}
-:::
-::::::
-
-- 4$\times$SIMD units, 16 threads per SIMD unit
-  - 128 kiB *vector register* (**VGPR**) storage per SIMD unit $\Rightarrow$ 512 kiB register storage on CU
-  - 512 4-byte registers per thread (2 kiB). 
-- MI250x CU has matrix units, but they are tricky to program
-
-
-::: notes
-- Simplification
-- Ballpark sizes for registers, LDS and cache
-- MI250x GCD has 110 compute units
-  - Note: Cache is per CU
-  - CPU: 32 kiB L1 cache per core
-- Lot of register storage
-- MI250x has also matrix units but they are tricker. Need intrinsics.
-- `hipcc -Rpass-analysis=kernel-resource-usage`!
-:::
-
-
-# 4. Optimise for coalesced memory access
-
-- Device main memory accessed in batches of 64 or 128 bytes
-- If warp requests consecutive elements, then fewer global memory accesses are needed
-- Typically
-
-  |  |  |  |
-  |--|--|--|
-  | stride-1 | "`double val = global_mem[tid]`" | ***fast*** 🐇 |
-  | stride-64 |"`double val = global_mem[tid*8]`" | ***slow*** 🐢 |
-
-- But access needn't be linear as long as the warp accesses consecutive elements in global memory!
-  - "`double val = global_mem[permutation_of_1_to_8[tid]]`" 🐇
-
----
-
-## Uncoalesced memory access
-
-::::::{.columns}
-:::{.column width="50%"}
-![](img/uncoalesced.svg){width="100%"}
-<div align=right>
-![](img/global-mem-arrow.svg){width="3cm"}
-</div>
-:::
-:::{.column}
-
-* 6 read operations for 6 elements
-```cpp
-double val = global_array[8*tid];
-```
-:::
-::::::
-
-
----
-
-## Coalesced memory access
-
-::::::{.columns}
-:::{.column width="50%"}
-![](./img/coalesced.svg){width="100%"} 
-<div align=right>
-![](img/global-mem-arrow.svg){width="3cm"}
-</div>
-:::
-:::{.column}
-* 2 read operations for 16 elements
-```cpp
-double val = global_array[tid];
-```
-:::
-
-::::::
-
-
----
-
-# Local data share
-
-- Variable defined as `__shared__` is shared within block 
+- Accessing shared memory is faster than the global device memory
+- Shared within a block
+    - Synchronization with `__syncthreads()`
+- Amount of available shared memory depends on the architecture
 - Use cases:
-  - reduce overlapping global memory operations <br>$\Rightarrow$ Remember to `__syncthreads()`!
+  - reduce overlapping global memory operations
   - User controlled cache
-  - Transform uncoalesced memory OPs to coalesced
-- Usage:
-  ```cpp
+  - Transform uncoalesced memory operations to coalesced
+
+# Using shared memory
+
+- Shared memory is declared within the kernel with `__shared__` keyword
+- Shared memory can be static or dynamic
+    - kernel can have multiple shared memory arrays but only a single dynamic
+    - size of the dynamic shared memory is specified in the third argument in the kernel launch `kernel<<<blocks, threads, shmem>>>()`
+
+<small>
+<div class="column">
+**Static shared memory**
+```cpp
+__global__ void kernel(...)
+{
   __shared__ float buf[256];
-  ```
+  __shared__ int buf2[256];
+...
+}
+
+kernel<<<blocks, threads>>>(...)
+```
+</div>
+<div class="column">
+**Dynamic shared memory**
+```cpp
+__global__ void kernel(...)
+{
+  extern __shared__ float buf[];
+...
+}
+
+size_t shmem = n * sizeof(float) // given to kernel in bytes
+kernel<<<blocks, threads, shmem>>>(...)
+```
+</div>
+</small>
 
 ---
 
-## Local data share
+# Example: Matrix transpose with shared memory (I)
 
-**Advanced optimization**: avoid bank conflicts
+<small>
+<div class="column" style=width:55%>
+Naive implementation
+```cpp
+__global__ void transpose_kernel(float *in, float *out, 
+                                 int width, int height) {
 
-- LDS is divided into 32 banks of 512 Dwords (MI250x), each serve one address per cycle
+  int x_index = blockIdx.x * tile_dim + threadIdx.x;
+  int y_index = blockIdx.y * tile_dim + threadIdx.y;
 
+  int in_index = y_index * width + x_index;
+  int out_index = x_index * height + y_index;
 
-<div class="column">
-![](img/NoBankConflicts.jpeg){width=100%}
+  out[out_index] = in[in_index];
+}
+```
 </div>
-<div class="column">
-![](img/BankConflicts.jpeg){width=100%}
+<div class="column" style=width:42%>
+Either reads or writes are uncoalesced
+![](img/transpose_img.png){.center width=80%}
 </div>
+</small>
 
+# Example: Matrix transpose with shared memory (II)
 
-# 5. Avoid branching within warp
+<small>
+<div class="column" style=width:55%>
+Implementation with shared memory
+```cpp
+__global__ void transpose__kernel(float *in, float *out, 
+                                  int width, int height) {
 
+  __shared__ float tile[tile_dim][tile_dim];
+
+  int x_tile_index = blockIdx.x * tile_dim;
+  int y_tile_index = blockIdx.y * tile_dim;
+
+  int in_index =
+      (y_tile_index + threadIdx.y) * width + (x_tile_index + threadIdx.x);
+  int out_index =
+      (x_tile_index + threadIdx.y) * height + (y_tile_index + threadIdx.x);
+
+  tile[threadIdx.y][threadIdx.x] = in[in_index];
+
+  __syncthreads();
+
+  out[out_index] = tile[threadIdx.x][threadIdx.y];
+}
+```
+</div>
+<div class="column" style=width:42%>
+Both reads and writes are coalesced
+![](img/transpose_sm.png){.center width=60%}
+</div>
+</small>
+
+# Other examples where shared memory is important
+
+- Matrix-matrix/vector multiplication
+ 
+  :::{.fragment}
+  - Same elements are loaded in different threads
+  :::
+- N-body problem
+ 
+  :::{.fragment}
+  - One thread evolves one body: each thread loads all data of each other body as well
+  :::
+- Reductions
+ 
+  :::{.fragment}
+  - Cooperation between threads
+  :::
+
+# Other kernel optimizations {.section}
+
+# Avoid branching within wavefront/warp
 
 ::::::{.columns}
 :::{.column width=60%}
-- Both branches are executed sequentially
-  - In threads where the condition is false: 
+- Branching within wavefront/warp serializes execution 
 - If the branch changes only between warps, then there is no penalty
-- *Note*
-  - Code on right is memory bound
+- Branch divergence hurts most for compute bound or memory divergent branches
+- Memory bound branches with no divergence are less sensitive
 :::
 :::{.column width=39%}
 ```cpp
 if ( (tid%2) == 0) {
-  c[tid] = b[tid]-a[tid];
-} else {
-  c[tid] = a[tid]-b[tid];
-}
-```
-```cpp
-bool mask = (tid%2) == 0;
-c[tid] = mask*(b[tid]-a[tid]);
-c[tid] += (!mask)*(a[tid]-b[tid]);
-```
-"Solution"
-```cpp
-if ( ((tid/64)%2) == 0) {
   c[tid] = b[tid]-a[tid];
 } else {
   c[tid] = a[tid]-b[tid];
@@ -307,7 +514,7 @@ if ( ((tid/64)%2) == 0) {
 
 ---
 
-## Branching across warps
+# Branching across wavefronts/warps
 
 
 ::::::{.columns}
@@ -348,152 +555,85 @@ if(tid%2 == 0) {
 - Exercise: Find out how complicated `f_1` and `f_2` need to be that branch divergence is an issue
 :::
 
-# 6. Minimise number of active local variables 
+# Optimize occupancy
+
+- Occupancy is the ratio of active wavefronts/warps to the maximum CU/SM can support
+- High occupancy helps to hide latencies
+    - However, high occupancy does not automatically mean good performance 
+- Occupancy is determined by per block resources
+    - register per thread
+    - threads per block
+    - shared memory per block
+    - hardware limits
+
+ 
+
+# Minimise number of active local variables 
 
 - Local variables are stored in registers
   - MI250x 128 kiB per SIMD-unit
 - What happens if there is not enough registers? 
   - Variables are "spilled" to local memory on slow global device memory
 - Might happen if the kernel is very complicated
-  - Solution: reduce *occupancy*.
-
-# Example: Utilizing local shared memory {.section}
-## Matrix transpose
-
-# Matrix transpose
-
-- Naive: Either reads or writes are uncoalesced
-
-![](img/transpose_img.png){.center width=60%}
-
-# Copy operation as base
-
-```cpp
-__global__ void copy_kernel(float *in, float *out, int width, int height) {
-  int x_index = blockIdx.x * tile_dim + threadIdx.x;
-  int y_index = blockIdx.y * tile_dim + threadIdx.y;
-
-  int index = y_index * width + x_index;
-
-  out[index] = in[index];
-}
-```
-
-```cpp
-  int block_x = width / tile_dim;
-  int block_y = height / tile_dim;
-   hipLaunchKernelGGL(copy_kernel, dim3(block_x, block_y),
-                      dim3(tile_dim, tile_dim), 0, 0, d_in, d_out, width,
-                      height);
-   hipDeviceSynchronize();
-```
-The duration is `0.174 ms`  and the effective bandwidth `717 GB/s`
-
-# Matrix transpose naive
-
-```cpp
-__global__ void transpose_kernel(float *in, float *out, int width, int height) {
-  int x_index = blockIdx.x * tile_dim + threadIdx.x;
-  int y_index = blockIdx.y * tile_dim + threadIdx.y;
-
-  int in_index = y_index * width + x_index;
-  int out_index = x_index * height + y_index;
-
-  out[out_index] = in[in_index];
-}
-```
+  - Reducing occupancy may improve performance
 
 
-The duration is `0.401 ms`  and the effective bandwidth `311 GB/s`
+# MI250x Compute Units (CU)
+::::::{.columns}
 
+:::{.column width=55%}
 
-
-
-# Matrix transpose with shared memory
-
-<small>
-```cpp
-__global__ void transpose_lds_kernel(float *in, float *out, int width,
-                                     int height) {
-  __shared__ float tile[tile_dim][tile_dim];
-
-  int x_tile_index = blockIdx.x * tile_dim;
-  int y_tile_index = blockIdx.y * tile_dim;
-
-  int in_index =
-      (y_tile_index + threadIdx.y) * width + (x_tile_index + threadIdx.x);
-  int out_index =
-      (x_tile_index + threadIdx.y) * height + (y_tile_index + threadIdx.x);
-
-  tile[threadIdx.y][threadIdx.x] = in[in_index];
-
-  __syncthreads();
-
-  out[out_index] = tile[threadIdx.x][threadIdx.y];
-}
-```
-</small>
-
-The duration is `0.185 ms`  and the effective bandwidth `674 GB/s`
-
-
-# Extra: Matrix transpose with shared memory without bank conflicts
-
-<small>
-```cpp
-__global__ void transpose_lds_kernel(float *in, float *out, int width,
-                                     int height) {
-  __shared__ float tile[tile_dim][tile_dim+1];
-
-  int x_tile_index = blockIdx.x * tile_dim;
-  int y_tile_index = blockIdx.y * tile_dim;
-
-  int in_index =
-      (y_tile_index + threadIdx.y) * width + (x_tile_index + threadIdx.x);
-  int out_index =
-      (x_tile_index + threadIdx.y) * height + (y_tile_index + threadIdx.x);
-
-  tile[threadIdx.y][threadIdx.x] = in[in_index];
-
-  __syncthreads();
-
-  out[out_index] = tile[threadIdx.x][threadIdx.y];
-}
-```
-</small>
-
-The duration is `0.179 ms`  and the effective bandwidth `697 GB/s`
-
-:::{.notes}
-- Timings on puhti NVidia V100
+- 64 kiB of **local data share** (LDS) memory
+- 800 *scalar registers* (**SGPR**, 12.6 kiB)
+  - up to 102 per wavefront
+- 32 wavefront slots
+<!--- not relevant for occupancy
+- 16 kiB of L1 cache
+--->
 :::
 
-# Other examples where shared memory is critical 
+:::{.column width=45%}
+![](img/coarse_CU.svg){.center width=90%}
+:::
+::::::
 
-- Matrix-matrix/vector multiplication
- 
-  :::{.fragment}
-  - Same elements are loaded in different threads
-  :::
-- N-body problem
- 
-  :::{.fragment}
-  - One thread evolves one body: each thread loads all data of each other body as well
-  :::
-- Reductions
- 
-  :::{.fragment}
-  - Cooperation between threads
-  :::
+- 4$\times$SIMD units, 16 threads per SIMD unit
+  - 128 kiB *vector register* (**VGPR**) storage per SIMD unit $\Rightarrow$ 512 kiB register storage on CU
+  - 512 4-byte registers per thread (2 kiB). 
+
+
+::: notes
+- Simplification
+- Ballpark sizes for registers, LDS and cache
+- MI250x GCD has 110 compute units
+  - Note: Cache is per CU
+  - CPU: 32 kiB L1 cache per core
+- Lot of register storage
+- MI250x has also matrix units but they are tricker. Need intrinsics.
+- `hipcc -Rpass-analysis=kernel-resource-usage`!
+:::
+
+
+
+# Optimizing kernel launch latency
+
+- Launching a kernel has non-neglible cost
+    - Can be significant especially for small kernels
+- Fuse small kernels to larger ones (note however register pressure)
+- Launch independent kernels in different streams
+- Utilize HIP/CUDA graphs
+
 
 # Summary
 
+- Host-Device vs Device-Compute Unit bandwidth difference is 2 orders of magnitude
 - Specialised libraries are highly optimised
   - Especially dense linear algebra (hipBLAS/cuBLAS) and FFTs.
-- Host-Device vs Device-Compute Unit bandwidth difference is 2 orders of magnitude
-- Keep data in registers 
-  - But there are a finite amount of registers!
 - Neighbouring threads access neighbouring memory locations
   - Memory operations are coalesced
-- Local data share: a shared variable inside a block
-- Branching in warp: execute both branches
+- Shared memory: fast memory shared within a block
+- Keep data in registers 
+  - But there are a finite amount of registers!
+- Avoid branching within wavefront/warp
+
+
