@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2025 CSC - IT Center for Science Ltd. <www.csc.fi>
+
+SPDX-License-Identifier: CC-BY-4.0
+-->
+
 ## Accessing LUMI
 
 Are you able to `ssh` to LUMI? If not, have you followed the instructions [here](https://docs.lumi-supercomputer.eu/firststeps/)?
