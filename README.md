@@ -85,7 +85,7 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 
 ### Introduction and GPU kernels
 
-- [Mental model quiz](https://siili.rahtiapp.fi/s/gpmWnLY8q#)
+- Three questions at end of lecture
 - [Hello world](kernels/01-hello-world)
 - [Error checking](kernels/02-error-checking)
 - [Kernel saxpy](kernels/03-kernel-saxpy)
