@@ -201,7 +201,7 @@ __global__ void axpy(int n, double a, double *x, double *y)
 
 - grid dimensions are obligatory
     - must have an integer type or vector type of `dim3`
-- `shmem`, and `stream` are optional arguments for CUDA syntax, and can be `0` for the HIP syntax
+- `shmem`, and `stream` are optional arguments 
 - kernel execution is asynchronous with the host
 :::
 
