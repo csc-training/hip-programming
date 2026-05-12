@@ -52,7 +52,7 @@ CC -xhip -lroctx64 overlapping_work.cpp -o overlapping_work
 Run the program with ROCm profiling **and** `roctx` enabled:
 
 ```bash
-run_tue rocprofv3 --hip-trace --kernel-trace --marker-trace --output-format pftrace -- ./<yourapp>
+run_tue rocprofv3 --runtime-trace --marker-trace --output-format pftrace -- ./<yourapp>
 ```
 
 This generates a file with a suffix: `.pftrace`
