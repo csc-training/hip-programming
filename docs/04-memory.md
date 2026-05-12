@@ -288,7 +288,6 @@ Page-locked host memory
 # Asynchronous allocation: The stream-ordered memory allocator and memory pools 
 
 - Benefit of asynchronous memory management: allocate/free memory from/to a pool
-- By default the pool is only deallocated when the stream is synchronized and latest call is `hipFreeAsync`
 
 <small>
 
@@ -336,8 +335,7 @@ for (int i = 0; i < 100; i++) {
   // Return memory to the current memory pool
   hipFreeAsync(ptr, stream); 
 }
-// Synchronize and deallocate all memory from the 
-// current memory pool (default behavior)
+// Synchronize 
 hipStreamSynchronize(stream); 
 ```
 * Recurring memory allocation and deallocation does not occur anymore, because the memory is obtained from the memory pool and only deallocated during the synchronization (default behavior)
