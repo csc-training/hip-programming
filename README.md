@@ -102,7 +102,7 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 - [Running concurrent GPU kernels](streams/02-streams-asynckernel/)
 - [Asynchronous data transfers between CPU and GPU](streams/03-streams-asyncmemcpy/)
 - [Recording and timing GPU kernels with HIP events](streams/04-streams-timings/)
-- [Overlapping CPU and GPU computation](streams/0X-bonus-cpu-gpu-overlap/)
+- Bonus: [Overlapping CPU and GPU computation](streams/0X-bonus-cpu-gpu-overlap/)
 
 ### Memory allocations, access, and unified memory
 
