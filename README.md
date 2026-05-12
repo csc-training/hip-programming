@@ -49,7 +49,7 @@ Siili document for additional info during the course: https://siili.rahtiapp.fi/
 | 13:00-13:45 | [Exercises cont'd](memory/) |
 | 13:45-14:00 | Break |
 | 14:00-14:30 | Inspecting exercise traces, rocprof |
-| 14:30-15:00 | Bonus exercise |
+| 14:30-15:00 | [Bonus exercise](streams/0X-bonus-cpu-gpu-overlap/) |
 | 15:00-16:00 | Close-up |
 
 
