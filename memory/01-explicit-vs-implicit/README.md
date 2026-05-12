@@ -46,7 +46,7 @@ Lastly, you should define kernels call to execute `hipKernel` on the GPU in each
 
 ## Hints
 
-`int device;`
+* `int device;`
 `hipGetDevice(&device);`
 
 * prefetch:
