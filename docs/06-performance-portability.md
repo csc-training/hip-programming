@@ -121,7 +121,7 @@ where **`$HOP_ROOT`** points to the installation path of HOP:<br>
 ```
 export HOP_ROOT=/path/to/hop
 export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/cuda -DHOP_TARGET_HIP
-CC -x hip $HOP_FLAGS hello.cu -o hello
+$CC -x hip $HOP_FLAGS hello.cu -o hello
 ./hello
 ```
 <br>
@@ -131,7 +131,7 @@ CC -x hip $HOP_FLAGS hello.cu -o hello
 ```
 export HOP_ROOT=/path/to/hop
 export HOP_FLAGS=-I$HOP_ROOT -I$HOP_ROOT/source/hip -DHOP_TARGET_CUDA
-CC -x cu $HOP_FLAGS hello.cpp -o hello
+$CC -x cu $HOP_FLAGS hello.cpp -o hello
 ./hello
 ```
 
