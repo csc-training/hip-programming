@@ -45,12 +45,14 @@ run_tue ./<yourapp>
 To inspect a trace, run the program with ROCm profiling enabled:
 
 ```bash
-run_tue rocprofv3 --hip-trace --kernel-trace --output-format pftrace -- ./<yourapp>
+run_tue rocprofv3 --hip-trace --runtime-trace --kernel-trace --output-format pftrace -- ./<yourapp>
 ```
 
 This generates a file with a suffix: `.pftrace`
 
-Copy the file to your local machine:
+Copy the file to your local machine from e.g. www.lumi.csc.fi from the home directory file tree.
+
+Another option is to copy it from your local (laptop) terminal:
 
 ```bash
 scp <your_username>@lumi.csc.fi:/scratch/project_462001376/<your_username>/hip-programming/streams/<exercise>/<path-to-your-file>/<file>.pftrace .
