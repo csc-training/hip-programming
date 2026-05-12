@@ -338,7 +338,8 @@ for (int i = 0; i < 100; i++) {
 // Synchronize 
 hipStreamSynchronize(stream); 
 ```
-* Recurring memory allocation and deallocation does not occur anymore, because the memory is obtained from the memory pool and only deallocated during the synchronization (default behavior)
+* Recurring memory allocation and deallocation does not occur anymore, because
+  the memory is obtained from the memory pool 
 
 </div>
 </small>
