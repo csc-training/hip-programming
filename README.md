@@ -113,9 +113,12 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 
 ### Optimization
 
-- [Coalescing](optimization/01-coalescing)
-- [Matrix Transpose](optimization/02-matrix_transpose)
-- [Tracing](optimization/03-trace)
+- [Using BLAS library](optimization/01-using-blas)
+- [Coalesced memory access](optimization/02-coalescing)
+- [Using shared memory](optimization/03-matrix_transpose)
+- Bonus: [Parallel histogram](optimization/04-histogram)
+- Bonus: [Parallel reduction](optimization/05-reductions) 
+- Bonus: [Optimizing calculation of pi](optimization/06-bbp-pi)
 
 ### Multi-GPU programming and HIP+MPI
 
