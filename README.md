@@ -122,7 +122,9 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 
 ### Multi-GPU programming and HIP+MPI
 
-- [Ping-pong with multiple GPUs and MPI](multi-gpu/03-mpi)
+- [Hello world](multi-gpu/01-hello)
+- [Ping-pong with multiple GPUs and MPI](multi-gpu/02-mpi-pingpong)
+- Bonus: [Overlapping communication and computation](multi-gpu/03-overlap)
 
 ### Porting to HIP
 
