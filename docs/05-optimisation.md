@@ -536,7 +536,7 @@ if(tid%2 == 0) {
 
   | Branching | time (µs) |
   |-----------|-----:|
-  | *No divergence* | 970 |
+  | *No divergence* | 1000 |
   | *Branch divergence* | 1900|
   | *single branch* | 1000 |
 
