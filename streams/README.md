@@ -45,7 +45,7 @@ run_tue ./<yourapp>
 To inspect a trace, run the program with ROCm profiling enabled:
 
 ```bash
-run_tue rocprofv3 --hip-trace --runtime-trace --kernel-trace --output-format pftrace -- ./<yourapp>
+run_tue rocprofv3 --runtime-trace --output-format pftrace -- ./<yourapp>
 ```
 
 This generates a file with a suffix: `.pftrace`
