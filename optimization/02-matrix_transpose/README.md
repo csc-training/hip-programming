@@ -97,12 +97,13 @@ is improved if threads within a warp are accessing different banks.
 
 The figures below illustrate a case where there are 8 banks accessed by 16 threads
 
-Case 1: 2 bank conflicts (minimal here), whole access in 2 cycles
-![](img/no-bank-conflicts.svg){width=80%}
+**Case 1: 2 bank conflicts (minimal here), whole access in 2 cycles**
 
-Case 2: 8 bank conflicts, whole access in 8 cycles
-![](img/many-bank-conflicts.svg){width=80%}
-:
+![](img/no-bank-conflicts.svg){width=40%}
+
+**Case 2: 8 bank conflicts, whole access in 8 cycles**
+
+![](img/many-bank-conflicts.svg){width=40%}
 
 ### Transpose with shared memory and no bank conflicts
 
