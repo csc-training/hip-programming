@@ -8,6 +8,8 @@ lang:     en
 
 # Monday recap
 
+# Monday recap
+
 * GPU is a massively parallel processor
 * HIP/CUDA is an API for programming AMD/NVidia GPUs
   * C++ extension kernel language
@@ -15,6 +17,8 @@ lang:     en
   * Blocks ⟷  Compute unit / streaming multiprocessor
 * Blocks are partitioned in grid
   * Grid ⟷  GPU
+
+# Kernels
 
 # Kernels
 
@@ -37,26 +41,23 @@ __global__ void mykernel(size_t n_x, size_t n_y, float* x) {
 4. copy data back to host
 
 # Calling kernels
+
+# Calling kernels
 ```c++
 ...
-
 float* d_x;
 float* x;
+x = (float*) malloc(M*N*sizeof(float));
 
 HIP_ERRCHK(hipMalloc(&d_x, M*N*sizeof(float)));
-y = malloc(M*N*sizeof(float));
 HIP_ERRCHK(hipMemcpy(d_x, x, M*N*sizeof(float), hipMemcpyDefault));
-// init y
 
 // 2D grid
 dim3 blocks(num_blocks_x, num_blocks_y, 1);
 dim3 threads(num_threads_x, num_threads_x, 1),
 
-// CUDA syntax:
-mykernel<<<blocks,threads>>>(M, N, d_x); 
-
-// Or with the LAUNCH_KERNEL macro for error checking:
-LAUNCH_KERNEL(mykernel, blocks, threads, 0, 0, M, N, d_x));
+mykernel<<<blocks,threads>>>(M, N, d_x);  //CUDA Syntax
+LAUNCH_KERNEL(mykernel, blocks, threads, 0, 0, M, N, d_x)); // Error checking macro
 
 HIP_ERRCHK(hipMemcpy(x, d_x, M*N*sizeof(float), hipMemcpyDefault));
 
