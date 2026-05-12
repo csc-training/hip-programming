@@ -58,7 +58,7 @@ module load LUMI/25.03
 module load partition/G
 module load rocm/6.3.4
 
-CC -xhip -o <yourapp> <hip_source.cpp>
+CC -xhip -O2 -o <yourapp> <hip_source.cpp>
 ```
 
 or with `hipcc`
@@ -69,7 +69,7 @@ module load PrgEnv-amd
 export HIPCC_COMPILE_FLAGS_APPEND="--offload-arch=gfx90a $(CC --cray-print-opts=cflags)"
 export HIPCC_LINK_FLAGS_APPEND=$(CC --cray-print-opts=libs)
 
-hipcc -o <yourapp> <hip_source.cpp>
+hipcc -O2 -o <yourapp> <hip_source.cpp>
 ```
 
 More information on compiling can be found in the [LUMI documentation](https://docs.lumi-supercomputer.eu/development/compiling/prgenv/#compile-hip-code).
