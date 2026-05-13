@@ -145,7 +145,6 @@ int main(int argc, char* argv[])
     double total_ms = 0.0;
 
     for (int i = 0; i < repeat; i++) {
-        hipDeviceSynchronize();
 
         auto start = std::chrono::high_resolution_clock::now();
 
