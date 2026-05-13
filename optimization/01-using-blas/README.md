@@ -35,12 +35,12 @@ hipcc -o gemm gemm.cpp -O3 --offload-arch=gfx90a
 To run the code, one provides the matrix dimension and number of repeates as 
 command line arguments:
 ```bash
-srun ... gemm 2048 10
+srun ... ./gemm 2048 10
 ```
 
 You may try to run the code also under `rocprofv3` with the summary mode:
 ```bash
-srun ... rocprofv3 -r -T -S gemm 2048 10
+srun ... rocprofv3 -r -T -S -- ./gemm 2048 10
 ```
 You can check the meaning of `rocprofv3` input parameters and how to print summary
 output to a file with `rocprofv3 --help`
