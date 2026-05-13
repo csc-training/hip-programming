@@ -120,15 +120,16 @@ Link to [slides](https://csc-training.github.io/hip-programming/)
 - Bonus: [Parallel reduction](optimization/05-reductions) 
 - Bonus: [Optimizing calculation of pi](optimization/06-bbp-pi)
 
+### Porting to HIP
+
+- [Converting Tools & Portability](porting)
+
+
 ### Multi-GPU programming and HIP+MPI
 
 - [Hello world](multi-gpu/01-hello)
 - [Ping-pong with multiple GPUs and MPI](multi-gpu/02-mpi-pingpong)
 - Bonus: [Overlapping communication and computation](multi-gpu/03-overlap)
-
-### Porting to HIP
-
-- [Converting Tools & Portability](porting)
 
 #### Bonus
 - [Heat equation with HIP](bonus/heat-equation)
